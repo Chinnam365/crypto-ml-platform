@@ -1,5 +1,10 @@
 function evaluateDogeStrategy(data) {
-  const { ema20, ema50, rsi, latestPrice } = data;
+  const {
+    ema20,
+    ema50,
+    rsi,
+    latestPrice,
+  } = data;
 
   let confidence = 0;
 
@@ -7,35 +12,58 @@ function evaluateDogeStrategy(data) {
 
   let decision = "SKIP";
 
-  // Trend check
+  // =========================
+  // EMA TREND
+  // =========================
+
   if (ema20 > ema50) {
     confidence += 2;
-    reasons.push("Bullish EMA trend");
+
+    reasons.push(
+      "Bullish EMA trend"
+    );
   } else {
-    reasons.push("Bearish EMA trend");
+    reasons.push(
+      "Bearish EMA trend"
+    );
   }
 
-  // RSI recovery
-  if (rsi > 50 && rsi < 70) {
+  // =========================
+  // RSI MOMENTUM
+  // =========================
+
+  if (rsi >= 50 && rsi <= 65) {
     confidence += 2;
-    reasons.push("RSI bullish recovery");
+
+    reasons.push(
+      "Healthy RSI momentum"
+    );
+  } else {
+    reasons.push(
+      "RSI outside ideal range"
+    );
   }
 
-  // Oversold condition
-  if (rsi < 30) {
-    confidence += 1;
-    reasons.push("RSI oversold");
-  }
+  // =========================
+  // FINAL DECISION
+  // =========================
 
-  // Final decision
-  if (confidence >= 4) {
+  if (
+    ema20 > ema50 &&
+    rsi >= 50 &&
+    rsi <= 65 &&
+    confidence >= 4
+  ) {
     decision = "BUY";
   }
 
   return {
     latestPrice,
+
     decision,
+
     confidence,
+
     reasons,
   };
 }

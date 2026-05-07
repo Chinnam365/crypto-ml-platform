@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 const dogeRoute = require("./routes/doge");
+const tradesRoute = require("./routes/trades");
 
 const app = express();
 
@@ -13,5 +14,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/doge", dogeRoute);
+
+app.use("/api/trades", tradesRoute);
 
 module.exports = app;

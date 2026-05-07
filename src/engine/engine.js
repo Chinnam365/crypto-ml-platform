@@ -137,7 +137,7 @@ async function runEngine() {
       );
 
     // =========================
-    // BTC FILTER
+    // BTC 15M
     // =========================
 
     const rawBtc =
@@ -184,6 +184,8 @@ async function runEngine() {
         rsi5m,
 
         latestPrice,
+
+        btcBullish,
       });
 
     // =========================
@@ -207,7 +209,7 @@ async function runEngine() {
         strategyResult.decision,
 
       confidence:
-        strategyResult.confidence,
+        strategyResult.score,
 
       reasons:
         strategyResult.reasons,
@@ -220,7 +222,9 @@ async function runEngine() {
     let activeTrade =
       getActiveTrade();
 
+    // =========================
     // MONITOR TRADE
+    // =========================
 
     if (activeTrade) {
       await monitorTrade(
@@ -232,7 +236,9 @@ async function runEngine() {
       );
     }
 
+    // =========================
     // COOLDOWN
+    // =========================
 
     if (isCooldownActive()) {
       console.log(
@@ -240,7 +246,9 @@ async function runEngine() {
       );
     }
 
+    // =========================
     // BTC FILTER
+    // =========================
 
     if (!btcBullish) {
       console.log(
@@ -248,12 +256,13 @@ async function runEngine() {
       );
     }
 
+    // =========================
     // OPEN TRADE
+    // =========================
 
     if (
       !activeTrade &&
       !isCooldownActive() &&
-      btcBullish &&
       strategyResult.decision ===
         "BUY"
     ) {
@@ -265,6 +274,10 @@ async function runEngine() {
         "New trade opened"
       );
     }
+
+    // =========================
+    // STATUS OUTPUT
+    // =========================
 
     console.log({
       latestPrice,

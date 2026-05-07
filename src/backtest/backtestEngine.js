@@ -28,7 +28,7 @@ const {
 async function runBacktest() {
 
   console.log(
-    "Starting adaptive volatility regime backtest..."
+    "Starting dynamic sizing backtest..."
   );
 
   // =========================
@@ -60,7 +60,7 @@ async function runBacktest() {
     formatCandles(rawBtc);
 
   // =========================
-  // PARAMETER TESTS
+  // TEST PARAMETERS
   // =========================
 
   const thresholds = [6, 7, 8];
@@ -68,7 +68,6 @@ async function runBacktest() {
   const tpLevels = [
     0.005,
     0.007,
-    0.01,
   ];
 
   const slLevels = [
@@ -99,18 +98,6 @@ async function runBacktest() {
         let activeTrade = null;
 
         // =====================
-        // VOLATILITY REGIMES
-        // =====================
-
-        let lowVolTrades = 0;
-        let mediumVolTrades = 0;
-        let highVolTrades = 0;
-
-        let lowVolPnl = 0;
-        let mediumVolPnl = 0;
-        let highVolPnl = 0;
-
-        // =====================
         // REPLAY LOOP
         // =====================
 
@@ -121,7 +108,7 @@ async function runBacktest() {
         ) {
 
           // ===================
-          // 5M DATA
+          // 5M
           // ===================
 
           const slice5m =
@@ -161,7 +148,7 @@ async function runBacktest() {
             );
 
           // ===================
-          // VOLATILITY REGIME
+          // VOL REGIME
           // ===================
 
           let volatilityRegime =
@@ -182,7 +169,7 @@ async function runBacktest() {
           }
 
           // ===================
-          // 15M DATA
+          // 15M
           // ===================
 
           const index15m =
@@ -216,7 +203,7 @@ async function runBacktest() {
               : 0;
 
           // ===================
-          // 1H DATA
+          // 1H
           // ===================
 
           const index1h =
@@ -250,7 +237,7 @@ async function runBacktest() {
               : 0;
 
           // ===================
-          // BTC DATA
+          // BTC
           // ===================
 
           const btcIndex =
@@ -321,8 +308,6 @@ async function runBacktest() {
             idealRsi,
           });
 
-          // Volatility bonus
-
           if (
             volatilityRegime ===
             "MEDIUM_VOL"
@@ -338,12 +323,49 @@ async function runBacktest() {
           }
 
           // ===================
+          // POSITION SIZE
+          // ===================
+
+          let positionSize = 1;
+
+          // Threshold quality
+
+          if (threshold === 7) {
+            positionSize = 1.5;
+          }
+
+          if (threshold === 8) {
+            positionSize = 2;
+          }
+
+          // Reduce risk during
+          // extreme volatility
+
+          if (
+            volatilityRegime ===
+            "HIGH_VOL"
+          ) {
+            positionSize *= 0.7;
+          }
+
+          // Reduce risk during
+          // low volatility
+
+          if (
+            volatilityRegime ===
+            "LOW_VOL"
+          ) {
+            positionSize *= 0.5;
+          }
+
+          // ===================
           // OPEN TRADE
           // ===================
 
           if (
             !activeTrade &&
-            score >= threshold
+            score >= threshold &&
+            btcBullish
           ) {
 
             activeTrade = {
@@ -360,29 +382,8 @@ async function runBacktest() {
 
               openedAt: i,
 
-              volatilityRegime,
+              positionSize,
             };
-
-            if (
-              volatilityRegime ===
-              "LOW_VOL"
-            ) {
-              lowVolTrades++;
-            }
-
-            if (
-              volatilityRegime ===
-              "MEDIUM_VOL"
-            ) {
-              mediumVolTrades++;
-            }
-
-            if (
-              volatilityRegime ===
-              "HIGH_VOL"
-            ) {
-              highVolTrades++;
-            }
           }
 
           // ===================
@@ -402,33 +403,13 @@ async function runBacktest() {
             ) {
 
               const pnl =
-                ((latestPrice -
+                (((latestPrice -
                   activeTrade.entryPrice) /
                   activeTrade.entryPrice) *
-                100;
+                  100) *
+                activeTrade.positionSize;
 
               totalPnl += pnl;
-
-              if (
-                activeTrade.volatilityRegime ===
-                "LOW_VOL"
-              ) {
-                lowVolPnl += pnl;
-              }
-
-              if (
-                activeTrade.volatilityRegime ===
-                "MEDIUM_VOL"
-              ) {
-                mediumVolPnl += pnl;
-              }
-
-              if (
-                activeTrade.volatilityRegime ===
-                "HIGH_VOL"
-              ) {
-                highVolPnl += pnl;
-              }
 
               timedOut++;
 
@@ -447,33 +428,13 @@ async function runBacktest() {
               wins++;
 
               const pnl =
-                ((latestPrice -
+                (((latestPrice -
                   activeTrade.entryPrice) /
                   activeTrade.entryPrice) *
-                100;
+                  100) *
+                activeTrade.positionSize;
 
               totalPnl += pnl;
-
-              if (
-                activeTrade.volatilityRegime ===
-                "LOW_VOL"
-              ) {
-                lowVolPnl += pnl;
-              }
-
-              if (
-                activeTrade.volatilityRegime ===
-                "MEDIUM_VOL"
-              ) {
-                mediumVolPnl += pnl;
-              }
-
-              if (
-                activeTrade.volatilityRegime ===
-                "HIGH_VOL"
-              ) {
-                highVolPnl += pnl;
-              }
 
               activeTrade = null;
             }
@@ -488,33 +449,13 @@ async function runBacktest() {
               losses++;
 
               const pnl =
-                ((latestPrice -
+                (((latestPrice -
                   activeTrade.entryPrice) /
                   activeTrade.entryPrice) *
-                100;
+                  100) *
+                activeTrade.positionSize;
 
               totalPnl += pnl;
-
-              if (
-                activeTrade.volatilityRegime ===
-                "LOW_VOL"
-              ) {
-                lowVolPnl += pnl;
-              }
-
-              if (
-                activeTrade.volatilityRegime ===
-                "MEDIUM_VOL"
-              ) {
-                mediumVolPnl += pnl;
-              }
-
-              if (
-                activeTrade.volatilityRegime ===
-                "HIGH_VOL"
-              ) {
-                highVolPnl += pnl;
-              }
 
               activeTrade = null;
             }
@@ -542,9 +483,11 @@ async function runBacktest() {
         results.push({
           threshold,
 
-          takeProfit: tp,
+          takeProfit:
+            tp,
 
-          stopLoss: sl,
+          stopLoss:
+            sl,
 
           totalTrades,
 
@@ -553,19 +496,6 @@ async function runBacktest() {
           losses,
 
           timedOut,
-
-          lowVolTrades,
-          mediumVolTrades,
-          highVolTrades,
-
-          lowVolPnl:
-            lowVolPnl.toFixed(2),
-
-          mediumVolPnl:
-            mediumVolPnl.toFixed(2),
-
-          highVolPnl:
-            highVolPnl.toFixed(2),
 
           winRate,
 
@@ -591,7 +521,7 @@ async function runBacktest() {
   );
 
   console.log(
-    "Adaptive volatility backtest completed"
+    "Dynamic sizing completed"
   );
 
   return results.slice(0, 20);

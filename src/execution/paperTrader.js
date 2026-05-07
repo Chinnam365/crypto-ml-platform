@@ -1,4 +1,8 @@
 const {
+  startCooldown,
+} = require("../risk/cooldown");
+
+const {
   getActiveTrade,
   openTrade,
   closeTrade,

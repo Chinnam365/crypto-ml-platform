@@ -14,20 +14,29 @@ const decisionsRoute =
 const analyticsRoute =
   require("./routes/analytics");
 
+const backtestRoute =
+  require("./routes/backtest");
+
 const app = express();
 
 app.use(cors());
 
 app.use(express.json());
 
+// =========================
 // ROOT
+// =========================
+
 app.get("/", (req, res) => {
   res.send(
     "Crypto ML Platform Running"
   );
 });
 
+// =========================
 // ROUTES
+// =========================
+
 app.use(
   "/api/doge",
   dogeRoute
@@ -46,6 +55,11 @@ app.use(
 app.use(
   "/api/analytics",
   analyticsRoute
+);
+
+app.use(
+  "/api/backtest",
+  backtestRoute
 );
 
 module.exports = app;

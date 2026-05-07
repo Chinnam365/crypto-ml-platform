@@ -28,7 +28,7 @@ const {
 async function runBacktest() {
 
   console.log(
-    "Starting volatility-aware backtest..."
+    "Starting execution optimization backtest..."
   );
 
   // =========================
@@ -60,370 +60,388 @@ async function runBacktest() {
     formatCandles(rawBtc);
 
   // =========================
-  // THRESHOLDS
+  // PARAMETER TESTS
   // =========================
 
   const thresholds = [
-    4, 5, 6, 7, 8,
+    6, 7, 8,
+  ];
+
+  const tpLevels = [
+    0.005,
+    0.007,
+    0.01,
+    0.015,
+  ];
+
+  const slLevels = [
+    0.003,
+    0.004,
+    0.005,
+    0.007,
   ];
 
   const results = [];
 
   // =========================
-  // TEST THRESHOLDS
+  // TEST COMBINATIONS
   // =========================
 
   for (const threshold of thresholds) {
 
-    let wins = 0;
+    for (const tp of tpLevels) {
 
-    let losses = 0;
+      for (const sl of slLevels) {
 
-    let timedOut = 0;
+        let wins = 0;
 
-    let totalPnl = 0;
+        let losses = 0;
 
-    let activeTrade = null;
+        let timedOut = 0;
 
-    // =======================
-    // REPLAY LOOP
-    // =======================
+        let totalPnl = 0;
 
-    for (
-      let i = 50;
-      i < candles5m.length;
-      i++
-    ) {
+        let activeTrade = null;
 
-      // =====================
-      // 5M DATA
-      // =====================
+        // =====================
+        // REPLAY LOOP
+        // =====================
 
-      const slice5m =
-        candles5m.slice(0, i);
+        for (
+          let i = 50;
+          i < candles5m.length;
+          i++
+        ) {
 
-      const closes5m =
-        slice5m.map(
-          (c) => c.close
-        );
+          // ===================
+          // 5M
+          // ===================
 
-      const latestPrice =
-        closes5m[
-          closes5m.length - 1
-        ];
+          const slice5m =
+            candles5m.slice(0, i);
 
-      const ema5m20 =
-        calculateEMA(
-          closes5m.slice(-20),
-          20
-        );
+          const closes5m =
+            slice5m.map(
+              (c) => c.close
+            );
 
-      const ema5m50 =
-        calculateEMA(
-          closes5m.slice(-50),
-          50
-        );
+          const latestPrice =
+            closes5m[
+              closes5m.length - 1
+            ];
 
-      const rsi5m =
-        calculateRSI(
-          closes5m.slice(-15)
-        );
-
-      const volatility =
-        calculateVolatility(
-          slice5m,
-          10
-        );
-
-      // =====================
-      // 15M DATA
-      // =====================
-
-      const index15m =
-        Math.floor(i / 3);
-
-      const slice15m =
-        candles15m.slice(
-          0,
-          index15m
-        );
-
-      const closes15m =
-        slice15m.map(
-          (c) => c.close
-        );
-
-      const ema15m20 =
-        closes15m.length >= 50
-          ? calculateEMA(
-              closes15m.slice(-20),
+          const ema5m20 =
+            calculateEMA(
+              closes5m.slice(-20),
               20
-            )
-          : 0;
+            );
 
-      const ema15m50 =
-        closes15m.length >= 50
-          ? calculateEMA(
-              closes15m.slice(-50),
+          const ema5m50 =
+            calculateEMA(
+              closes5m.slice(-50),
               50
-            )
-          : 0;
+            );
 
-      // =====================
-      // 1H DATA
-      // =====================
+          const rsi5m =
+            calculateRSI(
+              closes5m.slice(-15)
+            );
 
-      const index1h =
-        Math.floor(i / 12);
+          const volatility =
+            calculateVolatility(
+              slice5m,
+              10
+            );
 
-      const slice1h =
-        candles1h.slice(
-          0,
-          index1h
-        );
+          // ===================
+          // 15M
+          // ===================
 
-      const closes1h =
-        slice1h.map(
-          (c) => c.close
-        );
+          const index15m =
+            Math.floor(i / 3);
 
-      const ema1h20 =
-        closes1h.length >= 50
-          ? calculateEMA(
-              closes1h.slice(-20),
-              20
-            )
-          : 0;
+          const slice15m =
+            candles15m.slice(
+              0,
+              index15m
+            );
 
-      const ema1h50 =
-        closes1h.length >= 50
-          ? calculateEMA(
-              closes1h.slice(-50),
-              50
-            )
-          : 0;
+          const closes15m =
+            slice15m.map(
+              (c) => c.close
+            );
 
-      // =====================
-      // BTC DATA
-      // =====================
+          const ema15m20 =
+            closes15m.length >= 50
+              ? calculateEMA(
+                  closes15m.slice(-20),
+                  20
+                )
+              : 0;
 
-      const btcIndex =
-        Math.floor(i / 3);
+          const ema15m50 =
+            closes15m.length >= 50
+              ? calculateEMA(
+                  closes15m.slice(-50),
+                  50
+                )
+              : 0;
 
-      const btcSlice =
-        btcCandles.slice(
-          0,
-          btcIndex
-        );
+          // ===================
+          // 1H
+          // ===================
 
-      const btcCloses =
-        btcSlice.map(
-          (c) => c.close
-        );
+          const index1h =
+            Math.floor(i / 12);
 
-      const btcEma20 =
-        btcCloses.length >= 50
-          ? calculateEMA(
-              btcCloses.slice(-20),
-              20
-            )
-          : 0;
+          const slice1h =
+            candles1h.slice(
+              0,
+              index1h
+            );
 
-      const btcEma50 =
-        btcCloses.length >= 50
-          ? calculateEMA(
-              btcCloses.slice(-50),
-              50
-            )
-          : 0;
+          const closes1h =
+            slice1h.map(
+              (c) => c.close
+            );
 
-      // =====================
-      // CONDITIONS
-      // =====================
+          const ema1h20 =
+            closes1h.length >= 50
+              ? calculateEMA(
+                  closes1h.slice(-20),
+                  20
+                )
+              : 0;
 
-      const bullish5m =
-        ema5m20 > ema5m50;
+          const ema1h50 =
+            closes1h.length >= 50
+              ? calculateEMA(
+                  closes1h.slice(-50),
+                  50
+                )
+              : 0;
 
-      const bullish15m =
-        ema15m20 > ema15m50;
+          // ===================
+          // BTC
+          // ===================
 
-      const bullish1h =
-        ema1h20 > ema1h50;
+          const btcIndex =
+            Math.floor(i / 3);
 
-      const btcBullish =
-        btcEma20 > btcEma50;
+          const btcSlice =
+            btcCandles.slice(
+              0,
+              btcIndex
+            );
 
-      const idealRsi =
-        rsi5m >= 50 &&
-        rsi5m <= 65;
+          const btcCloses =
+            btcSlice.map(
+              (c) => c.close
+            );
 
-      const strongVolatility =
-        volatility >= 0.0008;
+          const btcEma20 =
+            btcCloses.length >= 50
+              ? calculateEMA(
+                  btcCloses.slice(-20),
+                  20
+                )
+              : 0;
 
-      // =====================
-      // SCORE
-      // =====================
+          const btcEma50 =
+            btcCloses.length >= 50
+              ? calculateEMA(
+                  btcCloses.slice(-50),
+                  50
+                )
+              : 0;
 
-      let {
-        score,
-      } = calculateScore({
-        btcBullish,
+          // ===================
+          // CONDITIONS
+          // ===================
 
-        bullish1h,
+          const bullish5m =
+            ema5m20 > ema5m50;
 
-        bullish15m,
+          const bullish15m =
+            ema15m20 > ema15m50;
 
-        bullish5m,
+          const bullish1h =
+            ema1h20 > ema1h50;
 
-        idealRsi,
-      });
+          const btcBullish =
+            btcEma20 > btcEma50;
 
-      // =====================
-      // VOLATILITY BONUS
-      // =====================
+          const idealRsi =
+            rsi5m >= 50 &&
+            rsi5m <= 65;
 
-      if (strongVolatility) {
-        score += 2;
-      }
+          const strongVolatility =
+            volatility >= 0.0008;
 
-      // =====================
-      // OPEN TRADE
-      // =====================
+          // ===================
+          // SCORE
+          // ===================
 
-      if (
-        !activeTrade &&
-        score >= threshold
-      ) {
+          let {
+            score,
+          } = calculateScore({
+            btcBullish,
 
-        activeTrade = {
-          entryPrice:
-            latestPrice,
+            bullish1h,
+
+            bullish15m,
+
+            bullish5m,
+
+            idealRsi,
+          });
+
+          if (
+            strongVolatility
+          ) {
+            score += 2;
+          }
+
+          // ===================
+          // OPEN TRADE
+          // ===================
+
+          if (
+            !activeTrade &&
+            score >= threshold
+          ) {
+
+            activeTrade = {
+              entryPrice:
+                latestPrice,
+
+              takeProfit:
+                latestPrice *
+                (1 + tp),
+
+              stopLoss:
+                latestPrice *
+                (1 - sl),
+
+              openedAt: i,
+            };
+          }
+
+          // ===================
+          // MONITOR TRADE
+          // ===================
+
+          if (activeTrade) {
+
+            const candlesOpen =
+              i -
+              activeTrade.openedAt;
+
+            // TIMEOUT
+
+            if (
+              candlesOpen >= 24
+            ) {
+
+              const pnl =
+                ((latestPrice -
+                  activeTrade.entryPrice) /
+                  activeTrade.entryPrice) *
+                100;
+
+              totalPnl += pnl;
+
+              timedOut++;
+
+              activeTrade = null;
+
+              continue;
+            }
+
+            // TAKE PROFIT
+
+            if (
+              latestPrice >=
+              activeTrade.takeProfit
+            ) {
+
+              wins++;
+
+              const pnl =
+                ((latestPrice -
+                  activeTrade.entryPrice) /
+                  activeTrade.entryPrice) *
+                100;
+
+              totalPnl += pnl;
+
+              activeTrade = null;
+            }
+
+            // STOP LOSS
+
+            else if (
+              latestPrice <=
+              activeTrade.stopLoss
+            ) {
+
+              losses++;
+
+              const pnl =
+                ((latestPrice -
+                  activeTrade.entryPrice) /
+                  activeTrade.entryPrice) *
+                100;
+
+              totalPnl += pnl;
+
+              activeTrade = null;
+            }
+          }
+        }
+
+        // =====================
+        // RESULTS
+        // =====================
+
+        const totalTrades =
+          wins +
+          losses +
+          timedOut;
+
+        const winRate =
+          totalTrades > 0
+            ? (
+                (wins /
+                  totalTrades) *
+                100
+              ).toFixed(2)
+            : 0;
+
+        results.push({
+          threshold,
 
           takeProfit:
-            latestPrice *
-            1.01,
+            tp,
 
           stopLoss:
-            latestPrice *
-            0.995,
+            sl,
 
-          openedAt: i,
-        };
-      }
+          totalTrades,
 
-      // =====================
-      // MONITOR TRADE
-      // =====================
+          wins,
 
-      if (activeTrade) {
+          losses,
 
-        const candlesOpen =
-          i -
-          activeTrade.openedAt;
+          timedOut,
 
-        // ===================
-        // TIMEOUT
-        // ===================
+          winRate,
 
-        if (
-          candlesOpen >= 24
-        ) {
-
-          const pnl =
-            ((latestPrice -
-              activeTrade.entryPrice) /
-              activeTrade.entryPrice) *
-            100;
-
-          totalPnl += pnl;
-
-          timedOut++;
-
-          activeTrade = null;
-
-          continue;
-        }
-
-        // ===================
-        // TAKE PROFIT
-        // ===================
-
-        if (
-          latestPrice >=
-          activeTrade.takeProfit
-        ) {
-
-          wins++;
-
-          const pnl =
-            ((latestPrice -
-              activeTrade.entryPrice) /
-              activeTrade.entryPrice) *
-            100;
-
-          totalPnl += pnl;
-
-          activeTrade = null;
-        }
-
-        // ===================
-        // STOP LOSS
-        // ===================
-
-        else if (
-          latestPrice <=
-          activeTrade.stopLoss
-        ) {
-
-          losses++;
-
-          const pnl =
-            ((latestPrice -
-              activeTrade.entryPrice) /
-              activeTrade.entryPrice) *
-            100;
-
-          totalPnl += pnl;
-
-          activeTrade = null;
-        }
+          totalPnl:
+            totalPnl.toFixed(2),
+        });
       }
     }
-
-    // =======================
-    // RESULTS
-    // =======================
-
-    const totalTrades =
-      wins +
-      losses +
-      timedOut;
-
-    const winRate =
-      totalTrades > 0
-        ? (
-            (wins /
-              totalTrades) *
-            100
-          ).toFixed(2)
-        : 0;
-
-    results.push({
-      threshold,
-
-      totalTrades,
-
-      wins,
-
-      losses,
-
-      timedOut,
-
-      winRate,
-
-      totalPnl:
-        totalPnl.toFixed(2),
-    });
   }
 
   // =========================
@@ -441,10 +459,10 @@ async function runBacktest() {
   );
 
   console.log(
-    "Backtest completed"
+    "Execution optimization completed"
   );
 
-  return results;
+  return results.slice(0, 20);
 }
 
 module.exports = {

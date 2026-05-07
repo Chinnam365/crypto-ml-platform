@@ -23,7 +23,7 @@ async function runWeightOptimization() {
     await getCandles(
       "DOGEUSDT",
       "5m",
-      500
+      20000
     );
 
   const candles =

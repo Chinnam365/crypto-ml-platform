@@ -20,6 +20,9 @@ const backtestRoute =
 const optimizeRoute =
   require("./routes/optimize");
 
+const weightsRoute =
+  require("./routes/weights");
+
 const app = express();
 
 app.use(cors());
@@ -68,6 +71,11 @@ app.use(
 app.use(
   "/api/optimize",
   optimizeRoute
+);
+
+app.use(
+  "/api/weights",
+  weightsRoute
 );
 
 module.exports = app;

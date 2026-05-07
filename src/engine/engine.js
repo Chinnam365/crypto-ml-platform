@@ -17,6 +17,11 @@ const {
   monitorTrade,
 } = require("../execution/paperTrader");
 
+const {
+  isCooldownActive,
+  getCooldownRemaining,
+} = require("../risk/cooldown");
+
 async function runEngine() {
   try {
     console.log("Engine cycle started");
@@ -44,16 +49,24 @@ async function runEngine() {
 
     let activeTrade = getActiveTrade();
 
-    // Monitor active trade
+    // MONITOR EXISTING TRADE
     if (activeTrade) {
       await monitorTrade(latestPrice);
 
       console.log("Monitoring active trade");
     }
 
-    // Open new trade
+    // COOLDOWN STATUS
+    if (isCooldownActive()) {
+      console.log(
+        `Cooldown active: ${getCooldownRemaining()} seconds remaining`
+      );
+    }
+
+    // OPEN NEW TRADE
     if (
       !activeTrade &&
+      !isCooldownActive() &&
       strategyResult.decision === "BUY"
     ) {
       createPaperTrade(latestPrice);

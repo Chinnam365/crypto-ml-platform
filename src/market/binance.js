@@ -3,9 +3,11 @@ const axios = require("axios");
 async function getCandles(
   symbol,
   interval = "5m",
-  limit = 100
+  limit = 500
 ) {
+
   try {
+
     const response =
       await axios.get(
         "https://api.binance.com/api/v3/klines",
@@ -19,7 +21,9 @@ async function getCandles(
       );
 
     return response.data;
+
   } catch (error) {
+
     console.error(
       `Binance API Error (${symbol} ${interval}):`,
       error.message
@@ -33,24 +37,33 @@ async function getCandles(
 // DOGE
 // =========================
 
-async function getDoge5mCandles() {
+async function getDoge5mCandles(
+  limit = 500
+) {
   return getCandles(
     "DOGEUSDT",
-    "5m"
+    "5m",
+    limit
   );
 }
 
-async function getDoge15mCandles() {
+async function getDoge15mCandles(
+  limit = 500
+) {
   return getCandles(
     "DOGEUSDT",
-    "15m"
+    "15m",
+    limit
   );
 }
 
-async function getDoge1hCandles() {
+async function getDoge1hCandles(
+  limit = 500
+) {
   return getCandles(
     "DOGEUSDT",
-    "1h"
+    "1h",
+    limit
   );
 }
 
@@ -58,10 +71,13 @@ async function getDoge1hCandles() {
 // BTC
 // =========================
 
-async function getBtc15mCandles() {
+async function getBtc15mCandles(
+  limit = 500
+) {
   return getCandles(
     "BTCUSDT",
-    "15m"
+    "15m",
+    limit
   );
 }
 

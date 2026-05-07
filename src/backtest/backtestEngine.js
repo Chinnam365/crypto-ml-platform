@@ -15,12 +15,13 @@ const {
 } = require("../indicators/rsi");
 
 const {
-  evaluateDogeStrategy,
-} = require("../strategies/dogeStrategy");
+  calculateScore,
+} = require("../strategies/scoreCalculator");
 
 async function runBacktest() {
+
   console.log(
-    "Starting backtest..."
+    "Starting production-grade backtest..."
   );
 
   // =========================
@@ -31,178 +32,276 @@ async function runBacktest() {
     await getCandles(
       "DOGEUSDT",
       "5m",
-      500
+      2000
     );
 
   const candles =
     formatCandles(rawCandles);
 
-  let activeTrade = null;
-
-  let wins = 0;
-
-  let losses = 0;
-
-  let totalPnl = 0;
-
   // =========================
-  // REPLAY LOOP
+  // THRESHOLDS
   // =========================
 
-  for (
-    let i = 50;
-    i < candles.length;
-    i++
-  ) {
-    const slice =
-      candles.slice(0, i);
+  const thresholds = [
+    4, 5, 6, 7, 8,
+  ];
 
-    const closes =
-      slice.map(
-        (c) => c.close
-      );
+  const results = [];
 
-    const latestPrice =
-      closes[
-        closes.length - 1
-      ];
+  // =========================
+  // TEST THRESHOLDS
+  // =========================
 
-    const ema20 =
-      calculateEMA(
-        closes.slice(-20),
-        20
-      );
+  for (const threshold of thresholds) {
 
-    const ema50 =
-      calculateEMA(
-        closes.slice(-50),
-        50
-      );
+    let wins = 0;
 
-    const rsi =
-      calculateRSI(
-        closes.slice(-15)
-      );
+    let losses = 0;
 
-    const strategy =
-      evaluateDogeStrategy({
-        ema20,
-        ema50,
-        rsi,
-        latestPrice,
+    let timedOut = 0;
+
+    let totalPnl = 0;
+
+    let activeTrade = null;
+
+    // =======================
+    // REPLAY LOOP
+    // =======================
+
+    for (
+      let i = 50;
+      i < candles.length;
+      i++
+    ) {
+
+      const slice =
+        candles.slice(0, i);
+
+      const closes =
+        slice.map(
+          (c) => c.close
+        );
+
+      const latestPrice =
+        closes[
+          closes.length - 1
+        ];
+
+      // =====================
+      // INDICATORS
+      // =====================
+
+      const ema20 =
+        calculateEMA(
+          closes.slice(-20),
+          20
+        );
+
+      const ema50 =
+        calculateEMA(
+          closes.slice(-50),
+          50
+        );
+
+      const rsi =
+        calculateRSI(
+          closes.slice(-15)
+        );
+
+      // =====================
+      // CONDITIONS
+      // =====================
+
+      const bullish5m =
+        ema20 > ema50;
+
+      // Simplified proxies
+      // for replay version
+
+      const bullish15m =
+        bullish5m;
+
+      const bullish1h =
+        bullish5m;
+
+      const btcBullish =
+        bullish5m;
+
+      const idealRsi =
+        rsi >= 50 &&
+        rsi <= 65;
+
+      // =====================
+      // SCORE
+      // =====================
+
+      const {
+        score,
+      } = calculateScore({
+        btcBullish,
+
+        bullish1h,
+
+        bullish15m,
+
+        bullish5m,
+
+        idealRsi,
       });
 
-    // =========================
-    // OPEN TRADE
-    // =========================
-
-    if (
-      !activeTrade &&
-      strategy.decision ===
-        "BUY"
-    ) {
-      activeTrade = {
-        entryPrice:
-          latestPrice,
-
-        takeProfit:
-          latestPrice * 1.01,
-
-        stopLoss:
-          latestPrice * 0.995,
-      };
-    }
-
-    // =========================
-    // MONITOR TRADE
-    // =========================
-
-    if (activeTrade) {
-      // TAKE PROFIT
+      // =====================
+      // OPEN TRADE
+      // =====================
 
       if (
-        latestPrice >=
-        activeTrade.takeProfit
+        !activeTrade &&
+        score >= threshold
       ) {
-        wins++;
 
-        const pnl =
-          ((latestPrice -
-            activeTrade.entryPrice) /
-            activeTrade.entryPrice) *
-          100;
+        activeTrade = {
+          entryPrice:
+            latestPrice,
 
-        totalPnl += pnl;
+          takeProfit:
+            latestPrice *
+            1.01,
 
-        activeTrade = null;
+          stopLoss:
+            latestPrice *
+            0.995,
+
+          openedAt: i,
+        };
       }
 
-      // STOP LOSS
+      // =====================
+      // MONITOR TRADE
+      // =====================
 
-      else if (
-        latestPrice <=
-        activeTrade.stopLoss
-      ) {
-        losses++;
+      if (activeTrade) {
 
-        const pnl =
-          ((latestPrice -
-            activeTrade.entryPrice) /
-            activeTrade.entryPrice) *
-          100;
+        const candlesOpen =
+          i -
+          activeTrade.openedAt;
 
-        totalPnl += pnl;
+        // TIMEOUT
 
-        activeTrade = null;
+        if (
+          candlesOpen >= 24
+        ) {
+
+          const pnl =
+            ((latestPrice -
+              activeTrade.entryPrice) /
+              activeTrade.entryPrice) *
+            100;
+
+          totalPnl += pnl;
+
+          timedOut++;
+
+          activeTrade = null;
+
+          continue;
+        }
+
+        // TAKE PROFIT
+
+        if (
+          latestPrice >=
+          activeTrade.takeProfit
+        ) {
+
+          wins++;
+
+          const pnl =
+            ((latestPrice -
+              activeTrade.entryPrice) /
+              activeTrade.entryPrice) *
+            100;
+
+          totalPnl += pnl;
+
+          activeTrade = null;
+        }
+
+        // STOP LOSS
+
+        else if (
+          latestPrice <=
+          activeTrade.stopLoss
+        ) {
+
+          losses++;
+
+          const pnl =
+            ((latestPrice -
+              activeTrade.entryPrice) /
+              activeTrade.entryPrice) *
+            100;
+
+          totalPnl += pnl;
+
+          activeTrade = null;
+        }
       }
     }
+
+    // =======================
+    // RESULTS
+    // =======================
+
+    const totalTrades =
+      wins +
+      losses +
+      timedOut;
+
+    const winRate =
+      totalTrades > 0
+        ? (
+            (wins /
+              totalTrades) *
+            100
+          ).toFixed(2)
+        : 0;
+
+    results.push({
+      threshold,
+
+      totalTrades,
+
+      wins,
+
+      losses,
+
+      timedOut,
+
+      winRate,
+
+      totalPnl:
+        totalPnl.toFixed(2),
+    });
   }
 
   // =========================
-  // RESULTS
+  // SORT RESULTS
   // =========================
 
-  const totalTrades =
-    wins + losses;
-
-  const winRate =
-    totalTrades > 0
-      ? (
-          (wins /
-            totalTrades) *
-          100
-        ).toFixed(2)
-      : 0;
+  results.sort(
+    (a, b) =>
+      parseFloat(
+        b.totalPnl
+      ) -
+      parseFloat(
+        a.totalPnl
+      )
+  );
 
   console.log(
     "Backtest completed"
   );
 
-  console.log({
-    totalTrades,
-
-    wins,
-
-    losses,
-
-    winRate,
-
-    totalPnl:
-      totalPnl.toFixed(2),
-  });
-
-  return {
-    totalTrades,
-
-    wins,
-
-    losses,
-
-    winRate,
-
-    totalPnl:
-      totalPnl.toFixed(2),
-  };
+  return results;
 }
 
 module.exports = {

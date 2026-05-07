@@ -4,6 +4,10 @@ const {
   closeTrade,
 } = require("./tradeState");
 
+const {
+  saveTrade,
+} = require("../logging/tradeLogger");
+
 function createPaperTrade(price) {
   const trade = {
     symbol: "DOGEUSDT",
@@ -21,32 +25,44 @@ function createPaperTrade(price) {
 
   openTrade(trade);
 
+  console.log("Trade opened");
+
   return trade;
 }
 
-function monitorTrade(currentPrice) {
+async function monitorTrade(currentPrice) {
   const trade = getActiveTrade();
 
   if (!trade) {
     return null;
   }
 
-  // Take Profit
+  // TP
   if (currentPrice >= trade.takeProfit) {
     trade.status = "TP_HIT";
+
     trade.exitPrice = currentPrice;
 
+    await saveTrade(trade);
+
     closeTrade();
+
+    console.log("Take profit hit");
 
     return trade;
   }
 
-  // Stop Loss
+  // SL
   if (currentPrice <= trade.stopLoss) {
     trade.status = "SL_HIT";
+
     trade.exitPrice = currentPrice;
 
+    await saveTrade(trade);
+
     closeTrade();
+
+    console.log("Stop loss hit");
 
     return trade;
   }

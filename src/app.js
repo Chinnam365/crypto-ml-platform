@@ -17,6 +17,9 @@ const analyticsRoute =
 const backtestRoute =
   require("./routes/backtest");
 
+const optimizeRoute =
+  require("./routes/optimize");
+
 const app = express();
 
 app.use(cors());
@@ -60,6 +63,11 @@ app.use(
 app.use(
   "/api/backtest",
   backtestRoute
+);
+
+app.use(
+  "/api/optimize",
+  optimizeRoute
 );
 
 module.exports = app;

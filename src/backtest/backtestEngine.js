@@ -28,7 +28,7 @@ const {
 async function runBacktest() {
 
   console.log(
-    "Starting execution optimization backtest..."
+    "Starting regime-aware backtest..."
   );
 
   // =========================
@@ -71,12 +71,9 @@ async function runBacktest() {
     0.005,
     0.007,
     0.01,
-    0.015,
   ];
 
   const slLevels = [
-    0.003,
-    0.004,
     0.005,
     0.007,
   ];
@@ -102,6 +99,18 @@ async function runBacktest() {
         let totalPnl = 0;
 
         let activeTrade = null;
+
+        // =====================
+        // REGIME STATS
+        // =====================
+
+        let bullTrades = 0;
+
+        let bearTrades = 0;
+
+        let bullPnl = 0;
+
+        let bearPnl = 0;
 
         // =====================
         // REPLAY LOOP
@@ -324,7 +333,18 @@ async function runBacktest() {
                 (1 - sl),
 
               openedAt: i,
+
+              regime:
+                btcBullish
+                  ? "BULL"
+                  : "BEAR",
             };
+
+            if (btcBullish) {
+              bullTrades++;
+            } else {
+              bearTrades++;
+            }
           }
 
           // ===================
@@ -351,6 +371,15 @@ async function runBacktest() {
 
               totalPnl += pnl;
 
+              if (
+                activeTrade.regime ===
+                "BULL"
+              ) {
+                bullPnl += pnl;
+              } else {
+                bearPnl += pnl;
+              }
+
               timedOut++;
 
               activeTrade = null;
@@ -375,6 +404,15 @@ async function runBacktest() {
 
               totalPnl += pnl;
 
+              if (
+                activeTrade.regime ===
+                "BULL"
+              ) {
+                bullPnl += pnl;
+              } else {
+                bearPnl += pnl;
+              }
+
               activeTrade = null;
             }
 
@@ -394,6 +432,15 @@ async function runBacktest() {
                 100;
 
               totalPnl += pnl;
+
+              if (
+                activeTrade.regime ===
+                "BULL"
+              ) {
+                bullPnl += pnl;
+              } else {
+                bearPnl += pnl;
+              }
 
               activeTrade = null;
             }
@@ -435,6 +482,16 @@ async function runBacktest() {
 
           timedOut,
 
+          bullTrades,
+
+          bearTrades,
+
+          bullPnl:
+            bullPnl.toFixed(2),
+
+          bearPnl:
+            bearPnl.toFixed(2),
+
           winRate,
 
           totalPnl:
@@ -459,7 +516,7 @@ async function runBacktest() {
   );
 
   console.log(
-    "Execution optimization completed"
+    "Regime backtest completed"
   );
 
   return results.slice(0, 20);

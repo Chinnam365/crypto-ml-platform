@@ -28,7 +28,7 @@ function evaluateDogeStrategy(data) {
   }
 
   // Final decision
-  if (confidence >= 4) {
+  if (confidence >= 1) {
     decision = "BUY";
   }
 

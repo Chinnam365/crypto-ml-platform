@@ -1,4 +1,9 @@
+const {
+  calculateScore,
+} = require("./scoreCalculator");
+
 function evaluateDogeStrategy(data) {
+
   const {
     ema5m20,
     ema5m50,
@@ -16,102 +21,41 @@ function evaluateDogeStrategy(data) {
     btcBullish,
   } = data;
 
-  let score = 0;
-
-  const reasons = [];
-
   // =========================
-  // BTC MARKET
-  // =========================
-
-  if (btcBullish) {
-    score += 3;
-
-    reasons.push(
-      "BTC bullish"
-    );
-  } else {
-    reasons.push(
-      "BTC bearish"
-    );
-  }
-
-  // =========================
-  // 1H TREND
+  // CONDITIONS
   // =========================
 
   const bullish1h =
     ema1h20 > ema1h50;
 
-  if (bullish1h) {
-    score += 3;
-
-    reasons.push(
-      "1h bullish"
-    );
-  } else {
-    reasons.push(
-      "1h bearish"
-    );
-  }
-
-  // =========================
-  // 15M TREND
-  // =========================
-
   const bullish15m =
     ema15m20 > ema15m50;
 
-  if (bullish15m) {
-    score += 2;
-
-    reasons.push(
-      "15m bullish"
-    );
-  } else {
-    reasons.push(
-      "15m bearish"
-    );
-  }
-
-  // =========================
-  // 5M TREND
-  // =========================
-
   const bullish5m =
     ema5m20 > ema5m50;
-
-  if (bullish5m) {
-    score += 1;
-
-    reasons.push(
-      "5m bullish"
-    );
-  } else {
-    reasons.push(
-      "5m bearish"
-    );
-  }
-
-  // =========================
-  // RSI
-  // =========================
 
   const idealRsi =
     rsi5m >= 50 &&
     rsi5m <= 65;
 
-  if (idealRsi) {
-    score += 2;
+  // =========================
+  // SCORE CALCULATION
+  // =========================
 
-    reasons.push(
-      "RSI ideal"
-    );
-  } else {
-    reasons.push(
-      "RSI weak"
-    );
-  }
+  const {
+    score,
+    reasons,
+  } = calculateScore({
+    btcBullish,
+
+    bullish1h,
+
+    bullish15m,
+
+    bullish5m,
+
+    idealRsi,
+  });
 
   // =========================
   // DECISION

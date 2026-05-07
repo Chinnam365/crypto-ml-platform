@@ -1,8 +1,4 @@
 const {
-  startCooldown,
-} = require("../risk/cooldown");
-
-const {
   getActiveTrade,
   openTrade,
   closeTrade,
@@ -12,14 +8,19 @@ const {
   saveTrade,
 } = require("../logging/tradeLogger");
 
+const {
+  startCooldown,
+} = require("../risk/cooldown");
+
 function createPaperTrade(price) {
   const trade = {
     symbol: "DOGEUSDT",
 
     entryPrice: price,
 
-    takeProfit: price * 1.001,
-stopLoss: price * 0.999,
+    takeProfit: price * 1.01,
+
+    stopLoss: price * 0.995,
 
     openedAt: new Date(),
 
@@ -40,13 +41,15 @@ async function monitorTrade(currentPrice) {
     return null;
   }
 
-  // TP
+  // TAKE PROFIT
   if (currentPrice >= trade.takeProfit) {
     trade.status = "TP_HIT";
 
     trade.exitPrice = currentPrice;
 
     await saveTrade(trade);
+
+    startCooldown();
 
     closeTrade();
 
@@ -55,13 +58,15 @@ async function monitorTrade(currentPrice) {
     return trade;
   }
 
-  // SL
+  // STOP LOSS
   if (currentPrice <= trade.stopLoss) {
     trade.status = "SL_HIT";
 
     trade.exitPrice = currentPrice;
 
     await saveTrade(trade);
+
+    startCooldown();
 
     closeTrade();
 

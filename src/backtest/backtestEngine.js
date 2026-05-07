@@ -28,7 +28,7 @@ const {
 async function runBacktest() {
 
   console.log(
-    "Starting equity curve backtest..."
+    "Starting walk-forward validation..."
   );
 
   // =========================
@@ -60,7 +60,16 @@ async function runBacktest() {
     formatCandles(rawBtc);
 
   // =========================
-  // TEST PARAMETERS
+  // WALK-FORWARD SPLIT
+  // =========================
+
+  const splitIndex =
+    Math.floor(
+      candles5m.length * 0.7
+    );
+
+  // =========================
+  // PARAMETERS
   // =========================
 
   const thresholds = [6, 7, 8];
@@ -87,25 +96,23 @@ async function runBacktest() {
 
       for (const sl of slLevels) {
 
-        let wins = 0;
+        // =====================
+        // TRAINING STATS
+        // =====================
 
-        let losses = 0;
+        let trainingPnl = 0;
+        let trainingWins = 0;
+        let trainingTrades = 0;
 
-        let timedOut = 0;
+        // =====================
+        // VALIDATION STATS
+        // =====================
 
-        let totalPnl = 0;
+        let validationPnl = 0;
+        let validationWins = 0;
+        let validationTrades = 0;
 
         let activeTrade = null;
-
-        // =====================
-        // EQUITY CURVE
-        // =====================
-
-        let equity = 100;
-
-        let peakEquity = 100;
-
-        let maxDrawdown = 0;
 
         // =====================
         // REPLAY LOOP
@@ -116,6 +123,13 @@ async function runBacktest() {
           i < candles5m.length;
           i++
         ) {
+
+          // ===================
+          // DATA SEGMENT
+          // ===================
+
+          const isValidation =
+            i >= splitIndex;
 
           // ===================
           // 5M DATA
@@ -333,34 +347,6 @@ async function runBacktest() {
           }
 
           // ===================
-          // POSITION SIZE
-          // ===================
-
-          let positionSize = 1;
-
-          if (threshold === 7) {
-            positionSize = 1.5;
-          }
-
-          if (threshold === 8) {
-            positionSize = 2;
-          }
-
-          if (
-            volatilityRegime ===
-            "HIGH_VOL"
-          ) {
-            positionSize *= 0.7;
-          }
-
-          if (
-            volatilityRegime ===
-            "LOW_VOL"
-          ) {
-            positionSize *= 0.5;
-          }
-
-          // ===================
           // OPEN TRADE
           // ===================
 
@@ -384,7 +370,7 @@ async function runBacktest() {
 
               openedAt: i,
 
-              positionSize,
+              isValidation,
             };
           }
 
@@ -407,13 +393,10 @@ async function runBacktest() {
             ) {
 
               pnl =
-                (((latestPrice -
+                ((latestPrice -
                   activeTrade.entryPrice) /
                   activeTrade.entryPrice) *
-                  100) *
-                activeTrade.positionSize;
-
-              timedOut++;
+                100;
             }
 
             // TAKE PROFIT
@@ -424,13 +407,18 @@ async function runBacktest() {
             ) {
 
               pnl =
-                (((latestPrice -
+                ((latestPrice -
                   activeTrade.entryPrice) /
                   activeTrade.entryPrice) *
-                  100) *
-                activeTrade.positionSize;
+                100;
 
-              wins++;
+              if (
+                activeTrade.isValidation
+              ) {
+                validationWins++;
+              } else {
+                trainingWins++;
+              }
             }
 
             // STOP LOSS
@@ -441,47 +429,31 @@ async function runBacktest() {
             ) {
 
               pnl =
-                (((latestPrice -
+                ((latestPrice -
                   activeTrade.entryPrice) /
                   activeTrade.entryPrice) *
-                  100) *
-                activeTrade.positionSize;
-
-              losses++;
+                100;
             }
 
             // ===================
-            // APPLY PNL
+            // APPLY RESULTS
             // ===================
 
             if (pnl !== null) {
 
-              totalPnl += pnl;
-
-              equity += pnl;
-
-              // Peak equity
-
               if (
-                equity >
-                peakEquity
+                activeTrade.isValidation
               ) {
-                peakEquity =
-                  equity;
-              }
 
-              // Drawdown
+                validationPnl += pnl;
 
-              const drawdown =
-                peakEquity -
-                equity;
+                validationTrades++;
 
-              if (
-                drawdown >
-                maxDrawdown
-              ) {
-                maxDrawdown =
-                  drawdown;
+              } else {
+
+                trainingPnl += pnl;
+
+                trainingTrades++;
               }
 
               activeTrade = null;
@@ -490,22 +462,30 @@ async function runBacktest() {
         }
 
         // =====================
-        // RESULTS
+        // WIN RATES
         // =====================
 
-        const totalTrades =
-          wins +
-          losses +
-          timedOut;
-
-        const winRate =
-          totalTrades > 0
+        const trainingWinRate =
+          trainingTrades > 0
             ? (
-                (wins /
-                  totalTrades) *
+                (trainingWins /
+                  trainingTrades) *
                 100
               ).toFixed(2)
             : 0;
+
+        const validationWinRate =
+          validationTrades > 0
+            ? (
+                (validationWins /
+                  validationTrades) *
+                100
+              ).toFixed(2)
+            : 0;
+
+        // =====================
+        // RESULTS
+        // =====================
 
         results.push({
           threshold,
@@ -516,48 +496,40 @@ async function runBacktest() {
           stopLoss:
             sl,
 
-          totalTrades,
+          trainingTrades,
 
-          wins,
+          validationTrades,
 
-          losses,
+          trainingWinRate,
 
-          timedOut,
+          validationWinRate,
 
-          finalEquity:
-            equity.toFixed(2),
+          trainingPnl:
+            trainingPnl.toFixed(2),
 
-          peakEquity:
-            peakEquity.toFixed(2),
-
-          maxDrawdown:
-            maxDrawdown.toFixed(2),
-
-          winRate,
-
-          totalPnl:
-            totalPnl.toFixed(2),
+          validationPnl:
+            validationPnl.toFixed(2),
         });
       }
     }
   }
 
   // =========================
-  // SORT RESULTS
+  // SORT BY VALIDATION
   // =========================
 
   results.sort(
     (a, b) =>
       parseFloat(
-        b.finalEquity
+        b.validationPnl
       ) -
       parseFloat(
-        a.finalEquity
+        a.validationPnl
       )
   );
 
   console.log(
-    "Equity curve backtest completed"
+    "Walk-forward validation completed"
   );
 
   return results.slice(0, 20);

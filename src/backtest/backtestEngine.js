@@ -18,13 +18,17 @@ const {
 } = require("../indicators/rsi");
 
 const {
+  calculateVolatility,
+} = require("../indicators/volatility");
+
+const {
   calculateScore,
 } = require("../strategies/scoreCalculator");
 
 async function runBacktest() {
 
   console.log(
-    "Starting real multi-timeframe backtest..."
+    "Starting volatility-aware backtest..."
   );
 
   // =========================
@@ -123,6 +127,12 @@ async function runBacktest() {
       const rsi5m =
         calculateRSI(
           closes5m.slice(-15)
+        );
+
+      const volatility =
+        calculateVolatility(
+          slice5m,
+          10
         );
 
       // =====================
@@ -247,11 +257,14 @@ async function runBacktest() {
         rsi5m >= 50 &&
         rsi5m <= 65;
 
+      const strongVolatility =
+        volatility >= 0.0008;
+
       // =====================
       // SCORE
       // =====================
 
-      const {
+      let {
         score,
       } = calculateScore({
         btcBullish,
@@ -264,6 +277,14 @@ async function runBacktest() {
 
         idealRsi,
       });
+
+      // =====================
+      // VOLATILITY BONUS
+      // =====================
+
+      if (strongVolatility) {
+        score += 2;
+      }
 
       // =====================
       // OPEN TRADE
@@ -300,7 +321,9 @@ async function runBacktest() {
           i -
           activeTrade.openedAt;
 
+        // ===================
         // TIMEOUT
+        // ===================
 
         if (
           candlesOpen >= 24
@@ -321,7 +344,9 @@ async function runBacktest() {
           continue;
         }
 
+        // ===================
         // TAKE PROFIT
+        // ===================
 
         if (
           latestPrice >=
@@ -341,7 +366,9 @@ async function runBacktest() {
           activeTrade = null;
         }
 
+        // ===================
         // STOP LOSS
+        // ===================
 
         else if (
           latestPrice <=

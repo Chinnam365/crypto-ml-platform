@@ -14,8 +14,8 @@ function createPaperTrade(price) {
 
     entryPrice: price,
 
-    takeProfit: price * 1.001
-stopLoss: price * 0.999
+    takeProfit: price * 1.001,
+stopLoss: price * 0.999,
 
     openedAt: new Date(),
 

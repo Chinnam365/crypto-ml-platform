@@ -28,7 +28,7 @@ const {
 async function runBacktest() {
 
   console.log(
-    "Starting dynamic sizing backtest..."
+    "Starting equity curve backtest..."
   );
 
   // =========================
@@ -98,6 +98,16 @@ async function runBacktest() {
         let activeTrade = null;
 
         // =====================
+        // EQUITY CURVE
+        // =====================
+
+        let equity = 100;
+
+        let peakEquity = 100;
+
+        let maxDrawdown = 0;
+
+        // =====================
         // REPLAY LOOP
         // =====================
 
@@ -108,7 +118,7 @@ async function runBacktest() {
         ) {
 
           // ===================
-          // 5M
+          // 5M DATA
           // ===================
 
           const slice5m =
@@ -169,7 +179,7 @@ async function runBacktest() {
           }
 
           // ===================
-          // 15M
+          // 15M DATA
           // ===================
 
           const index15m =
@@ -203,7 +213,7 @@ async function runBacktest() {
               : 0;
 
           // ===================
-          // 1H
+          // 1H DATA
           // ===================
 
           const index1h =
@@ -237,7 +247,7 @@ async function runBacktest() {
               : 0;
 
           // ===================
-          // BTC
+          // BTC DATA
           // ===================
 
           const btcIndex =
@@ -328,8 +338,6 @@ async function runBacktest() {
 
           let positionSize = 1;
 
-          // Threshold quality
-
           if (threshold === 7) {
             positionSize = 1.5;
           }
@@ -338,18 +346,12 @@ async function runBacktest() {
             positionSize = 2;
           }
 
-          // Reduce risk during
-          // extreme volatility
-
           if (
             volatilityRegime ===
             "HIGH_VOL"
           ) {
             positionSize *= 0.7;
           }
-
-          // Reduce risk during
-          // low volatility
 
           if (
             volatilityRegime ===
@@ -396,47 +398,39 @@ async function runBacktest() {
               i -
               activeTrade.openedAt;
 
+            let pnl = null;
+
             // TIMEOUT
 
             if (
               candlesOpen >= 24
             ) {
 
-              const pnl =
+              pnl =
                 (((latestPrice -
                   activeTrade.entryPrice) /
                   activeTrade.entryPrice) *
                   100) *
                 activeTrade.positionSize;
 
-              totalPnl += pnl;
-
               timedOut++;
-
-              activeTrade = null;
-
-              continue;
             }
 
             // TAKE PROFIT
 
-            if (
+            else if (
               latestPrice >=
               activeTrade.takeProfit
             ) {
 
-              wins++;
-
-              const pnl =
+              pnl =
                 (((latestPrice -
                   activeTrade.entryPrice) /
                   activeTrade.entryPrice) *
                   100) *
                 activeTrade.positionSize;
 
-              totalPnl += pnl;
-
-              activeTrade = null;
+              wins++;
             }
 
             // STOP LOSS
@@ -446,16 +440,49 @@ async function runBacktest() {
               activeTrade.stopLoss
             ) {
 
-              losses++;
-
-              const pnl =
+              pnl =
                 (((latestPrice -
                   activeTrade.entryPrice) /
                   activeTrade.entryPrice) *
                   100) *
                 activeTrade.positionSize;
 
+              losses++;
+            }
+
+            // ===================
+            // APPLY PNL
+            // ===================
+
+            if (pnl !== null) {
+
               totalPnl += pnl;
+
+              equity += pnl;
+
+              // Peak equity
+
+              if (
+                equity >
+                peakEquity
+              ) {
+                peakEquity =
+                  equity;
+              }
+
+              // Drawdown
+
+              const drawdown =
+                peakEquity -
+                equity;
+
+              if (
+                drawdown >
+                maxDrawdown
+              ) {
+                maxDrawdown =
+                  drawdown;
+              }
 
               activeTrade = null;
             }
@@ -497,6 +524,15 @@ async function runBacktest() {
 
           timedOut,
 
+          finalEquity:
+            equity.toFixed(2),
+
+          peakEquity:
+            peakEquity.toFixed(2),
+
+          maxDrawdown:
+            maxDrawdown.toFixed(2),
+
           winRate,
 
           totalPnl:
@@ -513,15 +549,15 @@ async function runBacktest() {
   results.sort(
     (a, b) =>
       parseFloat(
-        b.totalPnl
+        b.finalEquity
       ) -
       parseFloat(
-        a.totalPnl
+        a.finalEquity
       )
   );
 
   console.log(
-    "Dynamic sizing completed"
+    "Equity curve backtest completed"
   );
 
   return results.slice(0, 20);

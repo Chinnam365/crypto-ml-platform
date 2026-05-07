@@ -1,8 +1,16 @@
 function evaluateDogeStrategy(data) {
   const {
-    ema20,
-    ema50,
-    rsi,
+    ema5m20,
+    ema5m50,
+
+    ema15m20,
+    ema15m50,
+
+    ema1h20,
+    ema1h50,
+
+    rsi5m,
+
     latestPrice,
   } = data;
 
@@ -13,26 +21,71 @@ function evaluateDogeStrategy(data) {
   let decision = "SKIP";
 
   // =========================
-  // EMA TREND
+  // 1H TREND
   // =========================
 
-  if (ema20 > ema50) {
+  const bullish1h =
+    ema1h20 > ema1h50;
+
+  if (bullish1h) {
     confidence += 2;
 
     reasons.push(
-      "Bullish EMA trend"
+      "1h bullish trend"
     );
   } else {
     reasons.push(
-      "Bearish EMA trend"
+      "1h bearish trend"
     );
   }
 
   // =========================
-  // RSI MOMENTUM
+  // 15M TREND
   // =========================
 
-  if (rsi >= 50 && rsi <= 65) {
+  const bullish15m =
+    ema15m20 > ema15m50;
+
+  if (bullish15m) {
+    confidence += 2;
+
+    reasons.push(
+      "15m bullish trend"
+    );
+  } else {
+    reasons.push(
+      "15m bearish trend"
+    );
+  }
+
+  // =========================
+  // 5M TREND
+  // =========================
+
+  const bullish5m =
+    ema5m20 > ema5m50;
+
+  if (bullish5m) {
+    confidence += 2;
+
+    reasons.push(
+      "5m bullish trend"
+    );
+  } else {
+    reasons.push(
+      "5m bearish trend"
+    );
+  }
+
+  // =========================
+  // RSI
+  // =========================
+
+  const validRsi =
+    rsi5m >= 50 &&
+    rsi5m <= 65;
+
+  if (validRsi) {
     confidence += 2;
 
     reasons.push(
@@ -49,10 +102,11 @@ function evaluateDogeStrategy(data) {
   // =========================
 
   if (
-    ema20 > ema50 &&
-    rsi >= 50 &&
-    rsi <= 65 &&
-    confidence >= 4
+    bullish1h &&
+    bullish15m &&
+    bullish5m &&
+    validRsi &&
+    confidence >= 8
   ) {
     decision = "BUY";
   }

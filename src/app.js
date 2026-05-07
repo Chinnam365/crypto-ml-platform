@@ -1,20 +1,49 @@
 const express = require("express");
+
 const cors = require("cors");
 
-const dogeRoute = require("./routes/doge");
-const tradesRoute = require("./routes/trades");
+const dogeRoute =
+  require("./routes/doge");
+
+const tradesRoute =
+  require("./routes/trades");
+
+const decisionsRoute =
+  require("./routes/decisions");
 
 const app = express();
 
 app.use(cors());
+
 app.use(express.json());
 
+// =========================
+// ROOT
+// =========================
+
 app.get("/", (req, res) => {
-  res.send("Crypto ML Platform Running");
+  res.send(
+    "Crypto ML Platform Running"
+  );
 });
 
-app.use("/api/doge", dogeRoute);
+// =========================
+// ROUTES
+// =========================
 
-app.use("/api/trades", tradesRoute);
+app.use(
+  "/api/doge",
+  dogeRoute
+);
+
+app.use(
+  "/api/trades",
+  tradesRoute
+);
+
+app.use(
+  "/api/decisions",
+  decisionsRoute
+);
 
 module.exports = app;

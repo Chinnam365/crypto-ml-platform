@@ -12,13 +12,29 @@ function evaluateDogeStrategy(data) {
     rsi5m,
 
     latestPrice,
+
+    btcBullish,
   } = data;
 
-  let confidence = 0;
+  let score = 0;
 
   const reasons = [];
 
-  let decision = "SKIP";
+  // =========================
+  // BTC MARKET
+  // =========================
+
+  if (btcBullish) {
+    score += 3;
+
+    reasons.push(
+      "BTC bullish"
+    );
+  } else {
+    reasons.push(
+      "BTC bearish"
+    );
+  }
 
   // =========================
   // 1H TREND
@@ -28,14 +44,14 @@ function evaluateDogeStrategy(data) {
     ema1h20 > ema1h50;
 
   if (bullish1h) {
-    confidence += 2;
+    score += 3;
 
     reasons.push(
-      "1h bullish trend"
+      "1h bullish"
     );
   } else {
     reasons.push(
-      "1h bearish trend"
+      "1h bearish"
     );
   }
 
@@ -47,14 +63,14 @@ function evaluateDogeStrategy(data) {
     ema15m20 > ema15m50;
 
   if (bullish15m) {
-    confidence += 2;
+    score += 2;
 
     reasons.push(
-      "15m bullish trend"
+      "15m bullish"
     );
   } else {
     reasons.push(
-      "15m bearish trend"
+      "15m bearish"
     );
   }
 
@@ -66,14 +82,14 @@ function evaluateDogeStrategy(data) {
     ema5m20 > ema5m50;
 
   if (bullish5m) {
-    confidence += 2;
+    score += 1;
 
     reasons.push(
-      "5m bullish trend"
+      "5m bullish"
     );
   } else {
     reasons.push(
-      "5m bearish trend"
+      "5m bearish"
     );
   }
 
@@ -81,42 +97,38 @@ function evaluateDogeStrategy(data) {
   // RSI
   // =========================
 
-  const validRsi =
+  const idealRsi =
     rsi5m >= 50 &&
     rsi5m <= 65;
 
-  if (validRsi) {
-    confidence += 2;
+  if (idealRsi) {
+    score += 2;
 
     reasons.push(
-      "Healthy RSI momentum"
+      "RSI ideal"
     );
   } else {
     reasons.push(
-      "RSI outside ideal range"
+      "RSI weak"
     );
   }
 
   // =========================
-  // FINAL DECISION
+  // DECISION
   // =========================
 
-  if (
-    bullish1h &&
-    bullish15m &&
-    bullish5m &&
-    validRsi &&
-    confidence >= 8
-  ) {
+  let decision = "SKIP";
+
+  if (score >= 8) {
     decision = "BUY";
   }
 
   return {
     latestPrice,
 
-    decision,
+    score,
 
-    confidence,
+    decision,
 
     reasons,
   };

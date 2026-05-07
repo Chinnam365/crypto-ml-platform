@@ -1,13 +1,21 @@
 const {
-  getDogeCandles,
-  getBtcCandles,
+  getDoge5mCandles,
+  getDoge15mCandles,
+  getDoge1hCandles,
+  getBtc15mCandles,
 } = require("../market/binance");
 
-const { formatCandles } = require("../market/formatter");
+const {
+  formatCandles,
+} = require("../market/formatter");
 
-const { calculateEMA } = require("../indicators/ema");
+const {
+  calculateEMA,
+} = require("../indicators/ema");
 
-const { calculateRSI } = require("../indicators/rsi");
+const {
+  calculateRSI,
+} = require("../indicators/rsi");
 
 const {
   evaluateDogeStrategy,
@@ -33,83 +41,148 @@ const {
 
 async function runEngine() {
   try {
-    console.log("Engine cycle started");
+    console.log(
+      "Engine cycle started"
+    );
 
     // =========================
-    // DOGE DATA
+    // DOGE 5M
     // =========================
 
-    const rawDogeCandles =
-      await getDogeCandles();
+    const raw5m =
+      await getDoge5mCandles();
 
-    const dogeCandles =
-      formatCandles(rawDogeCandles);
+    const candles5m =
+      formatCandles(raw5m);
 
-    const dogeCloses =
-      dogeCandles.map((c) => c.close);
+    const closes5m =
+      candles5m.map(
+        (c) => c.close
+      );
 
     const latestPrice =
-      dogeCloses[dogeCloses.length - 1];
+      closes5m[
+        closes5m.length - 1
+      ];
 
-    const ema20 = calculateEMA(
-      dogeCloses.slice(-20),
-      20
-    );
+    const ema5m20 =
+      calculateEMA(
+        closes5m.slice(-20),
+        20
+      );
 
-    const ema50 = calculateEMA(
-      dogeCloses.slice(-50),
-      50
-    );
+    const ema5m50 =
+      calculateEMA(
+        closes5m.slice(-50),
+        50
+      );
 
-    const rsi = calculateRSI(
-      dogeCloses.slice(-15)
-    );
+    const rsi5m =
+      calculateRSI(
+        closes5m.slice(-15)
+      );
 
     // =========================
-    // BTC DATA
+    // DOGE 15M
     // =========================
 
-    const rawBtcCandles =
-      await getBtcCandles();
+    const raw15m =
+      await getDoge15mCandles();
+
+    const candles15m =
+      formatCandles(raw15m);
+
+    const closes15m =
+      candles15m.map(
+        (c) => c.close
+      );
+
+    const ema15m20 =
+      calculateEMA(
+        closes15m.slice(-20),
+        20
+      );
+
+    const ema15m50 =
+      calculateEMA(
+        closes15m.slice(-50),
+        50
+      );
+
+    // =========================
+    // DOGE 1H
+    // =========================
+
+    const raw1h =
+      await getDoge1hCandles();
+
+    const candles1h =
+      formatCandles(raw1h);
+
+    const closes1h =
+      candles1h.map(
+        (c) => c.close
+      );
+
+    const ema1h20 =
+      calculateEMA(
+        closes1h.slice(-20),
+        20
+      );
+
+    const ema1h50 =
+      calculateEMA(
+        closes1h.slice(-50),
+        50
+      );
+
+    // =========================
+    // BTC FILTER
+    // =========================
+
+    const rawBtc =
+      await getBtc15mCandles();
 
     const btcCandles =
-      formatCandles(rawBtcCandles);
+      formatCandles(rawBtc);
 
     const btcCloses =
-      btcCandles.map((c) => c.close);
+      btcCandles.map(
+        (c) => c.close
+      );
 
-    const btcEma20 = calculateEMA(
-      btcCloses.slice(-20),
-      20
-    );
+    const btcEma20 =
+      calculateEMA(
+        btcCloses.slice(-20),
+        20
+      );
 
-    const btcEma50 = calculateEMA(
-      btcCloses.slice(-50),
-      50
-    );
-
-    // =========================
-    // BTC TREND FILTER
-    // =========================
+    const btcEma50 =
+      calculateEMA(
+        btcCloses.slice(-50),
+        50
+      );
 
     const btcBullish =
       btcEma20 > btcEma50;
 
-    if (!btcBullish) {
-      console.log(
-        "BTC bearish - blocking trades"
-      );
-    }
-
     // =========================
-    // STRATEGY EVALUATION
+    // STRATEGY
     // =========================
 
     const strategyResult =
       evaluateDogeStrategy({
-        ema20,
-        ema50,
-        rsi,
+        ema5m20,
+        ema5m50,
+
+        ema15m20,
+        ema15m50,
+
+        ema1h20,
+        ema1h50,
+
+        rsi5m,
+
         latestPrice,
       });
 
@@ -122,11 +195,11 @@ async function runEngine() {
 
       latestPrice,
 
-      ema20,
+      ema20: ema5m20,
 
-      ema50,
+      ema50: ema5m50,
 
-      rsi,
+      rsi: rsi5m,
 
       btcBullish,
 
@@ -147,9 +220,7 @@ async function runEngine() {
     let activeTrade =
       getActiveTrade();
 
-    // =========================
-    // MONITOR EXISTING TRADE
-    // =========================
+    // MONITOR TRADE
 
     if (activeTrade) {
       await monitorTrade(
@@ -161,9 +232,7 @@ async function runEngine() {
       );
     }
 
-    // =========================
-    // COOLDOWN STATUS
-    // =========================
+    // COOLDOWN
 
     if (isCooldownActive()) {
       console.log(
@@ -171,9 +240,15 @@ async function runEngine() {
       );
     }
 
-    // =========================
-    // OPEN NEW TRADE
-    // =========================
+    // BTC FILTER
+
+    if (!btcBullish) {
+      console.log(
+        "BTC bearish - blocking trades"
+      );
+    }
+
+    // OPEN TRADE
 
     if (
       !activeTrade &&
@@ -190,10 +265,6 @@ async function runEngine() {
         "New trade opened"
       );
     }
-
-    // =========================
-    // ENGINE STATUS OUTPUT
-    // =========================
 
     console.log({
       latestPrice,

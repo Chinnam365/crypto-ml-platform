@@ -6,14 +6,12 @@ const pool = require("../db/db");
 
 router.get("/", async (req, res) => {
   try {
-    const result = await pool.query(
-      `
+    const result = await pool.query(`
       SELECT *
       FROM decision_logs
       ORDER BY id DESC
       LIMIT 50
-    `
-    );
+    `);
 
     res.json(result.rows);
   } catch (error) {

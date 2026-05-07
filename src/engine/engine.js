@@ -1,4 +1,7 @@
-const { getDogeCandles } = require("../market/binance");
+const {
+  getDogeCandles,
+  getBtcCandles,
+} = require("../market/binance");
 
 const { formatCandles } = require("../market/formatter");
 
@@ -26,47 +29,96 @@ async function runEngine() {
   try {
     console.log("Engine cycle started");
 
-    const rawCandles = await getDogeCandles();
+    // DOGE DATA
+    const rawDogeCandles =
+      await getDogeCandles();
 
-    const candles = formatCandles(rawCandles);
+    const dogeCandles =
+      formatCandles(rawDogeCandles);
 
-    const closes = candles.map((c) => c.close);
+    const dogeCloses =
+      dogeCandles.map((c) => c.close);
 
-    const latestPrice = closes[closes.length - 1];
+    const latestPrice =
+      dogeCloses[dogeCloses.length - 1];
 
-    const ema20 = calculateEMA(closes.slice(-20), 20);
+    const ema20 = calculateEMA(
+      dogeCloses.slice(-20),
+      20
+    );
 
-    const ema50 = calculateEMA(closes.slice(-50), 50);
+    const ema50 = calculateEMA(
+      dogeCloses.slice(-50),
+      50
+    );
 
-    const rsi = calculateRSI(closes.slice(-15));
+    const rsi = calculateRSI(
+      dogeCloses.slice(-15)
+    );
 
-    const strategyResult = evaluateDogeStrategy({
-      ema20,
-      ema50,
-      rsi,
-      latestPrice,
-    });
+    // BTC DATA
+    const rawBtcCandles =
+      await getBtcCandles();
 
-    let activeTrade = getActiveTrade();
+    const btcCandles =
+      formatCandles(rawBtcCandles);
 
-    // MONITOR EXISTING TRADE
+    const btcCloses =
+      btcCandles.map((c) => c.close);
+
+    const btcEma20 = calculateEMA(
+      btcCloses.slice(-20),
+      20
+    );
+
+    const btcEma50 = calculateEMA(
+      btcCloses.slice(-50),
+      50
+    );
+
+    // BTC FILTER
+    const btcBullish =
+      btcEma20 > btcEma50;
+
+    const strategyResult =
+      evaluateDogeStrategy({
+        ema20,
+        ema50,
+        rsi,
+        latestPrice,
+      });
+
+    let activeTrade =
+      getActiveTrade();
+
+    // MONITOR TRADE
     if (activeTrade) {
       await monitorTrade(latestPrice);
 
-      console.log("Monitoring active trade");
+      console.log(
+        "Monitoring active trade"
+      );
     }
 
-    // COOLDOWN STATUS
+    // COOLDOWN
     if (isCooldownActive()) {
       console.log(
         `Cooldown active: ${getCooldownRemaining()} seconds remaining`
       );
     }
 
-    // OPEN NEW TRADE
+    // BTC FILTER BLOCK
+    if (!btcBullish) {
+      console.log(
+        "BTC bearish - blocking trades"
+      );
+    }
+
+    // OPEN TRADE
     if (
       !activeTrade &&
       !isCooldownActive() &&
+      btcBullish &&
       strategyResult.decision === "BUY"
     ) {
       createPaperTrade(latestPrice);
@@ -76,11 +128,18 @@ async function runEngine() {
 
     console.log({
       latestPrice,
+
+      btcBullish,
+
       strategy: strategyResult,
-      activeTrade: getActiveTrade(),
+
+      activeTrade:
+        getActiveTrade(),
     });
 
-    console.log("Engine cycle completed");
+    console.log(
+      "Engine cycle completed"
+    );
   } catch (error) {
     console.error(
       "Engine cycle failed:",

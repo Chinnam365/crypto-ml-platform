@@ -2,68 +2,87 @@ const express = require("express");
 
 const router = express.Router();
 
-const { getDogeCandles } = require("../market/binance");
-
-const { formatCandles } = require("../market/formatter");
-
-const { calculateEMA } = require("../indicators/ema");
-
-const { calculateRSI } = require("../indicators/rsi");
-
-const { evaluateDogeStrategy } = require("../strategies/dogeStrategy");
+const {
+  getDoge5mCandles,
+} = require("../market/binance");
 
 const {
-  getActiveTrade,
-} = require("../execution/tradeState");
+  formatCandles,
+} = require("../market/formatter");
 
 const {
-  createPaperTrade,
-  monitorTrade,
-} = require("../execution/paperTrader");
+  calculateEMA,
+} = require("../indicators/ema");
+
+const {
+  calculateRSI,
+} = require("../indicators/rsi");
+
+const {
+  evaluateDogeStrategy,
+} = require("../strategies/dogeStrategy");
 
 router.get("/", async (req, res) => {
   try {
-    const rawCandles = await getDogeCandles();
 
-    const candles = formatCandles(rawCandles);
+    // =========================
+    // 5M DATA
+    // =========================
 
-    const closes = candles.map((c) => c.close);
+    const rawCandles =
+      await getDoge5mCandles();
 
-    const latestPrice = closes[closes.length - 1];
+    const candles =
+      formatCandles(rawCandles);
 
-    const ema20 = calculateEMA(closes.slice(-20), 20);
+    const closes =
+      candles.map(
+        (c) => c.close
+      );
 
-    const ema50 = calculateEMA(closes.slice(-50), 50);
+    const latestPrice =
+      closes[
+        closes.length - 1
+      ];
 
-    const rsi = calculateRSI(closes.slice(-15));
+    const ema5m20 =
+      calculateEMA(
+        closes.slice(-20),
+        20
+      );
 
-    const strategyResult = evaluateDogeStrategy({
-      ema20,
-      ema50,
-      rsi,
-      latestPrice,
-    });
+    const ema5m50 =
+      calculateEMA(
+        closes.slice(-50),
+        50
+      );
 
-    let activeTrade = getActiveTrade();
+    const rsi5m =
+      calculateRSI(
+        closes.slice(-15)
+      );
 
-    let tradeUpdate = null;
+    // =========================
+    // PLACEHOLDER VALUES
+    // =========================
 
-    // Monitor existing trade
-    if (activeTrade) {
-      tradeUpdate = monitorTrade(latestPrice);
+    const strategy =
+      evaluateDogeStrategy({
+        ema5m20,
+        ema5m50,
 
-      activeTrade = getActiveTrade();
-    }
+        ema15m20: ema5m20,
+        ema15m50: ema5m50,
 
-    // Open new trade only if no active trade
-    if (
-      !activeTrade &&
-      strategyResult.decision === "BUY"
-    ) {
-      tradeUpdate = createPaperTrade(latestPrice);
+        ema1h20: ema5m20,
+        ema1h50: ema5m50,
 
-      activeTrade = getActiveTrade();
-    }
+        rsi5m,
+
+        latestPrice,
+
+        btcBullish: true,
+      });
 
     res.json({
       symbol: "DOGEUSDT",
@@ -71,18 +90,23 @@ router.get("/", async (req, res) => {
       latestPrice,
 
       indicators: {
-        ema20,
-        ema50,
-        rsi,
+        ema5m20,
+
+        ema5m50,
+
+        rsi5m,
       },
 
-      strategy: strategyResult,
+      strategy,
 
-      activeTrade,
-
-      tradeUpdate,
+      latestCandle:
+        candles[
+          candles.length - 1
+        ],
     });
+
   } catch (error) {
+
     res.status(500).json({
       error: error.message,
     });

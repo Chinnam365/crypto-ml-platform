@@ -27,15 +27,15 @@ const {
   calculateScore,
 } = require("../strategies/scoreCalculator");
 
-async function exportTrainingData() {
+// =====================================
+// GENERATE DATASET
+// =====================================
+
+async function generateTrainingDataset() {
 
   console.log(
-    "Generating ML training dataset..."
+    "Generating training dataset..."
   );
-
-  // =====================================
-  // LOAD HISTORICAL DATA
-  // =====================================
 
   const raw5m =
     await getDoge5mCandles(20000);
@@ -61,15 +61,7 @@ async function exportTrainingData() {
   const btcCandles =
     formatCandles(rawBtc);
 
-  // =====================================
-  // DATASET
-  // =====================================
-
   const dataset = [];
-
-  // =====================================
-  // REPLAY LOOP
-  // =====================================
 
   for (
     let i = 100;
@@ -113,9 +105,7 @@ async function exportTrainingData() {
         10
       );
 
-    // ===================================
-    // 15M DATA
-    // ===================================
+    // 15m
 
     const index15m =
       Math.floor(i / 3);
@@ -147,9 +137,7 @@ async function exportTrainingData() {
           )
         : 0;
 
-    // ===================================
-    // 1H DATA
-    // ===================================
+    // 1h
 
     const index1h =
       Math.floor(i / 12);
@@ -181,9 +169,7 @@ async function exportTrainingData() {
           )
         : 0;
 
-    // ===================================
-    // BTC DATA
-    // ===================================
+    // BTC
 
     const btcIndex =
       Math.floor(i / 3);
@@ -215,9 +201,7 @@ async function exportTrainingData() {
           )
         : 0;
 
-    // ===================================
-    // CONDITIONS
-    // ===================================
+    // conditions
 
     const bullish5m =
       ema5m20 > ema5m50;
@@ -235,11 +219,7 @@ async function exportTrainingData() {
       rsi >= 50 &&
       rsi <= 65;
 
-    // ===================================
-    // SCORE
-    // ===================================
-
-    let {
+    const {
       score,
     } = calculateScore({
       btcBullish,
@@ -249,9 +229,7 @@ async function exportTrainingData() {
       idealRsi,
     });
 
-    // ===================================
-    // FUTURE TRADE SIMULATION
-    // ===================================
+    // future simulation
 
     const takeProfit =
       latestPrice * 1.005;
@@ -292,10 +270,6 @@ async function exportTrainingData() {
       }
     }
 
-    // ===================================
-    // DATA ROW
-    // ===================================
-
     dataset.push({
 
       rsi,
@@ -329,13 +303,21 @@ async function exportTrainingData() {
     });
   }
 
-  // =====================================
-  // SAVE JSON
-  // =====================================
+  return dataset;
+}
+
+// =====================================
+// EXPORT ROUTE
+// =====================================
+
+async function exportTrainingData() {
+
+  const dataset =
+    await generateTrainingDataset();
 
   fs.writeFileSync(
 
-    "/tmp/training-data.json",
+    "./training-data.json",
 
     JSON.stringify(
       dataset,
@@ -344,55 +326,13 @@ async function exportTrainingData() {
     )
   );
 
-  // =====================================
-  // SAVE CSV
-  // =====================================
-
-  const headers =
-    Object.keys(
-      dataset[0]
-    );
-
-  const csvRows = [
-    headers.join(","),
-  ];
-
-  for (const row of dataset) {
-
-    csvRows.push(
-
-      headers
-        .map(
-          (h) => row[h]
-        )
-        .join(",")
-    );
-  }
-
-  fs.writeFileSync(
-
-    "/tmp/training-data.csv",
-
-    csvRows.join("\n")
-  );
-
-  console.log(
-    `Exported ${dataset.length} rows`
-  );
-
   return {
-
     rows:
       dataset.length,
-
-    json:
-      "/tmp/training-data.json",
-
-    csv:
-      "/tmp/training-data.csv",
   };
 }
 
 module.exports = {
   exportTrainingData,
+  generateTrainingDataset,
 };

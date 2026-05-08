@@ -1,7 +1,3 @@
-const {
-  trainModel,
-} = require("./ml/trainModel");
-
 const express = require("express");
 
 const app = express();
@@ -34,12 +30,20 @@ const dogeRoute =
   require("./routes/doge");
 
 // =====================================
-// ML EXPORT
+// ML MODULES
 // =====================================
 
 const {
   exportTrainingData,
 } = require("./ml/exportTrainingData");
+
+const {
+  trainModel,
+} = require("./ml/trainModel");
+
+const {
+  predictTrade,
+} = require("./ml/predictTrade");
 
 // =====================================
 // ROOT
@@ -119,6 +123,11 @@ app.get(
     }
   }
 );
+
+// =====================================
+// TRAIN ML MODEL
+// =====================================
+
 app.get(
   "/api/train-model",
 
@@ -142,6 +151,70 @@ app.get(
     }
   }
 );
+
+// =====================================
+// ML PREDICTION
+// =====================================
+
+app.get(
+  "/api/predict",
+
+  async (req, res) => {
+
+    try {
+
+      // =================================
+      // SAMPLE FEATURES
+      // later connected to live engine
+      // =================================
+
+      const features = {
+
+        rsi: 58,
+
+        volatility: 0.0008,
+
+        score: 7,
+
+        bullish5m: 1,
+
+        bullish15m: 1,
+
+        bullish1h: 1,
+
+        btcBullish: 1,
+
+        ema5mSpread: 0.001,
+
+        ema15mSpread: 0.002,
+
+        ema1hSpread: 0.003,
+      };
+
+      const prediction =
+        predictTrade(
+          features
+        );
+
+      res.json({
+
+        features,
+
+        prediction,
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error:
+          error.message,
+      });
+    }
+  }
+);
+
 // =====================================
 // EXPORT
 // =====================================

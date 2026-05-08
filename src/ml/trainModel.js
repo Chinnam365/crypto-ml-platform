@@ -6,6 +6,10 @@ const {
   setModel,
 } = require("./modelStore");
 
+const {
+  normalizeFeatures,
+} = require("./normalizeFeatures");
+
 // =====================================
 // SIGMOID
 // =====================================
@@ -44,27 +48,44 @@ async function trainModel() {
       continue;
     }
 
+    const normalized =
+      normalizeFeatures(row);
+
     X.push([
 
-      row.rsi,
+      normalized.rsi,
 
-      row.volatility,
+      normalized.volatility,
 
-      row.score,
+      normalized.score,
 
-      row.bullish5m,
+      normalized.bullish5m,
 
-      row.bullish15m,
+      normalized.bullish15m,
 
-      row.bullish1h,
+      normalized.bullish1h,
 
-      row.btcBullish,
+      normalized.btcBullish,
 
-      row.ema5mSpread,
+      normalized.ema5mSpread,
 
-      row.ema15mSpread,
+      normalized.ema15mSpread,
 
-      row.ema1hSpread,
+      normalized.ema1hSpread,
+
+      normalized.atr,
+
+      normalized.candleBody,
+
+      normalized.upperWick,
+
+      normalized.lowerWick,
+
+      normalized.emaSlope,
+
+      normalized.rsiSlope,
+
+      normalized.distanceFromEma,
     ]);
 
     y.push(
@@ -92,7 +113,7 @@ async function trainModel() {
   let bias = 0;
 
   const learningRate =
-    0.0001;
+    0.01;
 
   const epochs = 1000;
 
@@ -171,7 +192,7 @@ async function trainModel() {
   }
 
   // ===================================
-  // STORE MODEL IN MEMORY
+  // STORE MODEL
   // ===================================
 
   const model = {

@@ -7,7 +7,7 @@ const {
 } = require("./normalizeFeatures");
 
 // =====================================
-// PREDICT
+// PREDICT TRADE
 // =====================================
 
 function predictTrade(features) {
@@ -63,7 +63,7 @@ function predictTrade(features) {
   ]];
 
   // ===================================
-  // PREDICT CLASS
+  // RANDOM FOREST PREDICTION
   // ===================================
 
   const prediction =
@@ -73,15 +73,11 @@ function predictTrade(features) {
   // APPROX PROBABILITY
   // ===================================
 
-  let probability = 0.5;
+  let probability = 0.35;
 
   if (prediction === 1) {
 
     probability = 0.75;
-
-  } else {
-
-    probability = 0.35;
   }
 
   // ===================================
@@ -100,7 +96,10 @@ function predictTrade(features) {
 
   return {
 
-    probability,
+    probability:
+      Number(
+        probability.toFixed(4)
+      ),
 
     decision,
   };

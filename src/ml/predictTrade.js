@@ -63,20 +63,34 @@ function predictTrade(features) {
   ]];
 
   // ===================================
-  // TREE VOTES
+  // GET TREE ESTIMATORS
   // ===================================
 
   const estimators =
     model.estimators;
 
+  if (
+    !estimators ||
+    estimators.length === 0
+  ) {
+
+    throw new Error(
+      "Random Forest estimators missing"
+    );
+  }
+
+  // ===================================
+  // TREE VOTING
+  // ===================================
+
   let buyVotes = 0;
 
   for (const tree of estimators) {
 
-    const vote =
+    const prediction =
       tree.predict(input)[0];
 
-    if (vote === 1) {
+    if (prediction === 1) {
 
       buyVotes++;
     }
@@ -91,7 +105,7 @@ function predictTrade(features) {
     estimators.length;
 
   // ===================================
-  // DECISION
+  // DECISION LOGIC
   // ===================================
 
   let decision =
@@ -103,6 +117,10 @@ function predictTrade(features) {
 
     decision = "BUY";
   }
+
+  // ===================================
+  // RETURN RESULT
+  // ===================================
 
   return {
 

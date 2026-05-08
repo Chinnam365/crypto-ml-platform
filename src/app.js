@@ -7,6 +7,9 @@ app.use(express.json());
 // =====================================
 // ROUTES
 // =====================================
+const {
+  calculateFeatureImportance,
+} = require("./ml/featureImportance");
 
 const tradesRoute =
   require("./routes/trades");
@@ -213,7 +216,33 @@ app.get(
     }
   }
 );
+// =====================================
+// FEATURE IMPORTANCE
+// =====================================
 
+app.get(
+  "/api/feature-importance",
+
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await calculateFeatureImportance();
+
+      res.json(result);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error:
+          error.message,
+      });
+    }
+  }
+);
 // =====================================
 // EXPORT
 // =====================================

@@ -1,4 +1,10 @@
 const {
+  RandomForestClassifier,
+} = require(
+  "ml-random-forest"
+);
+
+const {
   generateTrainingDataset,
 } = require("./exportTrainingData");
 
@@ -11,25 +17,13 @@ const {
 } = require("./normalizeFeatures");
 
 // =====================================
-// SIGMOID
-// =====================================
-
-function sigmoid(z) {
-
-  return (
-    1 /
-    (1 + Math.exp(-z))
-  );
-}
-
-// =====================================
-// TRAIN MODEL
+// TRAIN RANDOM FOREST
 // =====================================
 
 async function trainModel() {
 
   console.log(
-    "Training ML model..."
+    "Training Random Forest model..."
   );
 
   const dataset =
@@ -102,110 +96,40 @@ async function trainModel() {
     );
   }
 
-  const featureCount =
-    X[0].length;
-
-  let weights =
-    new Array(
-      featureCount
-    ).fill(0);
-
-  let bias = 0;
-
-  const learningRate =
-    0.01;
-
-  const epochs = 1000;
-
   // ===================================
-  // TRAIN LOOP
+  // RANDOM FOREST OPTIONS
   // ===================================
 
-  for (
-    let epoch = 0;
-    epoch < epochs;
-    epoch++
-  ) {
+  const options = {
 
-    let totalLoss = 0;
+    seed: 42,
 
-    for (
-      let i = 0;
-      i < X.length;
-      i++
-    ) {
+    maxFeatures: 0.8,
 
-      let z = bias;
+    replacement: true,
 
-      for (
-        let j = 0;
-        j < featureCount;
-        j++
-      ) {
+    nEstimators: 100,
+  };
 
-        z +=
-          weights[j] *
-          X[i][j];
-      }
+  // ===================================
+  // TRAIN MODEL
+  // ===================================
 
-      const prediction =
-        sigmoid(z);
+  const classifier =
+    new RandomForestClassifier(
+      options
+    );
 
-      const error =
-        prediction -
-        y[i];
-
-      for (
-        let j = 0;
-        j < featureCount;
-        j++
-      ) {
-
-        weights[j] -=
-          learningRate *
-          error *
-          X[i][j];
-      }
-
-      bias -=
-        learningRate *
-        error;
-
-      totalLoss +=
-        Math.abs(error);
-    }
-
-    if (
-      epoch % 100 === 0
-    ) {
-
-      console.log(
-
-        `Epoch ${epoch}`,
-
-        `Loss ${(
-          totalLoss /
-          X.length
-        ).toFixed(4)}`
-      );
-    }
-  }
+  classifier.train(X, y);
 
   // ===================================
   // STORE MODEL
   // ===================================
 
-  const model = {
-
-    weights,
-
-    bias,
-  };
-
-  setModel(model);
+  setModel(classifier);
 
   console.log(
-    "ML model stored in memory"
+    "Random Forest model stored in memory"
   );
 
   return {
@@ -214,12 +138,13 @@ async function trainModel() {
       X.length,
 
     features:
-      featureCount,
-
-    epochs,
+      X[0].length,
 
     model:
-      "logistic-regression",
+      "random-forest",
+
+    trees:
+      options.nEstimators,
 
     status:
       "stored-in-memory",

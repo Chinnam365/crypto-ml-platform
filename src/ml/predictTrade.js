@@ -63,22 +63,32 @@ function predictTrade(features) {
   ]];
 
   // ===================================
-  // RANDOM FOREST PREDICTION
+  // TREE VOTES
   // ===================================
 
-  const prediction =
-    model.predict(input)[0];
+  const estimators =
+    model.estimators;
 
-  // ===================================
-  // APPROX PROBABILITY
-  // ===================================
+  let buyVotes = 0;
 
-  let probability = 0.35;
+  for (const tree of estimators) {
 
-  if (prediction === 1) {
+    const vote =
+      tree.predict(input)[0];
 
-    probability = 0.75;
+    if (vote === 1) {
+
+      buyVotes++;
+    }
   }
+
+  // ===================================
+  // TRUE PROBABILITY
+  // ===================================
+
+  const probability =
+    buyVotes /
+    estimators.length;
 
   // ===================================
   // DECISION
@@ -88,7 +98,7 @@ function predictTrade(features) {
     "SKIP";
 
   if (
-    probability >= 0.70
+    probability >= 0.65
   ) {
 
     decision = "BUY";
@@ -100,6 +110,11 @@ function predictTrade(features) {
       Number(
         probability.toFixed(4)
       ),
+
+    buyVotes,
+
+    totalTrees:
+      estimators.length,
 
     decision,
   };

@@ -10,11 +10,11 @@ app.use(express.json());
 
 const {
   getTrades,
-} = require("./database/trades");
+} = require("./db/trades");
 
 const {
   getDecisions,
-} = require("./database/decisions");
+} = require("./db/decisions");
 
 const {
   runBacktest,

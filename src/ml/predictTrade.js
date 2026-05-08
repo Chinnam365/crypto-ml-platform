@@ -60,11 +60,15 @@ function predictTrade(features) {
     normalized.rsiSlope,
 
     normalized.distanceFromEma,
-  ]];
 
-  // ===================================
-  // GET TREE ESTIMATORS
-  // ===================================
+    normalized.relativeVolume,
+
+    normalized.bullishRatio,
+
+    normalized.momentum,
+
+    normalized.volatilityExpansion,
+  ]];
 
   const estimators =
     model.estimators;
@@ -79,10 +83,6 @@ function predictTrade(features) {
     );
   }
 
-  // ===================================
-  // TREE VOTING
-  // ===================================
-
   let buyVotes = 0;
 
   for (const tree of estimators) {
@@ -96,17 +96,9 @@ function predictTrade(features) {
     }
   }
 
-  // ===================================
-  // TRUE PROBABILITY
-  // ===================================
-
   const probability =
     buyVotes /
     estimators.length;
-
-  // ===================================
-  // DECISION LOGIC
-  // ===================================
 
   let decision =
     "SKIP";
@@ -117,10 +109,6 @@ function predictTrade(features) {
 
     decision = "BUY";
   }
-
-  // ===================================
-  // RETURN RESULT
-  // ===================================
 
   return {
 

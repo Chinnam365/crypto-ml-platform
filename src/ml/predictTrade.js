@@ -7,18 +7,6 @@ const {
 } = require("./normalizeFeatures");
 
 // =====================================
-// SIGMOID
-// =====================================
-
-function sigmoid(z) {
-
-  return (
-    1 /
-    (1 + Math.exp(-z))
-  );
-}
-
-// =====================================
 // PREDICT
 // =====================================
 
@@ -34,15 +22,10 @@ function predictTrade(features) {
     );
   }
 
-  const {
-    weights,
-    bias,
-  } = model;
-
   const normalized =
     normalizeFeatures(features);
 
-  const input = [
+  const input = [[
 
     normalized.rsi,
 
@@ -77,23 +60,33 @@ function predictTrade(features) {
     normalized.rsiSlope,
 
     normalized.distanceFromEma,
-  ];
+  ]];
 
-  let z = bias;
+  // ===================================
+  // PREDICT CLASS
+  // ===================================
 
-  for (
-    let i = 0;
-    i < weights.length;
-    i++
-  ) {
+  const prediction =
+    model.predict(input)[0];
 
-    z +=
-      weights[i] *
-      input[i];
+  // ===================================
+  // APPROX PROBABILITY
+  // ===================================
+
+  let probability = 0.5;
+
+  if (prediction === 1) {
+
+    probability = 0.75;
+
+  } else {
+
+    probability = 0.35;
   }
 
-  const probability =
-    sigmoid(z);
+  // ===================================
+  // DECISION
+  // ===================================
 
   let decision =
     "SKIP";
@@ -107,10 +100,7 @@ function predictTrade(features) {
 
   return {
 
-    probability:
-      Number(
-        probability.toFixed(4)
-      ),
+    probability,
 
     decision,
   };

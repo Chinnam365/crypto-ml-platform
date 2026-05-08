@@ -298,6 +298,20 @@ const distanceFromEma =
 
     score,
 
+    atr,
+
+candleBody,
+
+upperWick,
+
+lowerWick,
+
+emaSlope,
+
+rsiSlope,
+
+distanceFromEma,
+    
     bullish5m:
       bullish5m ? 1 : 0,
 

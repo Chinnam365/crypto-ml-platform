@@ -1,3 +1,7 @@
+const {
+  trainModel,
+} = require("./ml/trainModel");
+
 const express = require("express");
 
 const app = express();
@@ -115,7 +119,29 @@ app.get(
     }
   }
 );
+app.get(
+  "/api/train-model",
 
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await trainModel();
+
+      res.json(result);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error:
+          error.message,
+      });
+    }
+  }
+);
 // =====================================
 // EXPORT
 // =====================================

@@ -2,6 +2,10 @@ const {
   getModel,
 } = require("./modelStore");
 
+const {
+  normalizeFeatures,
+} = require("./normalizeFeatures");
+
 // =====================================
 // SIGMOID
 // =====================================
@@ -35,27 +39,44 @@ function predictTrade(features) {
     bias,
   } = model;
 
+  const normalized =
+    normalizeFeatures(features);
+
   const input = [
 
-    features.rsi,
+    normalized.rsi,
 
-    features.volatility,
+    normalized.volatility,
 
-    features.score,
+    normalized.score,
 
-    features.bullish5m,
+    normalized.bullish5m,
 
-    features.bullish15m,
+    normalized.bullish15m,
 
-    features.bullish1h,
+    normalized.bullish1h,
 
-    features.btcBullish,
+    normalized.btcBullish,
 
-    features.ema5mSpread,
+    normalized.ema5mSpread,
 
-    features.ema15mSpread,
+    normalized.ema15mSpread,
 
-    features.ema1hSpread,
+    normalized.ema1hSpread,
+
+    normalized.atr,
+
+    normalized.candleBody,
+
+    normalized.upperWick,
+
+    normalized.lowerWick,
+
+    normalized.emaSlope,
+
+    normalized.rsiSlope,
+
+    normalized.distanceFromEma,
   ];
 
   let z = bias;

@@ -80,6 +80,14 @@ async function trainModel() {
       normalized.rsiSlope,
 
       normalized.distanceFromEma,
+
+      normalized.relativeVolume,
+
+      normalized.bullishRatio,
+
+      normalized.momentum,
+
+      normalized.volatilityExpansion,
     ]);
 
     y.push(
@@ -96,10 +104,6 @@ async function trainModel() {
     );
   }
 
-  // ===================================
-  // RANDOM FOREST OPTIONS
-  // ===================================
-
   const options = {
 
     seed: 42,
@@ -111,20 +115,12 @@ async function trainModel() {
     nEstimators: 100,
   };
 
-  // ===================================
-  // TRAIN MODEL
-  // ===================================
-
   const classifier =
     new RandomForestClassifier(
       options
     );
 
   classifier.train(X, y);
-
-  // ===================================
-  // STORE MODEL
-  // ===================================
 
   setModel(classifier);
 

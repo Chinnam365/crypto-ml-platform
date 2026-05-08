@@ -1,3 +1,7 @@
+const {
+  exportTrainingData,
+} = require("./ml/exportTrainingData");
+
 const express = require("express");
 
 const cors = require("cors");
@@ -79,3 +83,25 @@ app.use(
 );
 
 module.exports = app;
+app.get(
+  "/api/export-training-data",
+
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await exportTrainingData();
+
+      res.json(result);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error: error.message,
+      });
+    }
+  }
+);

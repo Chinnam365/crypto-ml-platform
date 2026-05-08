@@ -1,8 +1,10 @@
-const fs = require("fs");
-
 const {
   generateTrainingDataset,
 } = require("./exportTrainingData");
+
+const {
+  setModel,
+} = require("./modelStore");
 
 // =====================================
 // SIGMOID
@@ -26,24 +28,14 @@ async function trainModel() {
     "Training ML model..."
   );
 
-  // ===================================
-  // GENERATE DATASET IN MEMORY
-  // ===================================
-
   const dataset =
     await generateTrainingDataset();
-
-  // ===================================
-  // FEATURE MATRIX
-  // ===================================
 
   const X = [];
 
   const y = [];
 
   for (const row of dataset) {
-
-    // Skip timeouts
 
     if (
       row.result ===
@@ -82,20 +74,12 @@ async function trainModel() {
     );
   }
 
-  // ===================================
-  // VALIDATION
-  // ===================================
-
   if (X.length === 0) {
 
     throw new Error(
-      "No training samples generated"
+      "No training samples"
     );
   }
-
-  // ===================================
-  // INITIALIZE MODEL
-  // ===================================
 
   const featureCount =
     X[0].length;
@@ -113,7 +97,7 @@ async function trainModel() {
   const epochs = 1000;
 
   // ===================================
-  // TRAINING LOOP
+  // TRAIN LOOP
   // ===================================
 
   for (
@@ -130,16 +114,6 @@ async function trainModel() {
       i++
     ) {
 
-      const features =
-        X[i];
-
-      const label =
-        y[i];
-
-      // ================================
-      // LINEAR COMBINATION
-      // ================================
-
       let z = bias;
 
       for (
@@ -150,27 +124,15 @@ async function trainModel() {
 
         z +=
           weights[j] *
-          features[j];
+          X[i][j];
       }
-
-      // ================================
-      // PREDICTION
-      // ================================
 
       const prediction =
         sigmoid(z);
 
-      // ================================
-      // ERROR
-      // ================================
-
       const error =
         prediction -
-        label;
-
-      // ================================
-      // UPDATE WEIGHTS
-      // ================================
+        y[i];
 
       for (
         let j = 0;
@@ -181,28 +143,16 @@ async function trainModel() {
         weights[j] -=
           learningRate *
           error *
-          features[j];
+          X[i][j];
       }
-
-      // ================================
-      // UPDATE BIAS
-      // ================================
 
       bias -=
         learningRate *
         error;
 
-      // ================================
-      // LOSS TRACKING
-      // ================================
-
       totalLoss +=
         Math.abs(error);
     }
-
-    // ================================
-    // PROGRESS LOGGING
-    // ================================
 
     if (
       epoch % 100 === 0
@@ -212,7 +162,7 @@ async function trainModel() {
 
         `Epoch ${epoch}`,
 
-        `Loss: ${(
+        `Loss ${(
           totalLoss /
           X.length
         ).toFixed(4)}`
@@ -221,7 +171,7 @@ async function trainModel() {
   }
 
   // ===================================
-  // SAVE MODEL
+  // STORE MODEL IN MEMORY
   // ===================================
 
   const model = {
@@ -229,53 +179,13 @@ async function trainModel() {
     weights,
 
     bias,
-
-    featureOrder: [
-
-      "rsi",
-
-      "volatility",
-
-      "score",
-
-      "bullish5m",
-
-      "bullish15m",
-
-      "bullish1h",
-
-      "btcBullish",
-
-      "ema5mSpread",
-
-      "ema15mSpread",
-
-      "ema1hSpread",
-    ],
   };
 
-  fs.writeFileSync(
-
-    "./model.json",
-
-    JSON.stringify(
-      model,
-      null,
-      2
-    )
-  );
+  setModel(model);
 
   console.log(
-    "Model training completed"
+    "ML model stored in memory"
   );
-
-  console.log(
-    "Model saved to model.json"
-  );
-
-  // ===================================
-  // RETURN RESULTS
-  // ===================================
 
   return {
 
@@ -290,8 +200,8 @@ async function trainModel() {
     model:
       "logistic-regression",
 
-    savedTo:
-      "./model.json",
+    status:
+      "stored-in-memory",
   };
 }
 

@@ -1,7 +1,7 @@
 const fs = require("fs");
 
 // =====================================
-// SIMPLE LOGISTIC REGRESSION
+// SIGMOID
 // =====================================
 
 function sigmoid(z) {
@@ -28,7 +28,7 @@ async function trainModel() {
 
   const raw =
     fs.readFileSync(
-      "./training-data.json",
+      "/tmp/training-data.json",
       "utf-8"
     );
 
@@ -44,8 +44,6 @@ async function trainModel() {
   const y = [];
 
   for (const row of dataset) {
-
-    // Skip timeouts
 
     if (
       row.result ===
@@ -85,7 +83,7 @@ async function trainModel() {
   }
 
   // ===================================
-  // INITIALIZE WEIGHTS
+  // INITIALIZE
   // ===================================
 
   const featureCount =
@@ -127,7 +125,7 @@ async function trainModel() {
       const label =
         y[i];
 
-      // Linear combination
+      // Linear equation
 
       let z = bias;
 
@@ -173,13 +171,11 @@ async function trainModel() {
         learningRate *
         error;
 
-      // Loss
-
       totalLoss +=
         Math.abs(error);
     }
 
-    // Progress logging
+    // Logging
 
     if (
       epoch % 100 === 0
@@ -189,7 +185,7 @@ async function trainModel() {
 
         `Epoch ${epoch}`,
 
-        `Loss: ${(
+        `Loss ${(
           totalLoss /
           X.length
         ).toFixed(4)}`
@@ -233,7 +229,7 @@ async function trainModel() {
 
   fs.writeFileSync(
 
-    "./model.json",
+    "/tmp/model.json",
 
     JSON.stringify(
       model,
@@ -244,10 +240,6 @@ async function trainModel() {
 
   console.log(
     "Model training completed"
-  );
-
-  console.log(
-    "Model saved to model.json"
   );
 
   return {
@@ -262,6 +254,9 @@ async function trainModel() {
 
     model:
       "logistic-regression",
+
+    savedTo:
+      "/tmp/model.json",
   };
 }
 

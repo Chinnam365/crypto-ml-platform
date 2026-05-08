@@ -77,10 +77,6 @@ async function exportTrainingData() {
     i++
   ) {
 
-    // ===================================
-    // 5M DATA
-    // ===================================
-
     const slice5m =
       candles5m.slice(0, i);
 
@@ -247,13 +243,9 @@ async function exportTrainingData() {
       score,
     } = calculateScore({
       btcBullish,
-
       bullish1h,
-
       bullish15m,
-
       bullish5m,
-
       idealRsi,
     });
 
@@ -267,9 +259,8 @@ async function exportTrainingData() {
     const stopLoss =
       latestPrice * 0.993;
 
-    let result = "TIMEOUT";
-
-    // Look ahead 24 candles
+    let result =
+      "TIMEOUT";
 
     for (
       let j = i;
@@ -307,8 +298,6 @@ async function exportTrainingData() {
 
     dataset.push({
 
-      // FEATURES
-
       rsi,
 
       volatility,
@@ -336,8 +325,6 @@ async function exportTrainingData() {
       ema1hSpread:
         ema1h20 - ema1h50,
 
-      // TARGET
-
       result,
     });
   }
@@ -347,7 +334,8 @@ async function exportTrainingData() {
   // =====================================
 
   fs.writeFileSync(
-    "./training-data.json",
+
+    "/tmp/training-data.json",
 
     JSON.stringify(
       dataset,
@@ -360,9 +348,10 @@ async function exportTrainingData() {
   // SAVE CSV
   // =====================================
 
-  const headers = Object.keys(
-    dataset[0]
-  );
+  const headers =
+    Object.keys(
+      dataset[0]
+    );
 
   const csvRows = [
     headers.join(","),
@@ -373,25 +362,34 @@ async function exportTrainingData() {
     csvRows.push(
 
       headers
-        .map((h) => row[h])
+        .map(
+          (h) => row[h]
+        )
         .join(",")
     );
   }
 
   fs.writeFileSync(
-    "./training-data.csv",
+
+    "/tmp/training-data.csv",
 
     csvRows.join("\n")
   );
 
   console.log(
-    `Exported ${dataset.length} training rows`
+    `Exported ${dataset.length} rows`
   );
 
   return {
-    rows: dataset.length,
-    json: "training-data.json",
-    csv: "training-data.csv",
+
+    rows:
+      dataset.length,
+
+    json:
+      "/tmp/training-data.json",
+
+    csv:
+      "/tmp/training-data.csv",
   };
 }
 

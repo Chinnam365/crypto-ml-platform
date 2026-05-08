@@ -41,10 +41,6 @@ const {
   trainModel,
 } = require("./ml/trainModel");
 
-const {
-  predictTrade,
-} = require("./ml/predictTrade");
-
 // =====================================
 // ROOT
 // =====================================
@@ -153,7 +149,7 @@ app.get(
 );
 
 // =====================================
-// ML PREDICTION
+// LIVE ML PREDICTION
 // =====================================
 
 app.get(
@@ -163,45 +159,16 @@ app.get(
 
     try {
 
-      // =================================
-      // SAMPLE FEATURES
-      // later connected to live engine
-      // =================================
+      const {
+        runDogeStrategy,
+      } = require(
+        "./strategies/dogeStrategy"
+      );
 
-      const features = {
+      const result =
+        await runDogeStrategy();
 
-        rsi: 58,
-
-        volatility: 0.0008,
-
-        score: 7,
-
-        bullish5m: 1,
-
-        bullish15m: 1,
-
-        bullish1h: 1,
-
-        btcBullish: 1,
-
-        ema5mSpread: 0.001,
-
-        ema15mSpread: 0.002,
-
-        ema1hSpread: 0.003,
-      };
-
-      const prediction =
-        predictTrade(
-          features
-        );
-
-      res.json({
-
-        features,
-
-        prediction,
-      });
+      res.json(result);
 
     } catch (error) {
 

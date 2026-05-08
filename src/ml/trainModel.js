@@ -1,5 +1,9 @@
 const fs = require("fs");
 
+const {
+  generateTrainingDataset,
+} = require("./exportTrainingData");
+
 // =====================================
 // SIGMOID
 // =====================================
@@ -23,17 +27,11 @@ async function trainModel() {
   );
 
   // ===================================
-  // LOAD DATASET
+  // GENERATE DATASET IN MEMORY
   // ===================================
 
-  const raw =
-    fs.readFileSync(
-      "/tmp/training-data.json",
-      "utf-8"
-    );
-
   const dataset =
-    JSON.parse(raw);
+    await generateTrainingDataset();
 
   // ===================================
   // FEATURE MATRIX
@@ -44,6 +42,8 @@ async function trainModel() {
   const y = [];
 
   for (const row of dataset) {
+
+    // Skip timeouts
 
     if (
       row.result ===
@@ -83,7 +83,18 @@ async function trainModel() {
   }
 
   // ===================================
-  // INITIALIZE
+  // VALIDATION
+  // ===================================
+
+  if (X.length === 0) {
+
+    throw new Error(
+      "No training samples generated"
+    );
+  }
+
+  // ===================================
+  // INITIALIZE MODEL
   // ===================================
 
   const featureCount =
@@ -125,7 +136,9 @@ async function trainModel() {
       const label =
         y[i];
 
-      // Linear equation
+      // ================================
+      // LINEAR COMBINATION
+      // ================================
 
       let z = bias;
 
@@ -140,18 +153,24 @@ async function trainModel() {
           features[j];
       }
 
-      // Prediction
+      // ================================
+      // PREDICTION
+      // ================================
 
       const prediction =
         sigmoid(z);
 
-      // Error
+      // ================================
+      // ERROR
+      // ================================
 
       const error =
         prediction -
         label;
 
-      // Update weights
+      // ================================
+      // UPDATE WEIGHTS
+      // ================================
 
       for (
         let j = 0;
@@ -165,17 +184,25 @@ async function trainModel() {
           features[j];
       }
 
-      // Update bias
+      // ================================
+      // UPDATE BIAS
+      // ================================
 
       bias -=
         learningRate *
         error;
 
+      // ================================
+      // LOSS TRACKING
+      // ================================
+
       totalLoss +=
         Math.abs(error);
     }
 
-    // Logging
+    // ================================
+    // PROGRESS LOGGING
+    // ================================
 
     if (
       epoch % 100 === 0
@@ -185,7 +212,7 @@ async function trainModel() {
 
         `Epoch ${epoch}`,
 
-        `Loss ${(
+        `Loss: ${(
           totalLoss /
           X.length
         ).toFixed(4)}`
@@ -229,7 +256,7 @@ async function trainModel() {
 
   fs.writeFileSync(
 
-    "/tmp/model.json",
+    "./model.json",
 
     JSON.stringify(
       model,
@@ -241,6 +268,14 @@ async function trainModel() {
   console.log(
     "Model training completed"
   );
+
+  console.log(
+    "Model saved to model.json"
+  );
+
+  // ===================================
+  // RETURN RESULTS
+  // ===================================
 
   return {
 
@@ -256,7 +291,7 @@ async function trainModel() {
       "logistic-regression",
 
     savedTo:
-      "/tmp/model.json",
+      "./model.json",
   };
 }
 

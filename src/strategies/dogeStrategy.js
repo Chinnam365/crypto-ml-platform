@@ -171,6 +171,85 @@ async function runDogeStrategy() {
     );
 
   // ===================================
+// ATR
+// ===================================
+
+const atr =
+  calculateATR(
+    candles5m,
+    14
+  );
+
+// ===================================
+// LAST CANDLE
+// ===================================
+
+const lastCandle =
+  candles5m[
+    candles5m.length - 1
+  ];
+
+const candleBody = Math.abs(
+
+  lastCandle.close -
+  lastCandle.open
+);
+
+const upperWick =
+
+  lastCandle.high -
+
+  Math.max(
+    lastCandle.open,
+    lastCandle.close
+  );
+
+const lowerWick =
+
+  Math.min(
+    lastCandle.open,
+    lastCandle.close
+  ) -
+
+  lastCandle.low;
+
+// ===================================
+// EMA SLOPES
+// ===================================
+
+const previousEma5m20 =
+  calculateEMA(
+    closes5m.slice(-21, -1),
+    20
+  );
+
+const emaSlope =
+
+  ema5m20 -
+  previousEma5m20;
+
+// ===================================
+// RSI SLOPE
+// ===================================
+
+const previousRsi =
+  calculateRSI(
+    closes5m.slice(-16, -1)
+  );
+
+const rsiSlope =
+  rsi - previousRsi;
+
+// ===================================
+// DISTANCE FROM EMA
+// ===================================
+
+const distanceFromEma =
+
+  latestPrice -
+  ema5m20;
+  
+  // ===================================
   // CONDITIONS
   // ===================================
 

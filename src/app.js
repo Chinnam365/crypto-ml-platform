@@ -1,5 +1,5 @@
 const express = require("express");
-  
+
 const app = express();
 
 app.use(express.json());
@@ -8,38 +8,33 @@ app.use(express.json());
 // IMPORTS
 // =====================================
 
-const {
-  getTrades,
-} = require("./database/trades");
+const { getTrades } =
+  require("../src/database/trades");
 
-const {
-  getDecisions,
-} = require("./database/decisions");
+const { getDecisions } =
+  require("../src/database/decisions");
 
-const {
-  runBacktest,
-} = require("./backtest/backtestEngine");
+const { runBacktest } =
+  require("../src/backtest/backtestEngine");
 
-const {
-  runWeightOptimization,
-} = require("./optimizer/weightOptimizer");
+const { runWeightOptimization } =
+  require("../src/optimizer/weightOptimizer");
 
-const {
-  getDoge5mCandles,
-} = require("./market/binance");
+const { getDoge5mCandles } =
+  require("../src/market/binance");
 
-const {
-  exportTrainingData,
-} = require("./ml/exportTrainingData");
+const { exportTrainingData } =
+  require("../src/ml/exportTrainingData");
 
 // =====================================
-// HEALTH CHECK
+// ROOT
 // =====================================
 
 app.get("/", (req, res) => {
 
   res.json({
-    status: "Crypto ML Platform Running",
+    status:
+      "Crypto ML Platform Running",
   });
 });
 
@@ -47,116 +42,136 @@ app.get("/", (req, res) => {
 // TRADES
 // =====================================
 
-app.get("/api/trades", async (req, res) => {
+app.get(
+  "/api/trades",
 
-  try {
+  async (req, res) => {
 
-    const trades =
-      await getTrades();
+    try {
 
-    res.json(trades);
+      const trades =
+        await getTrades();
 
-  } catch (error) {
+      res.json(trades);
 
-    console.error(error);
+    } catch (error) {
 
-    res.status(500).json({
-      error: error.message,
-    });
+      console.error(error);
+
+      res.status(500).json({
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 // =====================================
 // DECISIONS
 // =====================================
 
-app.get("/api/decisions", async (req, res) => {
+app.get(
+  "/api/decisions",
 
-  try {
+  async (req, res) => {
 
-    const decisions =
-      await getDecisions();
+    try {
 
-    res.json(decisions);
+      const decisions =
+        await getDecisions();
 
-  } catch (error) {
+      res.json(decisions);
 
-    console.error(error);
+    } catch (error) {
 
-    res.status(500).json({
-      error: error.message,
-    });
+      console.error(error);
+
+      res.status(500).json({
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 // =====================================
 // BACKTEST
 // =====================================
 
-app.get("/api/backtest", async (req, res) => {
+app.get(
+  "/api/backtest",
 
-  try {
+  async (req, res) => {
 
-    const result =
-      await runBacktest();
+    try {
 
-    res.json(result);
+      const result =
+        await runBacktest();
 
-  } catch (error) {
+      res.json(result);
 
-    console.error(error);
+    } catch (error) {
 
-    res.status(500).json({
-      error: error.message,
-    });
+      console.error(error);
+
+      res.status(500).json({
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 // =====================================
-// WEIGHT OPTIMIZATION
+// WEIGHT OPTIMIZER
 // =====================================
 
-app.get("/api/weights", async (req, res) => {
+app.get(
+  "/api/weights",
 
-  try {
+  async (req, res) => {
 
-    const result =
-      await runWeightOptimization();
+    try {
 
-    res.json(result);
+      const result =
+        await runWeightOptimization();
 
-  } catch (error) {
+      res.json(result);
 
-    console.error(error);
+    } catch (error) {
 
-    res.status(500).json({
-      error: error.message,
-    });
+      console.error(error);
+
+      res.status(500).json({
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 // =====================================
 // DOGE MARKET DATA
 // =====================================
 
-app.get("/api/doge", async (req, res) => {
+app.get(
+  "/api/doge",
 
-  try {
+  async (req, res) => {
 
-    const candles =
-      await getDoge5mCandles(50);
+    try {
 
-    res.json(candles);
+      const candles =
+        await getDoge5mCandles(50);
 
-  } catch (error) {
+      res.json(candles);
 
-    console.error(error);
+    } catch (error) {
 
-    res.status(500).json({
-      error: error.message,
-    });
+      console.error(error);
+
+      res.status(500).json({
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 // =====================================
 // EXPORT TRAINING DATA
@@ -189,117 +204,121 @@ app.get(
 // ANALYTICS
 // =====================================
 
-app.get("/api/analytics", async (req, res) => {
+app.get(
+  "/api/analytics",
 
-  try {
+  async (req, res) => {
 
-    const trades =
-      await getTrades();
+    try {
 
-    const decisions =
-      await getDecisions();
+      const trades =
+        await getTrades();
 
-    const totalTrades =
-      trades.length;
+      const decisions =
+        await getDecisions();
 
-    const wins =
-      trades.filter(
-        (t) =>
-          t.result === "TP_HIT"
-      ).length;
+      const totalTrades =
+        trades.length;
 
-    const losses =
-      trades.filter(
-        (t) =>
-          t.result === "SL_HIT"
-      ).length;
+      const wins =
+        trades.filter(
+          (t) =>
+            t.result === "TP_HIT"
+        ).length;
 
-    const totalPnl =
-      trades.reduce(
-        (sum, t) =>
-          sum +
-          parseFloat(
-            t.pnl || 0
-          ),
-        0
-      );
+      const losses =
+        trades.filter(
+          (t) =>
+            t.result === "SL_HIT"
+        ).length;
 
-    const averagePnl =
-      totalTrades > 0
-        ? totalPnl /
-          totalTrades
-        : 0;
+      const totalPnl =
+        trades.reduce(
+          (sum, t) =>
+            sum +
+            parseFloat(
+              t.pnl || 0
+            ),
+          0
+        );
 
-    const totalDecisions =
-      decisions.length;
+      const averagePnl =
+        totalTrades > 0
+          ? totalPnl /
+            totalTrades
+          : 0;
 
-    const buySignals =
-      decisions.filter(
-        (d) =>
-          d.decision === "BUY"
-      ).length;
+      const totalDecisions =
+        decisions.length;
 
-    const skipSignals =
-      decisions.filter(
-        (d) =>
-          d.decision === "SKIP"
-      ).length;
+      const buySignals =
+        decisions.filter(
+          (d) =>
+            d.decision === "BUY"
+        ).length;
 
-    const winRate =
-      totalTrades > 0
-        ? (
-            (wins /
-              totalTrades) *
-            100
-          ).toFixed(2)
-        : 0;
+      const skipSignals =
+        decisions.filter(
+          (d) =>
+            d.decision === "SKIP"
+        ).length;
 
-    res.json({
+      const winRate =
+        totalTrades > 0
+          ? (
+              (wins /
+                totalTrades) *
+              100
+            ).toFixed(2)
+          : 0;
 
-      tradeAnalytics: {
+      res.json({
 
-        totalTrades,
+        tradeAnalytics: {
 
-        wins,
+          totalTrades,
 
-        losses,
+          wins,
 
-        winRate:
-          parseFloat(winRate),
+          losses,
 
-        totalPnl:
-          parseFloat(
-            totalPnl.toFixed(2)
-          ),
+          winRate:
+            parseFloat(winRate),
 
-        averagePnl:
-          parseFloat(
-            averagePnl.toFixed(4)
-          ),
-      },
+          totalPnl:
+            parseFloat(
+              totalPnl.toFixed(2)
+            ),
 
-      decisionAnalytics: {
+          averagePnl:
+            parseFloat(
+              averagePnl.toFixed(4)
+            ),
+        },
 
-        totalDecisions,
+        decisionAnalytics: {
 
-        buySignals,
+          totalDecisions,
 
-        skipSignals,
-      },
-    });
+          buySignals,
 
-  } catch (error) {
+          skipSignals,
+        },
+      });
 
-    console.error(error);
+    } catch (error) {
 
-    res.status(500).json({
-      error: error.message,
-    });
+      console.error(error);
+
+      res.status(500).json({
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 // =====================================
-// EXPORT APP
+// EXPORT
 // =====================================
 
 module.exports = app;

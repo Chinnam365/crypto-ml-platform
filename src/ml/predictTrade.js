@@ -1,4 +1,6 @@
-const fs = require("fs");
+const {
+  getModel,
+} = require("./modelStore");
 
 // =====================================
 // SIGMOID
@@ -13,28 +15,20 @@ function sigmoid(z) {
 }
 
 // =====================================
-// LOAD MODEL
-// =====================================
-
-function loadModel() {
-
-  const raw =
-    fs.readFileSync(
-      "./model.json",
-      "utf-8"
-    );
-
-  return JSON.parse(raw);
-}
-
-// =====================================
 // PREDICT
 // =====================================
 
 function predictTrade(features) {
 
   const model =
-    loadModel();
+    getModel();
+
+  if (!model) {
+
+    throw new Error(
+      "Model not trained yet"
+    );
+  }
 
   const {
     weights,
@@ -64,10 +58,6 @@ function predictTrade(features) {
     features.ema1hSpread,
   ];
 
-  // ===================================
-  // LINEAR COMBINATION
-  // ===================================
-
   let z = bias;
 
   for (
@@ -81,16 +71,8 @@ function predictTrade(features) {
       input[i];
   }
 
-  // ===================================
-  // PROBABILITY
-  // ===================================
-
   const probability =
     sigmoid(z);
-
-  // ===================================
-  // DECISION
-  // ===================================
 
   let decision =
     "SKIP";

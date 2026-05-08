@@ -8,23 +8,29 @@ app.use(express.json());
 // IMPORTS
 // =====================================
 
-const { getTrades } =
-  require("../src/database/trades");
+const {
+  getTrades,
+} = require("./database/trades");
 
-const { getDecisions } =
-  require("../src/database/decisions");
+const {
+  getDecisions,
+} = require("./database/decisions");
 
-const { runBacktest } =
-  require("../src/backtest/backtestEngine");
+const {
+  runBacktest,
+} = require("./backtest/backtestEngine");
 
-const { runWeightOptimization } =
-  require("../src/optimizer/weightOptimizer");
+const {
+  runWeightOptimization,
+} = require("./optimizer/weightOptimizer");
 
-const { getDoge5mCandles } =
-  require("../src/market/binance");
+const {
+  getDoge5mCandles,
+} = require("./market/binance");
 
-const { exportTrainingData } =
-  require("../src/ml/exportTrainingData");
+const {
+  exportTrainingData,
+} = require("./ml/exportTrainingData");
 
 // =====================================
 // ROOT
@@ -59,7 +65,8 @@ app.get(
       console.error(error);
 
       res.status(500).json({
-        error: error.message,
+        error:
+          error.message,
       });
     }
   }
@@ -86,7 +93,8 @@ app.get(
       console.error(error);
 
       res.status(500).json({
-        error: error.message,
+        error:
+          error.message,
       });
     }
   }
@@ -113,7 +121,8 @@ app.get(
       console.error(error);
 
       res.status(500).json({
-        error: error.message,
+        error:
+          error.message,
       });
     }
   }
@@ -140,7 +149,8 @@ app.get(
       console.error(error);
 
       res.status(500).json({
-        error: error.message,
+        error:
+          error.message,
       });
     }
   }
@@ -167,7 +177,8 @@ app.get(
       console.error(error);
 
       res.status(500).json({
-        error: error.message,
+        error:
+          error.message,
       });
     }
   }
@@ -194,7 +205,8 @@ app.get(
       console.error(error);
 
       res.status(500).json({
-        error: error.message,
+        error:
+          error.message,
       });
     }
   }
@@ -223,13 +235,15 @@ app.get(
       const wins =
         trades.filter(
           (t) =>
-            t.result === "TP_HIT"
+            t.result ===
+            "TP_HIT"
         ).length;
 
       const losses =
         trades.filter(
           (t) =>
-            t.result === "SL_HIT"
+            t.result ===
+            "SL_HIT"
         ).length;
 
       const totalPnl =
@@ -254,13 +268,15 @@ app.get(
       const buySignals =
         decisions.filter(
           (d) =>
-            d.decision === "BUY"
+            d.decision ===
+            "BUY"
         ).length;
 
       const skipSignals =
         decisions.filter(
           (d) =>
-            d.decision === "SKIP"
+            d.decision ===
+            "SKIP"
         ).length;
 
       const winRate =
@@ -283,16 +299,22 @@ app.get(
           losses,
 
           winRate:
-            parseFloat(winRate),
+            parseFloat(
+              winRate
+            ),
 
           totalPnl:
             parseFloat(
-              totalPnl.toFixed(2)
+              totalPnl.toFixed(
+                2
+              )
             ),
 
           averagePnl:
             parseFloat(
-              averagePnl.toFixed(4)
+              averagePnl.toFixed(
+                4
+              )
             ),
         },
 
@@ -311,7 +333,8 @@ app.get(
       console.error(error);
 
       res.status(500).json({
-        error: error.message,
+        error:
+          error.message,
       });
     }
   }

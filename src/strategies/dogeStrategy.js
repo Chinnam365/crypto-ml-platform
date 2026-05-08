@@ -4,6 +4,9 @@ const {
   getDoge1hCandles,
   getBtc15mCandles,
 } = require("../market/binance");
+const {
+  calculateATR,
+} = require("../indicators/atr");
 
 const {
   formatCandles,

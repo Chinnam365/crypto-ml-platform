@@ -17,7 +17,7 @@ const {
 } = require("./normalizeFeatures");
 
 // =====================================
-// TRAIN RANDOM FOREST
+// TRAIN RANDOM FOREST MODEL
 // =====================================
 
 async function trainModel() {

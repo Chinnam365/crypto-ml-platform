@@ -41,6 +41,10 @@ const {
   trainModel,
 } = require("./ml/trainModel");
 
+const {
+  optimizeThresholds,
+} = require("./ml/thresholdOptimizer");
+
 // =====================================
 // ROOT
 // =====================================
@@ -167,6 +171,34 @@ app.get(
 
       const result =
         await runDogeStrategy();
+
+      res.json(result);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error:
+          error.message,
+      });
+    }
+  }
+);
+
+// =====================================
+// OPTIMIZE ML THRESHOLDS
+// =====================================
+
+app.get(
+  "/api/optimize-thresholds",
+
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await optimizeThresholds();
 
       res.json(result);
 

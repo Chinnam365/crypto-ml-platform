@@ -354,32 +354,27 @@ distanceFromEma,
   // RETURN
   // ===================================
 
-  return {
+return {
+  symbol: "DOGEUSDT",
 
-    symbol:
-      "DOGEUSDT",
+  latestPrice,
 
-    latestPrice,
+  rsi,
 
-    rsi,
+  volatility,
 
-    volatility,
+  score,
 
-    score,
+  bullish5m,
 
-    bullish5m,
+  bullish15m,
 
-    bullish15m,
+  bullish1h,
 
-    bullish1h,
+  btcBullish,
 
-    btcBullish,
-
-    probability:
-      prediction.probability,
-
-    decision,
-  };
+  ...prediction,
+};
 }
 
 module.exports = {

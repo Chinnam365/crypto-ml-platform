@@ -1,15 +1,12 @@
 {
-  "name": "crypto-ml-platform",
+  "name": "crypto-ml-clean",
   "version": "1.0.0",
-  "main": "src/server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "axios": "^1.6.0",
-    "ml-random-forest": "^2.1.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.0",
     "express": "^4.18.2",
     "pg": "^8.11.3"
   }

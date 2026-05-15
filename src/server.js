@@ -435,37 +435,7 @@ const regime =
 // SYMBOL PERFORMANCE
 // ==========================================
 
-const symbolRanking =
-  rankings.find(
-    s =>
-      s.symbol ===
-      randomSymbol
-  );
 
-const avgSymbolPnL =
-  symbolRanking
-    ? symbolRanking.avgPnL
-    : 0;
-
-// ==========================================
-// AI CONFIDENCE
-// ==========================================
-
-const confidence =
-  calculateConfidence({
-
-    rsi,
-
-    macd,
-
-    trend,
-
-    regime,
-
-    volatility,
-
-    avgSymbolPnL,
-  });
     if (!rsi) {
 
       console.log(
@@ -590,6 +560,42 @@ const volatility =
     ) /
     closes[closes.length - 1]
   ) * 100;
+
+// ==========================================
+// SYMBOL PERFORMANCE
+// ==========================================
+
+const symbolRanking =
+  rankings.find(
+    s =>
+      s.symbol ===
+      randomSymbol
+  );
+
+const avgSymbolPnL =
+  symbolRanking
+    ? symbolRanking.avgPnL
+    : 0;
+
+// ==========================================
+// AI CONFIDENCE
+// ==========================================
+
+const confidence =
+  calculateConfidence({
+
+    rsi,
+
+    macd,
+
+    trend,
+
+    regime,
+
+    volatility,
+
+    avgSymbolPnL,
+  });
 
 // ==========================================
 // SKIP LOW VOLATILITY

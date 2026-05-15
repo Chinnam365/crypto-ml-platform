@@ -1,12 +1,16 @@
-const pool =
+const { pool } =
   require("../db");
+
+// =====================================
+// ANALYTICS ENGINE
+// =====================================
 
 async function generateAnalytics() {
 
   try {
 
     // =========================
-    // TOTAL STATS
+    // TOTAL TRADES + AVG PNL
     // =========================
 
     const tradesResult =
@@ -14,53 +18,38 @@ async function generateAnalytics() {
 
         `
         SELECT
+
           COUNT(*) as total,
+
           AVG(pnl) as avg_pnl
+
         FROM trades
         `
       );
 
-    const winResult =
+    // =========================
+    // TOTAL WINS
+    // =========================
+
+    const winsResult =
       await pool.query(
 
         `
         SELECT
+
           COUNT(*) as wins
+
         FROM trades
+
         WHERE outcome = 'WIN'
         `
       );
-
-    const totalTrades =
-      Number(
-        tradesResult.rows[0].total
-      );
-
-    const totalWins =
-      Number(
-        winResult.rows[0].wins
-      );
-
-    const avgPnL =
-      Number(
-        tradesResult.rows[0].avg_pnl || 0
-      );
-
-    const winRate =
-      totalTrades > 0
-
-        ? (
-            totalWins /
-            totalTrades
-          ) * 100
-
-        : 0;
 
     // =========================
     // BEST SYMBOLS
     // =========================
 
-    const symbolResult =
+    const symbolsResult =
       await pool.query(
 
         `
@@ -81,10 +70,10 @@ async function generateAnalytics() {
       );
 
     // =========================
-    // BEST REGIMES
+    // BEST TRENDS
     // =========================
 
-    const regimeResult =
+    const trendsResult =
       await pool.query(
 
         `
@@ -106,6 +95,40 @@ async function generateAnalytics() {
         `
       );
 
+    // =========================
+    // FINAL CALCULATIONS
+    // =========================
+
+    const totalTrades =
+      Number(
+        tradesResult.rows[0].total
+      );
+
+    const totalWins =
+      Number(
+        winsResult.rows[0].wins
+      );
+
+    const avgPnL =
+      Number(
+        tradesResult.rows[0].avg_pnl || 0
+      );
+
+    const winRate =
+
+      totalTrades > 0
+
+        ? (
+            totalWins /
+            totalTrades
+          ) * 100
+
+        : 0;
+
+    // =========================
+    // RESPONSE OBJECT
+    // =========================
+
     const analytics = {
 
       totalTrades,
@@ -119,15 +142,14 @@ async function generateAnalytics() {
         avgPnL.toFixed(2),
 
       bestSymbols:
-        symbolResult.rows,
+        symbolsResult.rows,
 
-      bestRegimes:
-        regimeResult.rows,
+      bestTrends:
+        trendsResult.rows,
     };
 
     console.log(
-      "Analytics:",
-      analytics
+      "Analytics generated"
     );
 
     return analytics;
@@ -139,7 +161,11 @@ async function generateAnalytics() {
       error.message
     );
 
-    return null;
+    return {
+
+      error:
+        error.message,
+    };
   }
 }
 

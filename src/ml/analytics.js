@@ -1,5 +1,5 @@
-const { pool } =
-  require("../db");
+const pool =
+  require("../db/db");
 
 // =====================================
 // ANALYTICS ENGINE
@@ -10,7 +10,7 @@ async function generateAnalytics() {
   try {
 
     // =========================
-    // TOTAL TRADES + AVG PNL
+    // TOTAL TRADES
     // =========================
 
     const tradesResult =
@@ -96,7 +96,7 @@ async function generateAnalytics() {
       );
 
     // =========================
-    // FINAL CALCULATIONS
+    // CALCULATIONS
     // =========================
 
     const totalTrades =
@@ -126,10 +126,10 @@ async function generateAnalytics() {
         : 0;
 
     // =========================
-    // RESPONSE OBJECT
+    // RETURN ANALYTICS
     // =========================
 
-    const analytics = {
+    return {
 
       totalTrades,
 
@@ -147,12 +147,6 @@ async function generateAnalytics() {
       bestTrends:
         trendsResult.rows,
     };
-
-    console.log(
-      "Analytics generated"
-    );
-
-    return analytics;
 
   } catch (error) {
 

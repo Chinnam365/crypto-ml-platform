@@ -231,31 +231,32 @@ async function runEngine() {
     // SAVE FEATURES
     // =================================
 
-    await saveFeatures({
+    const featureId =
+  await saveFeatures({
 
-      symbol:
-        strategyResult.symbol,
+    symbol:
+      strategyResult.symbol,
 
-      price:
-        latestPrice,
+    price:
+      latestPrice,
 
-      rsi,
+    rsi,
 
-      macd,
+    macd,
 
-      trend,
+    trend,
 
-      volatility,
+    volatility,
 
-      probability:
-        aiProbability,
+    probability:
+      aiProbability,
 
-      score:
-        strategyResult.score,
+    score:
+      strategyResult.score,
 
-      decision:
-        filteredDecision,
-    });
+    decision:
+      filteredDecision,
+  });
 
     // =================================
     // SAVE DECISION

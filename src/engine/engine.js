@@ -20,6 +20,14 @@ const {
   saveDecision,
 } = require("../logging/decisionLogger");
 
+const {
+  calculateMACD,
+} = require("../indicators/macd");
+
+const {
+  detectTrend,
+} = require("../indicators/trend");
+
 // =====================================
 // ENGINE LOOP
 // =====================================
@@ -33,7 +41,7 @@ async function runEngine() {
     );
 
     // =================================
-    // RUN ML STRATEGY
+    // RUN STRATEGY
     // =================================
 
     const strategyResult =
@@ -45,6 +53,78 @@ async function runEngine() {
     );
 
     // =================================
+    // VALIDATION
+    // =================================
+
+    if (
+      !strategyResult ||
+      !strategyResult.closes ||
+      strategyResult.closes.length < 50
+    ) {
+
+      console.log(
+        "Not enough candle data"
+      );
+
+      return;
+    }
+
+    // =================================
+    // INDICATORS
+    // =================================
+
+    const closes =
+      strategyResult.closes;
+
+    const macd =
+      calculateMACD(closes);
+
+    const trend =
+      detectTrend(closes);
+
+    const rsi =
+      strategyResult.rsi;
+
+    let filteredDecision =
+      "HOLD";
+
+    // =================================
+    // SMART SIGNAL FILTERING
+    // =================================
+
+    if (
+
+      strategyResult.decision ===
+        "BUY" &&
+
+      rsi < 30 &&
+
+      macd > 0 &&
+
+      trend === "BULLISH"
+    ) {
+
+      filteredDecision =
+        "BUY";
+    }
+
+    else if (
+
+      strategyResult.decision ===
+        "SELL" &&
+
+      rsi > 70 &&
+
+      macd < 0 &&
+
+      trend === "BEARISH"
+    ) {
+
+      filteredDecision =
+        "SELL";
+    }
+
+    // =================================
     // ACTIVE TRADE
     // =================================
 
@@ -52,7 +132,7 @@ async function runEngine() {
       getActiveTrade();
 
     // =================================
-    // MONITOR EXISTING TRADE
+    // MONITOR TRADE
     // =================================
 
     if (activeTrade) {
@@ -83,9 +163,12 @@ async function runEngine() {
     // =================================
 
     if (
+
       !activeTrade &&
+
       !isCooldownActive() &&
-      strategyResult.decision ===
+
+      filteredDecision ===
         "BUY"
     ) {
 
@@ -94,7 +177,7 @@ async function runEngine() {
       );
 
       console.log(
-        "New ML trade opened"
+        "New filtered ML trade opened"
       );
     }
 
@@ -113,6 +196,10 @@ async function runEngine() {
       rsi:
         strategyResult.rsi,
 
+      macd,
+
+      trend,
+
       volatility:
         strategyResult.volatility,
 
@@ -135,13 +222,17 @@ async function runEngine() {
         strategyResult.probability,
 
       decision:
-        strategyResult.decision,
+        filteredDecision,
 
       reasons: [
 
         `ML Probability: ${strategyResult.probability}`,
 
         `Score: ${strategyResult.score}`,
+
+        `MACD: ${macd}`,
+
+        `Trend: ${trend}`,
       ],
     });
 
@@ -160,6 +251,10 @@ async function runEngine() {
       rsi:
         strategyResult.rsi,
 
+      macd,
+
+      trend,
+
       volatility:
         strategyResult.volatility,
 
@@ -182,11 +277,16 @@ async function runEngine() {
         strategyResult.probability,
 
       decision:
-        strategyResult.decision,
+        filteredDecision,
 
       activeTrade:
         getActiveTrade(),
     });
+
+    console.log(
+
+      `RSI ${rsi?.toFixed(2)} | MACD ${macd?.toFixed(4)} | Trend ${trend} | Decision ${filteredDecision}`
+    );
 
     console.log(
       "Engine cycle completed"

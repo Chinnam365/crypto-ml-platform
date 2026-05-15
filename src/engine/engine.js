@@ -29,16 +29,16 @@ const {
 } = require("../indicators/trend");
 
 const {
+  detectMarketRegime,
+} = require("../market/regime");
+
+const {
   saveFeatures,
 } = require("../ml/saveFeatures");
 
 const {
   trainModel,
 } = require("../ml/trainer");
-
-const {
-  detectMarketRegime,
-} = require("../market/regime");
 
 // =====================================
 // ENGINE LOOP
@@ -77,7 +77,7 @@ async function runEngine() {
     }
 
     // =================================
-    // TRAIN AI MODEL
+    // AI TRAINING
     // =================================
 
     const aiModel =
@@ -116,7 +116,7 @@ async function runEngine() {
       detectMarketRegime(closes);
 
     // =================================
-    // DECISION FILTERING
+    // FILTERED DECISION
     // =================================
 
     let filteredDecision =
@@ -138,6 +138,8 @@ async function runEngine() {
       trend === "BULLISH" &&
 
       aiProbability > 55 &&
+
+      volatility > 0.8 &&
 
       regime ===
         "TRENDING_BULLISH"
@@ -161,6 +163,8 @@ async function runEngine() {
       macd < 0 &&
 
       trend === "BEARISH" &&
+
+      volatility > 0.8 &&
 
       regime ===
         "TRENDING_BEARISH"
@@ -205,67 +209,65 @@ async function runEngine() {
     }
 
     // =================================
+    // SAVE FEATURES
+    // =================================
+
+    const featureId =
+      await saveFeatures({
+
+        symbol:
+          strategyResult.symbol,
+
+        price:
+          latestPrice,
+
+        rsi,
+
+        macd,
+
+        trend,
+
+        volatility,
+
+        probability:
+          aiProbability,
+
+        score:
+          strategyResult.score,
+
+        decision:
+          filteredDecision,
+      });
+
+    // =================================
     // OPEN NEW TRADE
     // =================================
 
     if (
 
-      if (
+      !activeTrade &&
 
-  !activeTrade &&
+      !isCooldownActive() &&
 
-  !isCooldownActive() &&
+      filteredDecision !==
+        "HOLD"
+    ) {
 
-  filteredDecision !==
-    "HOLD"
-) {
+      createPaperTrade(
 
-  createPaperTrade(
+        latestPrice,
 
-    latestPrice,
+        strategyResult.symbol,
 
-    strategyResult.symbol,
+        filteredDecision,
 
-    filteredDecision,
+        featureId
+      );
 
-    featureId
-  );
-
-  console.log(
-    "New AI trade opened"
-  );
-}
-
-    // =================================
-    // SAVE FEATURES
-    // =================================
-
-    const featureId =
-  await saveFeatures({
-
-    symbol:
-      strategyResult.symbol,
-
-    price:
-      latestPrice,
-
-    rsi,
-
-    macd,
-
-    trend,
-
-    volatility,
-
-    probability:
-      aiProbability,
-
-    score:
-      strategyResult.score,
-
-    decision:
-      filteredDecision,
-  });
+      console.log(
+        "New AI trade opened"
+      );
+    }
 
     // =================================
     // SAVE DECISION
@@ -284,9 +286,9 @@ async function runEngine() {
 
       trend,
 
-      volatility,
-
       regime,
+
+      volatility,
 
       score:
         strategyResult.score,
@@ -318,6 +320,8 @@ async function runEngine() {
         `Trend: ${trend}`,
 
         `Regime: ${regime}`,
+
+        `Volatility: ${volatility}`,
       ],
     });
 
@@ -351,7 +355,7 @@ async function runEngine() {
 
     console.log(
 
-      `RSI ${rsi?.toFixed(2)} | MACD ${macd?.toFixed(4)} | Trend ${trend} | Regime ${regime} | AI ${aiProbability.toFixed(2)}% | Decision ${filteredDecision}`
+      `RSI ${rsi?.toFixed(2)} | MACD ${macd?.toFixed(4)} | Trend ${trend} | Regime ${regime} | Volatility ${volatility?.toFixed(2)} | AI ${aiProbability.toFixed(2)}% | Decision ${filteredDecision}`
     );
 
     console.log(

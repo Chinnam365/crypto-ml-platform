@@ -80,7 +80,36 @@ async function getBtc15mCandles(
     limit
   );
 }
+// =========================
+// LIVE PRICE
+// =========================
 
+async function getPrice(symbol) {
+
+  try {
+
+    const response =
+      await axios.get(
+        "https://api.binance.com/api/v3/ticker/price",
+        {
+          params: {
+            symbol,
+          },
+        }
+      );
+
+    return Number(response.data.price);
+
+  } catch (error) {
+
+    console.error(
+      `Price API Error (${symbol}):`,
+      error.message
+    );
+
+    return null;
+  }
+}
 module.exports = {
   getCandles,
 

@@ -28,6 +28,14 @@ const {
   detectTrend,
 } = require("../indicators/trend");
 
+const {
+  saveFeatures,
+} = require("../ml/saveFeatures");
+
+const {
+  trainModel,
+} = require("../ml/trainer");
+
 // =====================================
 // ENGINE LOOP
 // =====================================
@@ -47,9 +55,19 @@ async function runEngine() {
     const strategyResult =
       await runDogeStrategy();
 
+    // =================================
+    // TRAIN AI MODEL
+    // =================================
+
+    const aiModel =
+      await trainModel();
+
+    const aiProbability =
+      aiModel.probability;
+
     console.log(
-      "ML Strategy Result:",
-      strategyResult
+      "AI Probability:",
+      aiProbability
     );
 
     // =================================
@@ -89,7 +107,7 @@ async function runEngine() {
       "HOLD";
 
     // =================================
-    // SMART SIGNAL FILTERING
+    // SMART FILTERING
     // =================================
 
     if (
@@ -101,7 +119,9 @@ async function runEngine() {
 
       macd > 0 &&
 
-      trend === "BULLISH"
+      trend === "BULLISH" &&
+
+      aiProbability > 55
     ) {
 
       filteredDecision =
@@ -132,7 +152,7 @@ async function runEngine() {
       getActiveTrade();
 
     // =================================
-    // MONITOR TRADE
+    // MONITOR ACTIVE TRADE
     // =================================
 
     if (activeTrade) {
@@ -147,7 +167,7 @@ async function runEngine() {
     }
 
     // =================================
-    // COOLDOWN STATUS
+    // COOLDOWN
     // =================================
 
     if (isCooldownActive()) {
@@ -177,9 +197,40 @@ async function runEngine() {
       );
 
       console.log(
-        "New filtered ML trade opened"
+        "New AI-filtered trade opened"
       );
     }
+
+    // =================================
+    // SAVE FEATURES
+    // =================================
+
+    await saveFeatures({
+
+      symbol:
+        strategyResult.symbol,
+
+      price:
+        strategyResult.latestPrice,
+
+      rsi,
+
+      macd,
+
+      trend,
+
+      volatility:
+        strategyResult.volatility,
+
+      probability:
+        aiProbability,
+
+      score:
+        strategyResult.score,
+
+      decision:
+        filteredDecision,
+    });
 
     // =================================
     // SAVE DECISION
@@ -193,8 +244,7 @@ async function runEngine() {
       latestPrice:
         strategyResult.latestPrice,
 
-      rsi:
-        strategyResult.rsi,
+      rsi,
 
       macd,
 
@@ -219,14 +269,14 @@ async function runEngine() {
         strategyResult.btcBullish,
 
       probability:
-        strategyResult.probability,
+        aiProbability,
 
       decision:
         filteredDecision,
 
       reasons: [
 
-        `ML Probability: ${strategyResult.probability}`,
+        `AI Probability: ${aiProbability}`,
 
         `Score: ${strategyResult.score}`,
 
@@ -248,8 +298,7 @@ async function runEngine() {
       latestPrice:
         strategyResult.latestPrice,
 
-      rsi:
-        strategyResult.rsi,
+      rsi,
 
       macd,
 
@@ -261,20 +310,8 @@ async function runEngine() {
       score:
         strategyResult.score,
 
-      bullish5m:
-        strategyResult.bullish5m,
-
-      bullish15m:
-        strategyResult.bullish15m,
-
-      bullish1h:
-        strategyResult.bullish1h,
-
-      btcBullish:
-        strategyResult.btcBullish,
-
       probability:
-        strategyResult.probability,
+        aiProbability,
 
       decision:
         filteredDecision,
@@ -285,7 +322,7 @@ async function runEngine() {
 
     console.log(
 
-      `RSI ${rsi?.toFixed(2)} | MACD ${macd?.toFixed(4)} | Trend ${trend} | Decision ${filteredDecision}`
+      `RSI ${rsi?.toFixed(2)} | MACD ${macd?.toFixed(4)} | Trend ${trend} | AI ${aiProbability.toFixed(2)}% | Decision ${filteredDecision}`
     );
 
     console.log(

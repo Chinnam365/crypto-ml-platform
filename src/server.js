@@ -4,6 +4,9 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 
+const {
+  calculateConfidence,
+} = require("./ml/confidenceEngine");
 
 const {
   getPrice,
@@ -428,6 +431,41 @@ const trend =
 
 const regime =
   detectMarketRegime(closes);
+    // ==========================================
+// SYMBOL PERFORMANCE
+// ==========================================
+
+const symbolRanking =
+  rankings.find(
+    s =>
+      s.symbol ===
+      randomSymbol
+  );
+
+const avgSymbolPnL =
+  symbolRanking
+    ? symbolRanking.avgPnL
+    : 0;
+
+// ==========================================
+// AI CONFIDENCE
+// ==========================================
+
+const confidence =
+  calculateConfidence({
+
+    rsi,
+
+    macd,
+
+    trend,
+
+    regime,
+
+    volatility,
+
+    avgSymbolPnL,
+  });
     if (!rsi) {
 
       console.log(
@@ -489,11 +527,29 @@ else if (
     ==========================================
     */
 
-    if (side === "HOLD") {
+    if (
+
+  side === "HOLD" ||
+
+  confidence < 70
+) {
 
       console.log(
-        `${randomSymbol} HOLD | RSI ${rsi}`
-      );
+
+  `${randomSymbol}
+
+  HOLD
+
+  | RSI ${rsi.toFixed(2)}
+
+  | MACD ${macd.toFixed(4)}
+
+  | Trend ${trend}
+
+  | Regime ${regime}
+
+  | Confidence ${confidence.toFixed(2)}`
+);
 
       return;
     }
@@ -654,7 +710,8 @@ if (volatility < 0.8) {
   Volatility ${volatility.toFixed(2)}
   |
   WinRate ${winRate}%
-  `
+  `|
+Confidence ${confidence.toFixed(2)}%
 );
 
   } catch (err) {

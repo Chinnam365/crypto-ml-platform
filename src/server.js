@@ -6,7 +6,12 @@ const { Pool } = require("pg");
 
 const {
   getPrice,
+  getCandles,
 } = require("./market/binance");
+
+const {
+  calculateRSI,
+} = require("./indicators/rsi");
 
 const app = express();
 
@@ -20,7 +25,9 @@ DATABASE
 */
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString:
+    process.env.DATABASE_URL,
+
   ssl: {
     rejectUnauthorized: false,
   },
@@ -28,7 +35,7 @@ const pool = new Pool({
 
 /*
 ==================================================
-INIT DB
+INIT DATABASE
 ==================================================
 */
 
@@ -41,6 +48,7 @@ async function initDB() {
         id SERIAL PRIMARY KEY,
         symbol TEXT,
         side TEXT,
+        rsi FLOAT,
         entry_price FLOAT,
         exit_price FLOAT,
         pnl FLOAT,
@@ -61,7 +69,9 @@ async function initDB() {
         `SELECT * FROM model LIMIT 1`
       );
 
-    if (existingModel.rows.length === 0) {
+    if (
+      existingModel.rows.length === 0
+    ) {
 
       await pool.query(
         `
@@ -71,20 +81,21 @@ async function initDB() {
         [
           JSON.stringify({
             rsi: 0.5,
-            macd: 0.5,
+            trend: 0.5,
             volume: 0.5,
-            trend: 0.5
-          })
+          }),
         ]
       );
     }
 
-    console.log("✅ Database initialized");
+    console.log(
+      "✅ Database initialized"
+    );
 
   } catch (err) {
 
     console.error(
-      "❌ Database init error:",
+      "DB INIT ERROR:",
       err.message
     );
   }
@@ -113,14 +124,20 @@ app.get("/", async (req, res) => {
       `);
 
     const total =
-      Number(totalResult.rows[0].count);
+      Number(
+        totalResult.rows[0].count
+      );
 
     const wins =
-      Number(winResult.rows[0].wins);
+      Number(
+        winResult.rows[0].wins
+      );
 
     const winRate =
       total > 0
-        ? ((wins / total) * 100).toFixed(2)
+        ? (
+            (wins / total) * 100
+          ).toFixed(2)
         : "0.00";
 
     res.send(`
@@ -164,8 +181,10 @@ app.get("/status", async (req, res) => {
 
     res.json({
       status: "running",
-      trades: trades.rows[0].count,
-      model: model.rows[0] || null,
+      trades:
+        trades.rows[0].count,
+      model:
+        model.rows[0] || null,
     });
 
   } catch (err) {
@@ -191,7 +210,9 @@ app.get("/model", async (req, res) => {
         `SELECT * FROM model LIMIT 1`
       );
 
-    res.json(result.rows[0] || {});
+    res.json(
+      result.rows[0] || {}
+    );
 
   } catch (err) {
 
@@ -222,22 +243,26 @@ app.get("/history", async (req, res) => {
     let html =
       "<h1>Trade History</h1>";
 
-    result.rows.forEach((trade) => {
+    result.rows.forEach(
+      (trade) => {
 
-      html += `
-        <p>
-          ${trade.symbol}
-          |
-          ${trade.side}
-          |
-          Entry: ${trade.entry_price}
-          |
-          Exit: ${trade.exit_price}
-          |
-          PnL: ${trade.pnl}
-        </p>
-      `;
-    });
+        html += `
+          <p>
+            ${trade.symbol}
+            |
+            ${trade.side}
+            |
+            RSI: ${trade.rsi}
+            |
+            Entry: ${trade.entry_price}
+            |
+            Exit: ${trade.exit_price}
+            |
+            PnL: ${trade.pnl}
+          </p>
+        `;
+      }
+    );
 
     res.send(html);
 
@@ -273,7 +298,7 @@ app.get("/reset", async (req, res) => {
 
 /*
 ==================================================
-LIVE MARKET ENGINE
+ML ENGINE
 ==================================================
 */
 
@@ -282,8 +307,6 @@ let tradeCounter = 0;
 async function runEngine() {
 
   try {
-
-    tradeCounter++;
 
     const symbols = [
       "BTCUSDT",
@@ -301,24 +324,23 @@ async function runEngine() {
         )
       ];
 
-    const side =
-      Math.random() > 0.5
-        ? "BUY"
-        : "SELL";
-
     /*
     ==========================================
-    REAL LIVE PRICE
+    GET REAL CANDLES
     ==========================================
     */
 
-    const livePrice =
-      await getPrice(randomSymbol);
+    const candles =
+      await getCandles(
+        randomSymbol,
+        "5m",
+        100
+      );
 
-    if (!livePrice) {
+    if (!candles.length) {
 
       console.log(
-        `Skipping ${randomSymbol}`
+        `No candles for ${randomSymbol}`
       );
 
       return;
@@ -326,11 +348,92 @@ async function runEngine() {
 
     /*
     ==========================================
-    SIMULATED MOVEMENT
+    EXTRACT CLOSES
     ==========================================
     */
 
-    const entry = livePrice;
+    const closes =
+      candles.map(
+        candle =>
+          Number(candle[4])
+      );
+
+    /*
+    ==========================================
+    RSI
+    ==========================================
+    */
+
+    const rsi =
+      calculateRSI(closes);
+
+    if (!rsi) {
+
+      console.log(
+        `RSI unavailable for ${randomSymbol}`
+      );
+
+      return;
+    }
+
+    /*
+    ==========================================
+    AI DECISION
+    ==========================================
+    */
+
+    let side = "HOLD";
+
+    if (rsi < 30) {
+      side = "BUY";
+    }
+    else if (rsi > 70) {
+      side = "SELL";
+    }
+
+    /*
+    ==========================================
+    SKIP HOLD
+    ==========================================
+    */
+
+    if (side === "HOLD") {
+
+      console.log(
+        `${randomSymbol} HOLD | RSI ${rsi}`
+      );
+
+      return;
+    }
+
+    /*
+    ==========================================
+    LIVE PRICE
+    ==========================================
+    */
+
+    const livePrice =
+      await getPrice(
+        randomSymbol
+      );
+
+    if (!livePrice) {
+
+      console.log(
+        `Price unavailable for ${randomSymbol}`
+      );
+
+      return;
+    }
+
+    /*
+    ==========================================
+    TRADE SIMULATION
+    ==========================================
+    */
+
+    const entry =
+      livePrice;
 
     const move =
       (Math.random() * 2 - 1)
@@ -361,20 +464,25 @@ async function runEngine() {
       (
         symbol,
         side,
+        rsi,
         entry_price,
         exit_price,
         pnl
       )
-      VALUES ($1,$2,$3,$4,$5)
+      VALUES
+      ($1,$2,$3,$4,$5,$6)
       `,
       [
         randomSymbol,
         side,
+        rsi,
         entry,
         exit,
         pnl,
       ]
     );
+
+    tradeCounter++;
 
     /*
     ==========================================
@@ -386,6 +494,7 @@ async function runEngine() {
       await pool.query(`
         SELECT
           COUNT(*) AS total,
+
           SUM(
             CASE
               WHEN pnl > 0
@@ -393,14 +502,19 @@ async function runEngine() {
               ELSE 0
             END
           ) AS wins
+
         FROM trades
       `);
 
     const total =
-      Number(stats.rows[0].total);
+      Number(
+        stats.rows[0].total
+      );
 
     const wins =
-      Number(stats.rows[0].wins);
+      Number(
+        stats.rows[0].wins
+      );
 
     const winRate =
       total > 0
@@ -410,7 +524,17 @@ async function runEngine() {
         : "0.00";
 
     console.log(
-      `Trade ${tradeCounter} | ${randomSymbol} | WinRate ${winRate}%`
+      `
+      Trade ${tradeCounter}
+      |
+      ${randomSymbol}
+      |
+      ${side}
+      |
+      RSI ${rsi}
+      |
+      WinRate ${winRate}%
+      `
     );
 
   } catch (err) {
@@ -432,15 +556,9 @@ async function startServer() {
 
   await initDB();
 
-  /*
-  ==========================================
-  ENGINE LOOP
-  ==========================================
-  */
-
   setInterval(
     runEngine,
-    10000
+    15000
   );
 
   const PORT =
@@ -449,7 +567,7 @@ async function startServer() {
   app.listen(PORT, () => {
 
     console.log(
-      `🚀 Server running on port ${PORT}`
+      `🚀 Running on port ${PORT}`
     );
   });
 }

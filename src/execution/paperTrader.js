@@ -1,81 +1,212 @@
+const pool =
+  require("../db/pool");
+
 const {
+  setActiveTrade,
+  clearActiveTrade,
   getActiveTrade,
-  openTrade,
-  closeTrade,
 } = require("./tradeState");
 
-const {
-  saveTrade,
-} = require("../logging/tradeLogger");
+async function createPaperTrade(
+  entryPrice,
+  symbol = "BTCUSDT",
+  type = "BUY",
+  featureId = null
+) {
 
-const {
-  startCooldown,
-} = require("../risk/cooldown");
-
-function createPaperTrade(price) {
   const trade = {
-    symbol: "DOGEUSDT",
 
-    entryPrice: price,
+    symbol,
 
-    takeProfit: price * 1.01,
+    type,
 
-    stopLoss: price * 0.995,
+    entryPrice,
 
-    openedAt: new Date(),
+    takeProfit:
+      entryPrice * 1.01,
 
-    status: "OPEN",
+    stopLoss:
+      entryPrice * 0.99,
+
+    openedAt:
+      Date.now(),
+
+    featureId,
   };
 
-  openTrade(trade);
+  setActiveTrade(trade);
 
-  console.log("Trade opened");
-
-  return trade;
+  console.log(
+    "Paper trade opened:",
+    trade
+  );
 }
 
-async function monitorTrade(currentPrice) {
-  const trade = getActiveTrade();
+async function monitorTrade(
+  currentPrice
+) {
+
+  const trade =
+    getActiveTrade();
 
   if (!trade) {
-    return null;
+
+    return;
   }
 
-  // TAKE PROFIT
-  if (currentPrice >= trade.takeProfit) {
-    trade.status = "TP_HIT";
+  let closed = false;
 
-    trade.exitPrice = currentPrice;
+  let pnl = 0;
 
-    await saveTrade(trade);
+  // =========================
+  // BUY
+  // =========================
 
-    startCooldown();
+  if (trade.type === "BUY") {
 
-    closeTrade();
+    if (
+      currentPrice >=
+      trade.takeProfit
+    ) {
 
-    console.log("Take profit hit");
+      pnl =
+        currentPrice -
+        trade.entryPrice;
 
-    return trade;
+      closed = true;
+    }
+
+    else if (
+      currentPrice <=
+      trade.stopLoss
+    ) {
+
+      pnl =
+        currentPrice -
+        trade.entryPrice;
+
+      closed = true;
+    }
   }
 
-  // STOP LOSS
-  if (currentPrice <= trade.stopLoss) {
-    trade.status = "SL_HIT";
+  // =========================
+  // SELL
+  // =========================
 
-    trade.exitPrice = currentPrice;
+  else {
 
-    await saveTrade(trade);
+    if (
+      currentPrice <=
+      trade.takeProfit
+    ) {
 
-    startCooldown();
+      pnl =
+        trade.entryPrice -
+        currentPrice;
 
-    closeTrade();
+      closed = true;
+    }
 
-    console.log("Stop loss hit");
+    else if (
+      currentPrice >=
+      trade.stopLoss
+    ) {
 
-    return trade;
+      pnl =
+        trade.entryPrice -
+        currentPrice;
+
+      closed = true;
+    }
   }
 
-  return trade;
+  // =========================
+  // CLOSE TRADE
+  // =========================
+
+  if (closed) {
+
+    const outcome =
+      pnl >= 0
+        ? "WIN"
+        : "LOSS";
+
+    try {
+
+      await pool.query(
+
+        `
+        INSERT INTO trades (
+
+          symbol,
+          type,
+          entry_price,
+          exit_price,
+          pnl,
+          outcome,
+          feature_id
+
+        )
+
+        VALUES (
+
+          $1,$2,$3,$4,$5,$6,$7
+        )
+        `,
+        [
+
+          trade.symbol,
+          trade.type,
+          trade.entryPrice,
+          currentPrice,
+          pnl,
+          outcome,
+          trade.featureId,
+        ]
+      );
+
+      // =====================
+      // UPDATE FEATURES
+      // =====================
+
+      if (trade.featureId) {
+
+        await pool.query(
+
+          `
+          UPDATE features
+
+          SET
+
+            pnl = $1,
+            outcome = $2
+
+          WHERE id = $3
+          `,
+          [
+
+            pnl,
+            outcome,
+            trade.featureId,
+          ]
+        );
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Trade save failed:",
+        error.message
+      );
+    }
+
+    console.log(
+
+      `Trade closed | ${outcome} | PnL ${pnl.toFixed(2)}`
+    );
+
+    clearActiveTrade();
+  }
 }
 
 module.exports = {

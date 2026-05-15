@@ -1,5 +1,5 @@
 const pool =
-  require("../db/pool");
+  require("../db/db");
 
 const {
   setActiveTrade,
@@ -7,10 +7,18 @@ const {
   getActiveTrade,
 } = require("./tradeState");
 
+// =====================================
+// CREATE PAPER TRADE
+// =====================================
+
 async function createPaperTrade(
+
   entryPrice,
+
   symbol = "BTCUSDT",
+
   type = "BUY",
+
   featureId = null
 ) {
 
@@ -23,10 +31,20 @@ async function createPaperTrade(
     entryPrice,
 
     takeProfit:
-      entryPrice * 1.01,
+
+      type === "BUY"
+
+        ? entryPrice * 1.01
+
+        : entryPrice * 0.99,
 
     stopLoss:
-      entryPrice * 0.99,
+
+      type === "BUY"
+
+        ? entryPrice * 0.99
+
+        : entryPrice * 1.01,
 
     openedAt:
       Date.now(),
@@ -41,6 +59,10 @@ async function createPaperTrade(
     trade
   );
 }
+
+// =====================================
+// MONITOR TRADE
+// =====================================
 
 async function monitorTrade(
   currentPrice
@@ -58,12 +80,14 @@ async function monitorTrade(
 
   let pnl = 0;
 
-  // =========================
-  // BUY
-  // =========================
+  // =================================
+  // BUY TRADE
+  // =================================
 
   if (trade.type === "BUY") {
 
+    // TAKE PROFIT
+
     if (
       currentPrice >=
       trade.takeProfit
@@ -75,6 +99,8 @@ async function monitorTrade(
 
       closed = true;
     }
+
+    // STOP LOSS
 
     else if (
       currentPrice <=
@@ -89,11 +115,15 @@ async function monitorTrade(
     }
   }
 
-  // =========================
-  // SELL
-  // =========================
+  // =================================
+  // SELL TRADE
+  // =================================
 
-  else {
+  else if (
+    trade.type === "SELL"
+  ) {
+
+    // TAKE PROFIT
 
     if (
       currentPrice <=
@@ -106,6 +136,8 @@ async function monitorTrade(
 
       closed = true;
     }
+
+    // STOP LOSS
 
     else if (
       currentPrice >=
@@ -120,18 +152,29 @@ async function monitorTrade(
     }
   }
 
-  // =========================
+  // =================================
   // CLOSE TRADE
-  // =========================
+  // =================================
 
   if (closed) {
 
+    // ===============================
+    // WIN / LOSS
+    // ===============================
+
     const outcome =
+
       pnl >= 0
+
         ? "WIN"
+
         : "LOSS";
 
     try {
+
+      // =============================
+      // SAVE TRADE
+      // =============================
 
       await pool.query(
 
@@ -156,18 +199,24 @@ async function monitorTrade(
         [
 
           trade.symbol,
+
           trade.type,
+
           trade.entryPrice,
+
           currentPrice,
+
           pnl,
+
           outcome,
+
           trade.featureId,
         ]
       );
 
-      // =====================
-      // UPDATE FEATURES
-      // =====================
+      // =============================
+      // UPDATE FEATURES TABLE
+      // =============================
 
       if (trade.featureId) {
 
@@ -186,30 +235,40 @@ async function monitorTrade(
           [
 
             pnl,
+
             outcome,
+
             trade.featureId,
           ]
         );
       }
 
+      console.log(
+
+        `Trade closed | ${trade.symbol} | ${trade.type} | ${outcome} | PnL ${pnl.toFixed(2)}`
+      );
+
     } catch (error) {
 
       console.error(
+
         "Trade save failed:",
+
         error.message
       );
     }
 
-    console.log(
-
-      `Trade closed | ${outcome} | PnL ${pnl.toFixed(2)}`
-    );
+    // ===============================
+    // CLEAR ACTIVE TRADE
+    // ===============================
 
     clearActiveTrade();
   }
 }
 
 module.exports = {
+
   createPaperTrade,
+
   monitorTrade,
 };

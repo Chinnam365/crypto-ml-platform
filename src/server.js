@@ -332,60 +332,63 @@ async function runEngine() {
 
   try {
 
-   // ==========================================
-// AI SYMBOL SELECTION
-// ==========================================
+    // ==========================================
+    // AI SYMBOL SELECTION
+    // ==========================================
 
-const rankings =
-  await getBestSymbols();
+    const rankings =
+      await getBestSymbols();
 
-let symbols = [
-  "ETHUSDT",
-  "BTCUSDT",
-  "SOLUSDT",
-  "DOGEUSDT",
-  "LINKUSDT",
-];
+    let symbols = [
 
-// ==========================================
-// USE ONLY PROFITABLE SYMBOLS
-// ==========================================
+      "ETHUSDT",
 
-if (rankings.length > 0) {
+      "BTCUSDT",
 
-  const profitable =
-    rankings
-      .filter(
-        s => s.avgPnL > 0
-      )
-      .map(
-        s => s.symbol
-      );
+      "SOLUSDT",
 
-  if (profitable.length > 0) {
+      "DOGEUSDT",
 
-    symbols = profitable;
-  }
-}
+      "LINKUSDT",
+    ];
 
-console.log(
-  "Allowed symbols:",
-  symbols
-);
+    // ==========================================
+    // USE ONLY PROFITABLE SYMBOLS
+    // ==========================================
 
-const randomSymbol =
-  symbols[
-    Math.floor(
-      Math.random() *
-      symbols.length
-    )
-  ];
+    if (rankings.length > 0) {
 
-    /*
-    ==========================================
-    GET REAL CANDLES
-    ==========================================
-    */
+      const profitable =
+        rankings
+          .filter(
+            s => s.avgPnL > 0
+          )
+          .map(
+            s => s.symbol
+          );
+
+      if (profitable.length > 0) {
+
+        symbols = profitable;
+      }
+    }
+
+    console.log(
+      "Allowed symbols:",
+      symbols
+    );
+
+    const randomSymbol =
+      symbols[
+        Math.floor(
+          Math.random() *
+          symbols.length
+        )
+      ];
+
+    // ==========================================
+    // GET REAL CANDLES
+    // ==========================================
 
     const candles =
       await getCandles(
@@ -403,11 +406,9 @@ const randomSymbol =
       return;
     }
 
-    /*
-    ==========================================
-    EXTRACT CLOSES
-    ==========================================
-    */
+    // ==========================================
+    // EXTRACT CLOSES
+    // ==========================================
 
     const closes =
       candles.map(
@@ -415,26 +416,21 @@ const randomSymbol =
           Number(candle[4])
       );
 
-    /*
-    ==========================================
-    RSI
-    ==========================================
-    */
+    // ==========================================
+    // INDICATORS
+    // ==========================================
 
     const rsi =
       calculateRSI(closes);
-const macd =
-  calculateMACD(closes);
 
-const trend =
-  detectTrend(closes);
+    const macd =
+      calculateMACD(closes);
 
-const regime =
-  detectMarketRegime(closes);
-    // ==========================================
-// SYMBOL PERFORMANCE
-// ==========================================
+    const trend =
+      detectTrend(closes);
 
+    const regime =
+      detectMarketRegime(closes);
 
     if (!rsi) {
 
@@ -445,90 +441,150 @@ const regime =
       return;
     }
 
-    /*
-    ==========================================
-    AI DECISION
-    ==========================================
-    */
+    // ==========================================
+    // VOLATILITY
+    // ==========================================
 
-    let side = "HOLD";
+    const volatility =
+      (
+        (
+          Math.max(...closes) -
+          Math.min(...closes)
+        ) /
+        closes[
+          closes.length - 1
+        ]
+      ) * 100;
 
-// ==========================================
-// BUY CONDITIONS
-// ==========================================
+    // ==========================================
+    // SKIP LOW VOLATILITY
+    // ==========================================
 
-if (
-
-  rsi < 30 &&
-
-  macd > 0 &&
-
-  trend === "BULLISH" &&
-
-  regime ===
-    "TRENDING_BULLISH"
-) {
-
-  side = "BUY";
-}
-
-// ==========================================
-// SELL CONDITIONS
-// ==========================================
-
-else if (
-
-  rsi > 70 &&
-
-  macd < 0 &&
-
-  trend === "BEARISH" &&
-
-  regime ===
-    "TRENDING_BEARISH"
-) {
-
-  side = "SELL";
-}
-
-    /*
-    ==========================================
-    SKIP HOLD
-    ==========================================
-    */
-
-    if (
-
-  side === "HOLD" ||
-
-  confidence < 70
-) {
+    if (volatility < 0.8) {
 
       console.log(
-
-  `${randomSymbol}
-
-  HOLD
-
-  | RSI ${rsi.toFixed(2)}
-
-  | MACD ${macd.toFixed(4)}
-
-  | Trend ${trend}
-
-  | Regime ${regime}
-
-  | Confidence ${confidence.toFixed(2)}`
-);
+        `${randomSymbol} volatility too low`
+      );
 
       return;
     }
 
-    /*
-    ==========================================
-    LIVE PRICE
-    ==========================================
-    */
+    // ==========================================
+    // SYMBOL PERFORMANCE
+    // ==========================================
+
+    const symbolRanking =
+      rankings.find(
+        s =>
+          s.symbol ===
+          randomSymbol
+      );
+
+    const avgSymbolPnL =
+      symbolRanking
+        ? symbolRanking.avgPnL
+        : 0;
+
+    // ==========================================
+    // AI CONFIDENCE
+    // ==========================================
+
+    const confidence =
+      calculateConfidence({
+
+        rsi,
+
+        macd,
+
+        trend,
+
+        regime,
+
+        volatility,
+
+        avgSymbolPnL,
+      });
+
+    // ==========================================
+    // AI DECISION
+    // ==========================================
+
+    let side = "HOLD";
+
+    // ==========================================
+    // BUY CONDITIONS
+    // ==========================================
+
+    if (
+
+      rsi < 30 &&
+
+      macd > 0 &&
+
+      trend === "BULLISH" &&
+
+      regime ===
+        "TRENDING_BULLISH"
+    ) {
+
+      side = "BUY";
+    }
+
+    // ==========================================
+    // SELL CONDITIONS
+    // ==========================================
+
+    else if (
+
+      rsi > 70 &&
+
+      macd < 0 &&
+
+      trend === "BEARISH" &&
+
+      regime ===
+        "TRENDING_BEARISH"
+    ) {
+
+      side = "SELL";
+    }
+
+    // ==========================================
+    // SKIP HOLD / LOW CONFIDENCE
+    // ==========================================
+
+    if (
+
+      side === "HOLD" ||
+
+      confidence < 70
+    ) {
+
+      console.log(
+
+        `${randomSymbol}
+
+        HOLD
+
+        | RSI ${rsi.toFixed(2)}
+
+        | MACD ${macd.toFixed(4)}
+
+        | Trend ${trend}
+
+        | Regime ${regime}
+
+        | Volatility ${volatility.toFixed(2)}
+
+        | Confidence ${confidence.toFixed(2)}`
+      );
+
+      return;
+    }
+
+    // ==========================================
+    // LIVE PRICE
+    // ==========================================
 
     const livePrice =
       await getPrice(
@@ -544,71 +600,13 @@ else if (
       return;
     }
 
-    /*
-    ==========================================
-    TRADE SIMULATION
-    ==========================================
-    */
+    // ==========================================
+    // TRADE SIMULATION
+    // ==========================================
 
     const entry =
       livePrice;
-const volatility =
-  (
-    (
-      Math.max(...closes) -
-      Math.min(...closes)
-    ) /
-    closes[closes.length - 1]
-  ) * 100;
 
-// ==========================================
-// SYMBOL PERFORMANCE
-// ==========================================
-
-const symbolRanking =
-  rankings.find(
-    s =>
-      s.symbol ===
-      randomSymbol
-  );
-
-const avgSymbolPnL =
-  symbolRanking
-    ? symbolRanking.avgPnL
-    : 0;
-
-// ==========================================
-// AI CONFIDENCE
-// ==========================================
-
-const confidence =
-  calculateConfidence({
-
-    rsi,
-
-    macd,
-
-    trend,
-
-    regime,
-
-    volatility,
-
-    avgSymbolPnL,
-  });
-
-// ==========================================
-// SKIP LOW VOLATILITY
-// ==========================================
-
-if (volatility < 0.8) {
-
-  console.log(
-    `${randomSymbol} volatility too low`
-  );
-
-  return;
-}
     const move =
       (Math.random() * 2 - 1)
       * 0.02;
@@ -626,11 +624,9 @@ if (volatility < 0.8) {
       ).toFixed(2)
     );
 
-    /*
-    ==========================================
-    SAVE TRADE
-    ==========================================
-    */
+    // ==========================================
+    // SAVE TRADE
+    // ==========================================
 
     await pool.query(
       `
@@ -658,11 +654,9 @@ if (volatility < 0.8) {
 
     tradeCounter++;
 
-    /*
-    ==========================================
-    STATS
-    ==========================================
-    */
+    // ==========================================
+    // STATS
+    // ==========================================
 
     const stats =
       await pool.query(`
@@ -697,29 +691,33 @@ if (volatility < 0.8) {
           ).toFixed(2)
         : "0.00";
 
-  console.log(
-  `
-  Trade ${tradeCounter}
-  |
-  ${randomSymbol}
-  |
-  ${side}
-  |
-  RSI ${rsi.toFixed(2)}
-  |
-  MACD ${macd.toFixed(4)}
-  |
-  Trend ${trend}
-  |
-  Regime ${regime}
-  |
-  Volatility ${volatility.toFixed(2)}
-  |
-  Confidence ${confidence.toFixed(2)}%
-  |
-  WinRate ${winRate}%
-  `
-);
+    // ==========================================
+    // FINAL LOGGING
+    // ==========================================
+
+    console.log(
+      `
+      Trade ${tradeCounter}
+      |
+      ${randomSymbol}
+      |
+      ${side}
+      |
+      RSI ${rsi.toFixed(2)}
+      |
+      MACD ${macd.toFixed(4)}
+      |
+      Trend ${trend}
+      |
+      Regime ${regime}
+      |
+      Volatility ${volatility.toFixed(2)}
+      |
+      Confidence ${confidence.toFixed(2)}%
+      |
+      WinRate ${winRate}%
+      `
+    );
 
   } catch (err) {
 

@@ -4,19 +4,23 @@ const {
 
 function calculateMACD(closes) {
 
-  const ema12 =
-    calculateEMA(closes, 12);
-
-  const ema26 =
-    calculateEMA(closes, 26);
-
-  if (!ema12 || !ema26) {
+  if (!closes || closes.length < 26) {
     return null;
   }
 
-  const macd = ema12 - ema26;
+  const ema12 =
+    calculateEMA(
+      closes.slice(-12),
+      12
+    );
 
-  return macd;
+  const ema26 =
+    calculateEMA(
+      closes.slice(-26),
+      26
+    );
+
+  return ema12 - ema26;
 }
 
 module.exports = {

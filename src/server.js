@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 
+
 const {
   getPrice,
   getCandles,
@@ -16,6 +17,22 @@ const {
 const {
   calculateRSI,
 } = require("./indicators/rsi");
+
+const {
+  calculateMACD,
+} = require("./indicators/macd");
+
+const {
+  detectTrend,
+} = require("./indicators/trend");
+
+const {
+  detectMarketRegime,
+} = require("./market/regime");
+
+const {
+  getBestSymbols,
+} = require("./ml/symbolSelector");
 
 const app = express();
 
@@ -312,21 +329,54 @@ async function runEngine() {
 
   try {
 
-    const symbols = [
-      "BTCUSDT",
-      "ETHUSDT",
-      "SOLUSDT",
-      "DOGEUSDT",
-      "LINKUSDT",
-    ];
+   // ==========================================
+// AI SYMBOL SELECTION
+// ==========================================
 
-    const randomSymbol =
-      symbols[
-        Math.floor(
-          Math.random() *
-          symbols.length
-        )
-      ];
+const rankings =
+  await getBestSymbols();
+
+let symbols = [
+  "ETHUSDT",
+  "BTCUSDT",
+  "SOLUSDT",
+  "DOGEUSDT",
+  "LINKUSDT",
+];
+
+// ==========================================
+// USE ONLY PROFITABLE SYMBOLS
+// ==========================================
+
+if (rankings.length > 0) {
+
+  const profitable =
+    rankings
+      .filter(
+        s => s.avgPnL > 0
+      )
+      .map(
+        s => s.symbol
+      );
+
+  if (profitable.length > 0) {
+
+    symbols = profitable;
+  }
+}
+
+console.log(
+  "Allowed symbols:",
+  symbols
+);
+
+const randomSymbol =
+  symbols[
+    Math.floor(
+      Math.random() *
+      symbols.length
+    )
+  ];
 
     /*
     ==========================================
@@ -370,7 +420,14 @@ async function runEngine() {
 
     const rsi =
       calculateRSI(closes);
+const macd =
+  calculateMACD(closes);
 
+const trend =
+  detectTrend(closes);
+
+const regime =
+  detectMarketRegime(closes);
     if (!rsi) {
 
       console.log(
@@ -388,12 +445,43 @@ async function runEngine() {
 
     let side = "HOLD";
 
-    if (rsi < 30) {
-      side = "BUY";
-    }
-    else if (rsi > 70) {
-      side = "SELL";
-    }
+// ==========================================
+// BUY CONDITIONS
+// ==========================================
+
+if (
+
+  rsi < 30 &&
+
+  macd > 0 &&
+
+  trend === "BULLISH" &&
+
+  regime ===
+    "TRENDING_BULLISH"
+) {
+
+  side = "BUY";
+}
+
+// ==========================================
+// SELL CONDITIONS
+// ==========================================
+
+else if (
+
+  rsi > 70 &&
+
+  macd < 0 &&
+
+  trend === "BEARISH" &&
+
+  regime ===
+    "TRENDING_BEARISH"
+) {
+
+  side = "SELL";
+}
 
     /*
     ==========================================
@@ -438,7 +526,27 @@ async function runEngine() {
 
     const entry =
       livePrice;
+const volatility =
+  (
+    (
+      Math.max(...closes) -
+      Math.min(...closes)
+    ) /
+    closes[closes.length - 1]
+  ) * 100;
 
+// ==========================================
+// SKIP LOW VOLATILITY
+// ==========================================
+
+if (volatility < 0.8) {
+
+  console.log(
+    `${randomSymbol} volatility too low`
+  );
+
+  return;
+}
     const move =
       (Math.random() * 2 - 1)
       * 0.02;
@@ -528,18 +636,26 @@ async function runEngine() {
         : "0.00";
 
     console.log(
-      `
-      Trade ${tradeCounter}
-      |
-      ${randomSymbol}
-      |
-      ${side}
-      |
-      RSI ${rsi}
-      |
-      WinRate ${winRate}%
-      `
-    );
+  `
+  Trade ${tradeCounter}
+  |
+  ${randomSymbol}
+  |
+  ${side}
+  |
+  RSI ${rsi.toFixed(2)}
+  |
+  MACD ${macd.toFixed(4)}
+  |
+  Trend ${trend}
+  |
+  Regime ${regime}
+  |
+  Volatility ${volatility.toFixed(2)}
+  |
+  WinRate ${winRate}%
+  `
+);
 
   } catch (err) {
 

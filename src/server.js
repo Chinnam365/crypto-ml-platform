@@ -1,223 +1,320 @@
+require("dotenv").config();
+
 const express = require("express");
-const axios = require("axios");
+const cors = require("cors");
 const { Pool } = require("pg");
 
 const app = express();
 
+app.use(cors());
+app.use(express.json());
+
+/*
+==================================================
+DATABASE CONNECTION
+==================================================
+*/
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
- 
-let stats = {
-  trades: 0,
-  wins: 0,
-};
 
-let openTrades = [];
+/*
+==================================================
+DATABASE INIT
+==================================================
+*/
 
-// =========================
-// INIT DB
-// =========================
 async function initDB() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS trades (
-      id SERIAL PRIMARY KEY,
-      symbol TEXT,
-      entry_price FLOAT,
-      exit_price FLOAT,
-      result FLOAT,
-      created_at TIMESTAMP DEFAULT NOW()
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS trades (
+        id SERIAL PRIMARY KEY,
+        symbol TEXT,
+        side TEXT,
+        entry_price FLOAT,
+        exit_price FLOAT,
+        pnl FLOAT,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS model (
+        id SERIAL PRIMARY KEY,
+        weights JSONB,
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+
+    const modelCheck = await pool.query(
+      `SELECT * FROM model LIMIT 1`
     );
-  `);
 
-  console.log("DB ready");
-}
-
-// =========================
-// FETCH MARKET DATA
-// =========================
-async function getPrice(symbol) {
-  const url = `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`;
-
-  const response = await axios.get(url);
-
-  return parseFloat(response.data.price);
-}
-
-// =========================
-// SIMPLE STRATEGY
-// =========================
-// If BTC moved up slightly,
-// simulate a BUY signal.
-
-let lastBTC = null;
-
-async function strategy() {
-  try {
-    const btc = await getPrice("BTCUSDT");
-
-    if (lastBTC !== null) {
-      const change = (btc - lastBTC) / lastBTC;
-
-      // small upward momentum
-      if (change > 0.001) {
-        console.log("BUY SIGNAL BTC");
-
-        openTrades.push({
-          symbol: "BTCUSDT",
-          entry: btc,
-        });
-      }
+    if (modelCheck.rows.length === 0) {
+      await pool.query(
+        `
+        INSERT INTO model (weights)
+        VALUES ($1)
+        `,
+        [
+          JSON.stringify({
+            rsi: 0.5,
+            macd: 0.5,
+            volume: 0.5,
+            trend: 0.5
+          })
+        ]
+      );
     }
 
-    lastBTC = btc;
-
+    console.log("✅ Database ready");
   } catch (err) {
-    console.error("Strategy error:", err.message);
+    console.error("❌ DB INIT ERROR:", err.message);
   }
 }
 
-// =========================
-// TRADE MANAGEMENT
-// =========================
-async function evaluateTrades() {
+/*
+==================================================
+HOME
+==================================================
+*/
+
+app.get("/", async (req, res) => {
   try {
-    const btc = await getPrice("BTCUSDT");
+    const tradeResult = await pool.query(
+      `SELECT COUNT(*) FROM trades`
+    );
 
-    let remaining = [];
+    const winResult = await pool.query(`
+      SELECT COUNT(*) AS wins
+      FROM trades
+      WHERE pnl > 0
+    `);
 
-    for (const trade of openTrades) {
+    const totalTrades = Number(tradeResult.rows[0].count);
+    const wins = Number(winResult.rows[0].wins);
 
-      const change = (btc - trade.entry) / trade.entry;
+    const winRate =
+      totalTrades > 0
+        ? ((wins / totalTrades) * 100).toFixed(2)
+        : "0.00";
 
-      // TAKE PROFIT +1%
-      if (change >= 0.01) {
+    res.send(`
+      <h1>🧠 ML Engine v12.1 (Stable)</h1>
 
-        stats.trades++;
-        stats.wins++;
+      <p>Trades: ${totalTrades}</p>
+      <p>Win Rate: ${winRate}%</p>
 
-        await pool.query(
-          `INSERT INTO trades
-          (symbol, entry_price, exit_price, result)
-          VALUES ($1,$2,$3,$4)`,
-          [trade.symbol, trade.entry, btc, 1]
-        );
-
-        console.log("WIN");
-
-      }
-
-      // STOP LOSS -0.5%
-      else if (change <= -0.005) {
-
-        stats.trades++;
-
-        await pool.query(
-          `INSERT INTO trades
-          (symbol, entry_price, exit_price, result)
-          VALUES ($1,$2,$3,$4)`,
-          [trade.symbol, trade.entry, btc, 0]
-        );
-
-        console.log("LOSS");
-
-      }
-
-      else {
-        remaining.push(trade);
-      }
-    }
-
-    openTrades = remaining;
-
+      <a href="/status">Status</a><br/>
+      <a href="/model">Model</a><br/>
+      <a href="/history">History</a><br/>
+      <a href="/reset">Reset</a>
+    `);
   } catch (err) {
-    console.error("Trade evaluation error:", err.message);
+    res.send("Server running");
   }
-}
-
-// =========================
-// ENGINE LOOP
-// =========================
-async function runEngine() {
-  await strategy();
-  await evaluateTrades();
-
-  // cleanup old data
-  await pool.query(`
-    DELETE FROM trades
-    WHERE id NOT IN (
-      SELECT id FROM trades
-      ORDER BY id DESC
-      LIMIT 500
-    )
-  `);
-
-  console.log(
-    `Trades: ${stats.trades} | WinRate: ${
-      stats.trades
-        ? ((stats.wins / stats.trades) * 100).toFixed(2)
-        : 0
-    }%`
-  );
-}
-
-// =========================
-// ROUTES
-// =========================
-
-app.get("/", (req, res) => {
-  res.send(`
-    <h1>Crypto ML Phase 2</h1>
-    <p>Trades: ${stats.trades}</p>
-    <p>Win Rate:
-      ${
-        stats.trades
-          ? ((stats.wins / stats.trades) * 100).toFixed(2)
-          : 0
-      }%
-    </p>
-
-    <a href="/status">Status</a><br/>
-    <a href="/history">History</a>
-  `);
 });
+
+/*
+==================================================
+STATUS
+==================================================
+*/
 
 app.get("/status", async (req, res) => {
-  const count = await pool.query(
-    `SELECT COUNT(*) FROM trades`
-  );
+  try {
+    const trades = await pool.query(
+      `SELECT COUNT(*) FROM trades`
+    );
 
-  res.json({
-    trades: count.rows[0].count,
-    winRate:
-      stats.trades
-        ? ((stats.wins / stats.trades) * 100).toFixed(2)
-        : 0,
-    openTrades: openTrades.length
-  });
+    const model = await pool.query(
+      `SELECT * FROM model LIMIT 1`
+    );
+
+    res.json({
+      status: "running",
+      trades: trades.rows[0].count,
+      model: model.rows[0] || null
+    });
+  } catch (err) {
+    res.json({
+      error: err.message
+    });
+  }
 });
+
+/*
+==================================================
+MODEL
+==================================================
+*/
+
+app.get("/model", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM model LIMIT 1`
+    );
+
+    res.json(result.rows[0] || {});
+  } catch (err) {
+    res.json({
+      error: err.message
+    });
+  }
+});
+
+/*
+==================================================
+HISTORY
+==================================================
+*/
 
 app.get("/history", async (req, res) => {
-  const result = await pool.query(
-    `SELECT * FROM trades
-     ORDER BY id DESC
-     LIMIT 20`
-  );
+  try {
+    const result = await pool.query(`
+      SELECT *
+      FROM trades
+      ORDER BY id DESC
+      LIMIT 50
+    `);
 
-  res.json(result.rows);
+    let html = "<h1>Trade History</h1>";
+
+    result.rows.forEach((trade) => {
+      html += `
+        <p>
+          ${trade.symbol || "BTCUSDT"}
+          |
+          ${trade.side || "BUY"}
+          |
+          PnL: ${trade.pnl || 0}
+        </p>
+      `;
+    });
+
+    res.send(html);
+  } catch (err) {
+    res.send(err.message);
+  }
 });
 
-// =========================
-// START SERVER
-// =========================
-const PORT = process.env.PORT || 10000;
+/*
+==================================================
+RESET
+==================================================
+*/
 
-app.listen(PORT, async () => {
-  console.log("Server started on", PORT);
+app.get("/reset", async (req, res) => {
+  try {
+    await pool.query(`DELETE FROM trades`);
 
+    res.send("✅ Trades reset complete");
+  } catch (err) {
+    res.send(err.message);
+  }
+});
+
+/*
+==================================================
+SIMULATION ENGINE
+==================================================
+*/
+
+let tradeCounter = 0;
+
+async function runEngine() {
+  try {
+    tradeCounter++;
+
+    const symbols = [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT",
+      "DOGEUSDT",
+      "LINKUSDT"
+    ];
+
+    const randomSymbol =
+      symbols[Math.floor(Math.random() * symbols.length)];
+
+    const side =
+      Math.random() > 0.5 ? "BUY" : "SELL";
+
+    const entry = Number(
+      (100 + Math.random() * 100).toFixed(2)
+    );
+
+    const exit = Number(
+      (entry + (Math.random() * 20 - 10)).toFixed(2)
+    );
+
+    const pnl = Number(
+      (exit - entry).toFixed(2)
+    );
+
+    await pool.query(
+      `
+      INSERT INTO trades
+      (symbol, side, entry_price, exit_price, pnl)
+      VALUES ($1, $2, $3, $4, $5)
+      `,
+      [
+        randomSymbol,
+        side,
+        entry,
+        exit,
+        pnl
+      ]
+    );
+
+    const stats = await pool.query(`
+      SELECT
+        COUNT(*) AS total,
+        SUM(
+          CASE
+            WHEN pnl > 0 THEN 1
+            ELSE 0
+          END
+        ) AS wins
+      FROM trades
+    `);
+
+    const total = Number(stats.rows[0].total);
+    const wins = Number(stats.rows[0].wins);
+
+    const winRate =
+      total > 0
+        ? ((wins / total) * 100).toFixed(2)
+        : "0.00";
+
+    console.log(
+      `Trade ${tradeCounter} | WinRate ${winRate}%`
+    );
+  } catch (err) {
+    console.error("ENGINE ERROR:", err.message);
+  }
+}
+
+/*
+==================================================
+START SERVER
+==================================================
+*/
+
+async function startServer() {
   await initDB();
 
-  // run every 15 sec
-  setInterval(runEngine, 15000);
-});
+  setInterval(runEngine, 5000);
+
+  const PORT = process.env.PORT || 10000;
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
+}
+
+startServer();

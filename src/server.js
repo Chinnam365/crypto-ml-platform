@@ -4,6 +4,10 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 
+const {
+  getPrice,
+} = require("./market/binance");
+
 const app = express();
 
 app.use(cors());
@@ -11,25 +15,27 @@ app.use(express.json());
 
 /*
 ==================================================
-DATABASE CONNECTION
+DATABASE
 ==================================================
 */
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+  },
 });
 
 /*
 ==================================================
-DATABASE INIT
+INIT DB
 ==================================================
 */
 
 async function initDB() {
+
   try {
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS trades (
         id SERIAL PRIMARY KEY,
@@ -50,11 +56,13 @@ async function initDB() {
       );
     `);
 
-    const modelCheck = await pool.query(
-      `SELECT * FROM model LIMIT 1`
-    );
+    const existingModel =
+      await pool.query(
+        `SELECT * FROM model LIMIT 1`
+      );
 
-    if (modelCheck.rows.length === 0) {
+    if (existingModel.rows.length === 0) {
+
       await pool.query(
         `
         INSERT INTO model (weights)
@@ -71,9 +79,14 @@ async function initDB() {
       );
     }
 
-    console.log("✅ Database ready");
+    console.log("✅ Database initialized");
+
   } catch (err) {
-    console.error("❌ DB INIT ERROR:", err.message);
+
+    console.error(
+      "❌ Database init error:",
+      err.message
+    );
   }
 }
 
@@ -84,29 +97,37 @@ HOME
 */
 
 app.get("/", async (req, res) => {
+
   try {
-    const tradeResult = await pool.query(
-      `SELECT COUNT(*) FROM trades`
-    );
 
-    const winResult = await pool.query(`
-      SELECT COUNT(*) AS wins
-      FROM trades
-      WHERE pnl > 0
-    `);
+    const totalResult =
+      await pool.query(
+        `SELECT COUNT(*) FROM trades`
+      );
 
-    const totalTrades = Number(tradeResult.rows[0].count);
-    const wins = Number(winResult.rows[0].wins);
+    const winResult =
+      await pool.query(`
+        SELECT COUNT(*) AS wins
+        FROM trades
+        WHERE pnl > 0
+      `);
+
+    const total =
+      Number(totalResult.rows[0].count);
+
+    const wins =
+      Number(winResult.rows[0].wins);
 
     const winRate =
-      totalTrades > 0
-        ? ((wins / totalTrades) * 100).toFixed(2)
+      total > 0
+        ? ((wins / total) * 100).toFixed(2)
         : "0.00";
 
     res.send(`
-      <h1>🧠 ML Engine v12.1 (Stable)</h1>
+      <h1>🧠 Crypto ML Platform</h1>
 
-      <p>Trades: ${totalTrades}</p>
+      <p>Total Trades: ${total}</p>
+
       <p>Win Rate: ${winRate}%</p>
 
       <a href="/status">Status</a><br/>
@@ -114,7 +135,9 @@ app.get("/", async (req, res) => {
       <a href="/history">History</a><br/>
       <a href="/reset">Reset</a>
     `);
+
   } catch (err) {
+
     res.send("Server running");
   }
 });
@@ -126,23 +149,29 @@ STATUS
 */
 
 app.get("/status", async (req, res) => {
-  try {
-    const trades = await pool.query(
-      `SELECT COUNT(*) FROM trades`
-    );
 
-    const model = await pool.query(
-      `SELECT * FROM model LIMIT 1`
-    );
+  try {
+
+    const trades =
+      await pool.query(
+        `SELECT COUNT(*) FROM trades`
+      );
+
+    const model =
+      await pool.query(
+        `SELECT * FROM model LIMIT 1`
+      );
 
     res.json({
       status: "running",
       trades: trades.rows[0].count,
-      model: model.rows[0] || null
+      model: model.rows[0] || null,
     });
+
   } catch (err) {
+
     res.json({
-      error: err.message
+      error: err.message,
     });
   }
 });
@@ -154,15 +183,20 @@ MODEL
 */
 
 app.get("/model", async (req, res) => {
+
   try {
-    const result = await pool.query(
-      `SELECT * FROM model LIMIT 1`
-    );
+
+    const result =
+      await pool.query(
+        `SELECT * FROM model LIMIT 1`
+      );
 
     res.json(result.rows[0] || {});
+
   } catch (err) {
+
     res.json({
-      error: err.message
+      error: err.message,
     });
   }
 });
@@ -174,30 +208,41 @@ HISTORY
 */
 
 app.get("/history", async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT *
-      FROM trades
-      ORDER BY id DESC
-      LIMIT 50
-    `);
 
-    let html = "<h1>Trade History</h1>";
+  try {
+
+    const result =
+      await pool.query(`
+        SELECT *
+        FROM trades
+        ORDER BY id DESC
+        LIMIT 50
+      `);
+
+    let html =
+      "<h1>Trade History</h1>";
 
     result.rows.forEach((trade) => {
+
       html += `
         <p>
-          ${trade.symbol || "BTCUSDT"}
+          ${trade.symbol}
           |
-          ${trade.side || "BUY"}
+          ${trade.side}
           |
-          PnL: ${trade.pnl || 0}
+          Entry: ${trade.entry_price}
+          |
+          Exit: ${trade.exit_price}
+          |
+          PnL: ${trade.pnl}
         </p>
       `;
     });
 
     res.send(html);
+
   } catch (err) {
+
     res.send(err.message);
   }
 });
@@ -209,25 +254,35 @@ RESET
 */
 
 app.get("/reset", async (req, res) => {
-  try {
-    await pool.query(`DELETE FROM trades`);
 
-    res.send("✅ Trades reset complete");
+  try {
+
+    await pool.query(
+      `DELETE FROM trades`
+    );
+
+    res.send(
+      "✅ Trade history reset"
+    );
+
   } catch (err) {
+
     res.send(err.message);
   }
 });
 
 /*
 ==================================================
-SIMULATION ENGINE
+LIVE MARKET ENGINE
 ==================================================
 */
 
 let tradeCounter = 0;
 
 async function runEngine() {
+
   try {
+
     tradeCounter++;
 
     const symbols = [
@@ -235,67 +290,135 @@ async function runEngine() {
       "ETHUSDT",
       "SOLUSDT",
       "DOGEUSDT",
-      "LINKUSDT"
+      "LINKUSDT",
     ];
 
     const randomSymbol =
-      symbols[Math.floor(Math.random() * symbols.length)];
+      symbols[
+        Math.floor(
+          Math.random() *
+          symbols.length
+        )
+      ];
 
     const side =
-      Math.random() > 0.5 ? "BUY" : "SELL";
+      Math.random() > 0.5
+        ? "BUY"
+        : "SELL";
 
-    const entry = Number(
-      (100 + Math.random() * 100).toFixed(2)
-    );
+    /*
+    ==========================================
+    REAL LIVE PRICE
+    ==========================================
+    */
+
+    const livePrice =
+      await getPrice(randomSymbol);
+
+    if (!livePrice) {
+
+      console.log(
+        `Skipping ${randomSymbol}`
+      );
+
+      return;
+    }
+
+    /*
+    ==========================================
+    SIMULATED MOVEMENT
+    ==========================================
+    */
+
+    const entry = livePrice;
+
+    const move =
+      (Math.random() * 2 - 1)
+      * 0.02;
 
     const exit = Number(
-      (entry + (Math.random() * 20 - 10)).toFixed(2)
+      (
+        entry *
+        (1 + move)
+      ).toFixed(2)
     );
 
     const pnl = Number(
-      (exit - entry).toFixed(2)
+      (
+        exit - entry
+      ).toFixed(2)
     );
+
+    /*
+    ==========================================
+    SAVE TRADE
+    ==========================================
+    */
 
     await pool.query(
       `
       INSERT INTO trades
-      (symbol, side, entry_price, exit_price, pnl)
-      VALUES ($1, $2, $3, $4, $5)
+      (
+        symbol,
+        side,
+        entry_price,
+        exit_price,
+        pnl
+      )
+      VALUES ($1,$2,$3,$4,$5)
       `,
       [
         randomSymbol,
         side,
         entry,
         exit,
-        pnl
+        pnl,
       ]
     );
 
-    const stats = await pool.query(`
-      SELECT
-        COUNT(*) AS total,
-        SUM(
-          CASE
-            WHEN pnl > 0 THEN 1
-            ELSE 0
-          END
-        ) AS wins
-      FROM trades
-    `);
+    /*
+    ==========================================
+    STATS
+    ==========================================
+    */
 
-    const total = Number(stats.rows[0].total);
-    const wins = Number(stats.rows[0].wins);
+    const stats =
+      await pool.query(`
+        SELECT
+          COUNT(*) AS total,
+          SUM(
+            CASE
+              WHEN pnl > 0
+              THEN 1
+              ELSE 0
+            END
+          ) AS wins
+        FROM trades
+      `);
+
+    const total =
+      Number(stats.rows[0].total);
+
+    const wins =
+      Number(stats.rows[0].wins);
 
     const winRate =
       total > 0
-        ? ((wins / total) * 100).toFixed(2)
+        ? (
+            (wins / total) * 100
+          ).toFixed(2)
         : "0.00";
 
     console.log(
-      `Trade ${tradeCounter} | WinRate ${winRate}%`
+      `Trade ${tradeCounter} | ${randomSymbol} | WinRate ${winRate}%`
     );
+
   } catch (err) {
-    console.error("ENGINE ERROR:", err.message);
+
+    console.error(
+      "ENGINE ERROR:",
+      err.message
+    );
   }
 }
 
@@ -306,14 +429,28 @@ START SERVER
 */
 
 async function startServer() {
+
   await initDB();
 
-  setInterval(runEngine, 5000);
+  /*
+  ==========================================
+  ENGINE LOOP
+  ==========================================
+  */
 
-  const PORT = process.env.PORT || 10000;
+  setInterval(
+    runEngine,
+    10000
+  );
+
+  const PORT =
+    process.env.PORT || 10000;
 
   app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+
+    console.log(
+      `🚀 Server running on port ${PORT}`
+    );
   });
 }
 

@@ -691,7 +691,7 @@ if (volatility < 0.8) {
           ).toFixed(2)
         : "0.00";
 
-    console.log(
+  console.log(
   `
   Trade ${tradeCounter}
   |
@@ -709,9 +709,10 @@ if (volatility < 0.8) {
   |
   Volatility ${volatility.toFixed(2)}
   |
+  Confidence ${confidence.toFixed(2)}%
+  |
   WinRate ${winRate}%
-  `|
-Confidence ${confidence.toFixed(2)}%
+  `
 );
 
   } catch (err) {

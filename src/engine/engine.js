@@ -36,6 +36,10 @@ const {
   trainModel,
 } = require("../ml/trainer");
 
+const {
+  detectMarketRegime,
+} = require("../market/regime");
+
 // =====================================
 // ENGINE LOOP
 // =====================================
@@ -56,21 +60,6 @@ async function runEngine() {
       await runDogeStrategy();
 
     // =================================
-    // TRAIN AI MODEL
-    // =================================
-
-    const aiModel =
-      await trainModel();
-
-    const aiProbability =
-      aiModel.probability;
-
-    console.log(
-      "AI Probability:",
-      aiProbability
-    );
-
-    // =================================
     // VALIDATION
     // =================================
 
@@ -88,11 +77,34 @@ async function runEngine() {
     }
 
     // =================================
-    // INDICATORS
+    // TRAIN AI MODEL
+    // =================================
+
+    const aiModel =
+      await trainModel();
+
+    const aiProbability =
+      aiModel.probability;
+
+    // =================================
+    // MARKET DATA
     // =================================
 
     const closes =
       strategyResult.closes;
+
+    const latestPrice =
+      strategyResult.latestPrice;
+
+    const rsi =
+      strategyResult.rsi;
+
+    const volatility =
+      strategyResult.volatility;
+
+    // =================================
+    // INDICATORS
+    // =================================
 
     const macd =
       calculateMACD(closes);
@@ -100,14 +112,18 @@ async function runEngine() {
     const trend =
       detectTrend(closes);
 
-    const rsi =
-      strategyResult.rsi;
+    const regime =
+      detectMarketRegime(closes);
+
+    // =================================
+    // DECISION FILTERING
+    // =================================
 
     let filteredDecision =
       "HOLD";
 
     // =================================
-    // SMART FILTERING
+    // BUY CONDITIONS
     // =================================
 
     if (
@@ -121,12 +137,19 @@ async function runEngine() {
 
       trend === "BULLISH" &&
 
-      aiProbability > 55
+      aiProbability > 55 &&
+
+      regime ===
+        "TRENDING_BULLISH"
     ) {
 
       filteredDecision =
         "BUY";
     }
+
+    // =================================
+    // SELL CONDITIONS
+    // =================================
 
     else if (
 
@@ -137,7 +160,10 @@ async function runEngine() {
 
       macd < 0 &&
 
-      trend === "BEARISH"
+      trend === "BEARISH" &&
+
+      regime ===
+        "TRENDING_BEARISH"
     ) {
 
       filteredDecision =
@@ -158,7 +184,7 @@ async function runEngine() {
     if (activeTrade) {
 
       await monitorTrade(
-        strategyResult.latestPrice
+        latestPrice
       );
 
       console.log(
@@ -167,7 +193,7 @@ async function runEngine() {
     }
 
     // =================================
-    // COOLDOWN
+    // COOLDOWN STATUS
     // =================================
 
     if (isCooldownActive()) {
@@ -193,11 +219,11 @@ async function runEngine() {
     ) {
 
       createPaperTrade(
-        strategyResult.latestPrice
+        latestPrice
       );
 
       console.log(
-        "New AI-filtered trade opened"
+        "New AI trade opened"
       );
     }
 
@@ -211,7 +237,7 @@ async function runEngine() {
         strategyResult.symbol,
 
       price:
-        strategyResult.latestPrice,
+        latestPrice,
 
       rsi,
 
@@ -219,8 +245,7 @@ async function runEngine() {
 
       trend,
 
-      volatility:
-        strategyResult.volatility,
+      volatility,
 
       probability:
         aiProbability,
@@ -241,8 +266,7 @@ async function runEngine() {
       symbol:
         strategyResult.symbol,
 
-      latestPrice:
-        strategyResult.latestPrice,
+      latestPrice,
 
       rsi,
 
@@ -250,8 +274,9 @@ async function runEngine() {
 
       trend,
 
-      volatility:
-        strategyResult.volatility,
+      volatility,
+
+      regime,
 
       score:
         strategyResult.score,
@@ -278,11 +303,11 @@ async function runEngine() {
 
         `AI Probability: ${aiProbability}`,
 
-        `Score: ${strategyResult.score}`,
-
         `MACD: ${macd}`,
 
         `Trend: ${trend}`,
+
+        `Regime: ${regime}`,
       ],
     });
 
@@ -295,8 +320,7 @@ async function runEngine() {
       symbol:
         strategyResult.symbol,
 
-      latestPrice:
-        strategyResult.latestPrice,
+      latestPrice,
 
       rsi,
 
@@ -304,25 +328,20 @@ async function runEngine() {
 
       trend,
 
-      volatility:
-        strategyResult.volatility,
+      regime,
 
-      score:
-        strategyResult.score,
+      volatility,
 
       probability:
         aiProbability,
 
       decision:
         filteredDecision,
-
-      activeTrade:
-        getActiveTrade(),
     });
 
     console.log(
 
-      `RSI ${rsi?.toFixed(2)} | MACD ${macd?.toFixed(4)} | Trend ${trend} | AI ${aiProbability.toFixed(2)}% | Decision ${filteredDecision}`
+      `RSI ${rsi?.toFixed(2)} | MACD ${macd?.toFixed(4)} | Trend ${trend} | Regime ${regime} | AI ${aiProbability.toFixed(2)}% | Decision ${filteredDecision}`
     );
 
     console.log(

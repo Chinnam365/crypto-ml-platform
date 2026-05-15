@@ -120,4 +120,6 @@ module.exports = {
   getDoge1hCandles,
 
   getBtc15mCandles,
+
+  getPrice,
 };

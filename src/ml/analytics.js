@@ -1,5 +1,5 @@
 const pool =
-  require("../db/pool");
+  require("../db");
 
 async function generateAnalytics() {
 

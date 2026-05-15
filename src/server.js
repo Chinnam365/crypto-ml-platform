@@ -10,6 +10,10 @@ const {
 } = require("./market/binance");
 
 const {
+  generateAnalytics,
+} = require("./ml/analytics");
+
+const {
   calculateRSI,
 } = require("./indicators/rsi");
 
@@ -564,6 +568,29 @@ async function startServer() {
   const PORT =
     process.env.PORT || 10000;
 
+  app.get(
+  "/analytics",
+
+  async (req, res) => {
+
+    try {
+
+      const analytics =
+        await generateAnalytics();
+
+      res.json(analytics);
+
+    } catch (error) {
+
+      res.status(500).json({
+
+        error:
+          error.message,
+      });
+    }
+  }
+);
+  
   app.listen(PORT, () => {
 
     console.log(

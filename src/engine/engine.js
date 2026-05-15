@@ -210,22 +210,31 @@ async function runEngine() {
 
     if (
 
-      !activeTrade &&
+      if (
 
-      !isCooldownActive() &&
+  !activeTrade &&
 
-      filteredDecision ===
-        "BUY"
-    ) {
+  !isCooldownActive() &&
 
-      createPaperTrade(
-        latestPrice
-      );
+  filteredDecision !==
+    "HOLD"
+) {
 
-      console.log(
-        "New AI trade opened"
-      );
-    }
+  createPaperTrade(
+
+    latestPrice,
+
+    strategyResult.symbol,
+
+    filteredDecision,
+
+    featureId
+  );
+
+  console.log(
+    "New AI trade opened"
+  );
+}
 
     // =================================
     // SAVE FEATURES

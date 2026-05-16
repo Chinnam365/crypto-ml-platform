@@ -36,9 +36,9 @@ async function monitorPositions(pool) {
 
       let pnl = 0;
 
-      // =========================
+      // ==========================================
       // BUY POSITIONS
-      // =========================
+      // ==========================================
 
       if (position.side === "BUY") {
 
@@ -66,9 +66,9 @@ async function monitorPositions(pool) {
           position.position_size;
       }
 
-      // =========================
+      // ==========================================
       // SELL POSITIONS
-      // =========================
+      // ==========================================
 
       if (position.side === "SELL") {
 
@@ -96,20 +96,24 @@ async function monitorPositions(pool) {
           position.position_size;
       }
 
+      // ==========================================
+      // TRADE DURATION
+      // ==========================================
+
       const openedAt =
-  new Date(position.opened_at);
+        new Date(position.opened_at);
 
-const now =
-  new Date();
+      const now =
+        new Date();
 
-const durationMinutes =
-  (
-    now - openedAt
-  ) / 1000 / 60;
-      
-      // =========================
+      const durationMinutes =
+        (
+          now - openedAt
+        ) / 1000 / 60;
+
+      // ==========================================
       // CLOSE POSITION
-      // =========================
+      // ==========================================
 
       if (shouldClose) {
 
@@ -137,41 +141,47 @@ const durationMinutes =
             position.id,
           ]
         );
-await saveMLDataset({
 
-  pool,
+        // ==========================================
+        // SAVE ML DATASET
+        // ==========================================
 
-  symbol:
-    position.symbol,
+        await saveMLDataset({
 
-  side:
-    position.side,
+          pool,
 
-  rsi:
-    position.rsi || 0,
+          symbol:
+            position.symbol,
 
-  macd:
-    position.macd || 0,
+          side:
+            position.side,
 
-  trend:
-    position.trend || "UNKNOWN",
+          rsi:
+            position.rsi || 0,
 
-  regime:
-    position.regime || "UNKNOWN",
+          macd:
+            position.macd || 0,
 
-  volatility:
-    position.volatility || 0,
+          trend:
+            position.trend || "UNKNOWN",
 
-  confidence:
-    position.confidence || 0,
+          regime:
+            position.regime || "UNKNOWN",
 
-  positionSize:
-    position.position_size || 0,
+          volatility:
+            position.volatility || 0,
 
-  pnl,
+          confidence:
+            position.confidence || 0,
 
-  durationMinutes,
-});
+          positionSize:
+            position.position_size || 0,
+
+          pnl,
+
+          durationMinutes,
+        });
+
         console.log(`
 ==================================
 POSITION CLOSED
@@ -188,6 +198,9 @@ ${currentPrice}
 
 PnL:
 ${pnl.toFixed(2)}
+
+Duration Minutes:
+${durationMinutes.toFixed(2)}
 
 ==================================
 `);

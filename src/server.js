@@ -82,6 +82,10 @@ const {
   getAdaptiveConfidence,
 } = require("./ml/adaptiveConfidence");
 
+const {
+  getSymbolMemory,
+} = require("./ml/symbolMemory");
+
 const app = express();
 
 app.use(cors());
@@ -1218,7 +1222,34 @@ app.get(
     }
   }
 );
- 
+ /*
+==================================================
+SYMBOL MEMORY
+==================================================
+*/
+
+app.get(
+  "/symbol-memory",
+
+  async (req, res) => {
+
+    try {
+
+      const memory =
+        await getSymbolMemory(pool);
+
+      res.json(memory);
+
+    } catch (error) {
+
+      res.status(500).json({
+
+        error:
+          error.message,
+      });
+    }
+  }
+);
   app.listen(PORT, () => {
 
     console.log(

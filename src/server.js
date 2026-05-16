@@ -78,6 +78,10 @@ const {
   getModelAnalytics,
 } = require("./ml/modelAnalytics");
 
+const {
+  getAdaptiveConfidence,
+} = require("./ml/adaptiveConfidence");
+
 const app = express();
 
 app.use(cors());
@@ -619,7 +623,12 @@ const mlProbability =
 
     confidence,
   });
+// ==========================================
+// ADAPTIVE CONFIDENCE
+// ==========================================
 
+const adaptiveThreshold =
+  await getAdaptiveConfidence(pool);
 const mlConfidence =
   mlProbability * 100;
 
@@ -693,7 +702,8 @@ else if (
 
   side === "HOLD" ||
 
-  confidence < 60
+  confidence <
+    adaptiveThreshold
 ) {
 
       console.log(

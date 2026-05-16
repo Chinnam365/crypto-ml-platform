@@ -54,6 +54,10 @@ const {
   getPortfolioStats,
 } = require("./ml/portfolioManager");
 
+const {
+  getDrawdownStats,
+} = require("./ml/drawdownManager");
+
 const app = express();
 
 app.use(cors());
@@ -684,6 +688,46 @@ if (!portfolio.canTrade) {
 
   return;
 }
+
+    // ==========================================
+// DRAWDOWN CHECK
+// ==========================================
+
+const drawdown =
+  await getDrawdownStats(pool);
+
+console.log(`
+==================================
+DRAWDOWN STATUS
+==================================
+
+Equity:
+${drawdown.equity}
+
+Peak Equity:
+${drawdown.peakEquity}
+
+Max Drawdown:
+${drawdown.maxDrawdown}%
+
+Risk Multiplier:
+${drawdown.riskMultiplier}
+
+Trading Enabled:
+${drawdown.tradingEnabled}
+
+==================================
+`);
+
+if (!drawdown.tradingEnabled) {
+
+  console.log(
+    "Trading disabled due to drawdown protection"
+  );
+
+  return;
+}
+    
     
     // ==========================================
     // LIVE PRICE

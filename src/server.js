@@ -94,6 +94,10 @@ const {
   getAdaptiveSymbolWeights,
 } = require("./ml/adaptiveSymbolWeights");
 
+const {
+  getConfidenceCalibration,
+} = require("./ml/confidenceCalibration");
+
 const app = express();
 
 app.use(cors());
@@ -1317,7 +1321,34 @@ app.get(
     }
   }
 );
- 
+ /*
+==================================================
+CONFIDENCE CALIBRATION
+==================================================
+*/
+
+app.get(
+  "/confidence-calibration",
+
+  async (req, res) => {
+
+    try {
+
+      const calibration =
+        await getConfidenceCalibration(pool);
+
+      res.json(calibration);
+
+    } catch (error) {
+
+      res.status(500).json({
+
+        error:
+          error.message,
+      });
+    }
+  }
+);
   app.listen(PORT, () => {
 
     console.log(

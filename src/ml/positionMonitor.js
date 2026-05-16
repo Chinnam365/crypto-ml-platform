@@ -96,6 +96,17 @@ async function monitorPositions(pool) {
           position.position_size;
       }
 
+      const openedAt =
+  new Date(position.opened_at);
+
+const now =
+  new Date();
+
+const durationMinutes =
+  (
+    now - openedAt
+  ) / 1000 / 60;
+      
       // =========================
       // CLOSE POSITION
       // =========================

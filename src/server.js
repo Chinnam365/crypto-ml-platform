@@ -50,6 +50,10 @@ const {
   calculatePositionSize,
 } = require("./ml/riskManager");
 
+const {
+  getPortfolioStats,
+} = require("./ml/portfolioManager");
+
 const app = express();
 
 app.use(cors());
@@ -648,6 +652,39 @@ async function runEngine() {
       return;
     }
 
+    // ==========================================
+// PORTFOLIO CHECK
+// ==========================================
+
+const portfolio =
+  await getPortfolioStats(pool);
+
+console.log(`
+==================================
+PORTFOLIO STATUS
+==================================
+
+Open Positions:
+${portfolio.openPositions}
+
+Total Exposure:
+${portfolio.totalExposure}
+
+Can Trade:
+${portfolio.canTrade}
+
+==================================
+`);
+
+if (!portfolio.canTrade) {
+
+  console.log(
+    "Portfolio risk limit reached"
+  );
+
+  return;
+}
+    
     // ==========================================
     // LIVE PRICE
     // ==========================================

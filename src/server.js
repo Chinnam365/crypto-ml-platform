@@ -102,6 +102,10 @@ const {
   getAdaptiveSizeMultiplier,
 } = require("./ml/adaptiveSizing");
 
+const {
+  getDrawdownState,
+} = require("./ml/drawdownIntelligence");
+
 const app = express();
 
 app.use(cors());
@@ -666,6 +670,40 @@ confidence =
   confidence *
   symbolWeight;
 
+   // ==========================================
+// DRAWDOWN RISK MODES
+// ==========================================
+
+if (
+  drawdownState.riskMode ===
+  "DEFENSIVE"
+) {
+
+  confidence += 5;
+}
+
+if (
+  drawdownState.riskMode ===
+  "PROTECTIVE"
+) {
+
+  confidence += 10;
+
+  positionSize =
+    positionSize * 0.7;
+}
+
+if (
+  drawdownState.riskMode ===
+  "LOCKDOWN"
+) {
+
+  console.log(
+    "LOCKDOWN MODE ACTIVE"
+  );
+
+  return;
+}
 console.log(`
 ==================================
 SYMBOL WEIGHTING
@@ -785,7 +823,13 @@ else if (
 
 const account =
   await getAccountStats(pool);
+// ==========================================
+// DRAWDOWN STATE
+// ==========================================
 
+const drawdownState =
+  await getDrawdownState(pool);
+   
 console.log(`
 ==================================
 ACCOUNT STATUS

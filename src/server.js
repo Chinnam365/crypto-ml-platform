@@ -70,6 +70,9 @@ const {
   saveMLDataset,
 } = require("./ml/datasetBuilder");
 
+const {
+  predictTrade,
+} = require("./ml/modelTrainer");
 
 const app = express();
 
@@ -581,21 +584,66 @@ await monitorPositions(pool);
     // AI CONFIDENCE
     // ==========================================
 
-    const confidence =
-      calculateConfidence({
+    let confidence =
+  calculateConfidence({
 
-        rsi,
+    rsi,
 
-        macd,
+    macd,
 
-        trend,
+    trend,
 
-        regime,
+    regime,
 
-        volatility,
+    volatility,
 
-        avgSymbolPnL,
-      });
+    avgSymbolPnL,
+  });
+
+// ==========================================
+// ML PREDICTION
+// ==========================================
+
+const mlProbability =
+  predictTrade({
+
+    rsi,
+
+    macd,
+
+    volatility,
+
+    confidence,
+  });
+
+const mlConfidence =
+  mlProbability * 100;
+
+// ==========================================
+// COMBINE RULES + ML
+// ==========================================
+
+confidence =
+  (
+    confidence * 0.7
+  ) +
+  (
+    mlConfidence * 0.3
+  );
+
+console.log(`
+==================================
+ML PREDICTION
+==================================
+
+ML Probability:
+${mlConfidence.toFixed(2)}
+
+Final Confidence:
+${confidence.toFixed(2)}
+
+==================================
+`);
 
     // ==========================================
     // AI DECISION
@@ -1066,7 +1114,27 @@ async function startServer() {
     }
   }
 );
+// ==========================================
+// INITIAL ML TRAINING
+// ==========================================
 
+try {
+
+  const data =
+    await getTrainingData(pool);
+
+  trainModel(data);
+
+  console.log(
+    "Initial ML model loaded"
+  );
+
+} catch (err) {
+
+  console.log(
+    "ML startup training skipped"
+  );
+}
  /*
 ==================================================
 TRAIN MODEL

@@ -710,7 +710,47 @@ Confidence: ${confidence.toFixed(2)}
     // ==========================================
     // SAVE TRADE
     // ==========================================
+// ==========================================
+// SAVE POSITION DATA
+// ==========================================
 
+await pool.query(
+  `
+  INSERT INTO positions
+  (
+    symbol,
+    side,
+    confidence,
+    volatility,
+    entry_price,
+    stop_loss,
+    take_profit,
+    position_size,
+    pnl
+  )
+  VALUES
+  ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+  `,
+  [
+    randomSymbol,
+
+    side,
+
+    confidence,
+
+    volatility,
+
+    entryPrice,
+
+    stopLoss,
+
+    takeProfit,
+
+    positionSize,
+
+    pnl,
+  ]
+);
     await pool.query(
       `
       INSERT INTO trades

@@ -38,6 +38,18 @@ const {
   calculateConfidence,
 } = require("./ml/confidenceEngine");
 
+const {
+  calculateStopLoss,
+} = require("./ml/stopLossEngine");
+
+const {
+  calculateTakeProfit,
+} = require("./ml/takeProfitEngine");
+
+const {
+  calculatePositionSize,
+} = require("./ml/riskManager");
+
 const app = express();
 
 app.use(cors());
@@ -600,7 +612,77 @@ async function runEngine() {
 
       return;
     }
+// ==========================================
+// PHASE 2 RISK ENGINE
+// ==========================================
 
+const balance = 10000;
+
+const entryPrice = livePrice;
+
+const {
+  stopLoss,
+  stopLossPercent,
+} = calculateStopLoss({
+
+  action: side,
+
+  entryPrice,
+
+  volatility,
+});
+
+const {
+  takeProfit,
+  rewardMultiplier,
+} = calculateTakeProfit({
+
+  action: side,
+
+  entryPrice,
+
+  stopLoss,
+
+  confidence,
+});
+
+const positionSize =
+  calculatePositionSize({
+
+    balance,
+
+    confidence,
+
+    volatility,
+
+    entryPrice,
+
+    stopLoss,
+  });
+
+console.log(`
+==================================
+RISK MANAGEMENT
+==================================
+
+Symbol: ${randomSymbol}
+
+Side: ${side}
+
+Entry: ${entryPrice}
+
+Stop Loss: ${stopLoss.toFixed(2)}
+
+Take Profit: ${takeProfit.toFixed(2)}
+
+Position Size: ${positionSize}
+
+Volatility: ${volatility.toFixed(2)}
+
+Confidence: ${confidence.toFixed(2)}
+
+==================================
+`);
     // ==========================================
     // TRADE SIMULATION
     // ==========================================

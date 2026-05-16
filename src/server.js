@@ -74,6 +74,10 @@ const {
   predictTrade,
 } = require("./ml/modelTrainer");
 
+const {
+  getModelAnalytics,
+} = require("./ml/modelAnalytics");
+
 const app = express();
 
 app.use(cors());
@@ -1175,6 +1179,36 @@ app.get(
     }
   }
 );
+
+ /*
+==================================================
+ML ANALYTICS
+==================================================
+*/
+
+app.get(
+  "/ml-analytics",
+
+  async (req, res) => {
+
+    try {
+
+      const analytics =
+        await getModelAnalytics(pool);
+
+      res.json(analytics);
+
+    } catch (error) {
+
+      res.status(500).json({
+
+        error:
+          error.message,
+      });
+    }
+  }
+);
+ 
   app.listen(PORT, () => {
 
     console.log(

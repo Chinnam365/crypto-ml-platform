@@ -22,7 +22,7 @@ async function saveMLDataset({
 
   pnl,
 
-durationMinutes,
+  durationMinutes,
 }) {
 
   try {
@@ -56,13 +56,13 @@ durationMinutes,
 
         pnl,
 
-durationMinutes,
+        duration_minutes,
 
         label
       )
       VALUES
       (
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12
       )
       `,
       [
@@ -87,7 +87,7 @@ durationMinutes,
 
         pnl,
 
-durationMinutes,
+        durationMinutes,
 
         label,
       ]
@@ -106,6 +106,9 @@ ${side}
 
 PnL:
 ${pnl}
+
+Duration Minutes:
+${durationMinutes}
 
 Label:
 ${label}

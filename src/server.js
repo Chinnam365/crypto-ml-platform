@@ -86,6 +86,10 @@ const {
   getSymbolMemory,
 } = require("./ml/symbolMemory");
 
+const {
+  getRegimeMemory,
+} = require("./ml/regimeMemory");
+
 const app = express();
 
 app.use(cors());
@@ -1250,6 +1254,35 @@ app.get(
     }
   }
 );
+ /*
+==================================================
+REGIME MEMORY
+==================================================
+*/
+
+app.get(
+  "/regime-memory",
+
+  async (req, res) => {
+
+    try {
+
+      const memory =
+        await getRegimeMemory(pool);
+
+      res.json(memory);
+
+    } catch (error) {
+
+      res.status(500).json({
+
+        error:
+          error.message,
+      });
+    }
+  }
+);
+ 
   app.listen(PORT, () => {
 
     console.log(

@@ -884,20 +884,23 @@ await pool.query(
   `
   INSERT INTO positions
   (
-    symbol,
-    side,
-    confidence,
-    volatility,
-    entry_price,
-    stop_loss,
-    take_profit,
-    position_size,
-    pnl
-  )
+  symbol,
+  side,
+  confidence,
+  volatility,
+  macd,
+  trend,
+  regime,
+  entry_price,
+  stop_loss,
+  take_profit,
+  position_size,
+  pnl
+)
   VALUES
-  ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+  ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
   `,
-  [
+ [
   randomSymbol,
 
   side,
@@ -905,6 +908,12 @@ await pool.query(
   confidence,
 
   volatility,
+
+  macd,
+
+  trend,
+
+  regime,
 
   entryPrice,
 

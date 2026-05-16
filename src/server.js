@@ -793,7 +793,13 @@ const positionSize =
 
     stopLoss,
   });
-
+const adjustedPositionSize =
+  Number(
+    (
+      positionSize *
+      drawdown.riskMultiplier
+    ).toFixed(6)
+  );
 console.log(`
 ==================================
 RISK MANAGEMENT
@@ -809,7 +815,7 @@ Stop Loss: ${stopLoss.toFixed(2)}
 
 Take Profit: ${takeProfit.toFixed(2)}
 
-Position Size: ${positionSize}
+Position Size: ${adjustedPositionSize}
 
 Volatility: ${volatility.toFixed(2)}
 
@@ -880,7 +886,7 @@ await pool.query(
 
     takeProfit,
 
-    positionSize,
+    adjustedPositionSize,
 
     pnl,
   ]

@@ -687,10 +687,10 @@ else if (
 
     if (
 
-      side === "HOLD" ||
+  side === "HOLD" ||
 
-      confidence < 70
-    ) {
+  confidence < 60
+) {
 
       console.log(
 

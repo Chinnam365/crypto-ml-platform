@@ -62,6 +62,10 @@ const {
   monitorPositions,
 } = require("./ml/positionMonitor");
 
+const {
+  getAccountStats,
+} = require("./ml/accountManager");
+
 const app = express();
 
 app.use(cors());
@@ -665,6 +669,36 @@ await monitorPositions(pool);
       return;
     }
 
+   // ==========================================
+// ACCOUNT STATUS
+// ==========================================
+
+const account =
+  await getAccountStats(pool);
+
+console.log(`
+==================================
+ACCOUNT STATUS
+==================================
+
+Equity:
+${account.equity}
+
+Available Capital:
+${account.availableCapital}
+
+Used Capital:
+${account.usedCapital}
+
+Realized PnL:
+${account.realizedPnL}
+
+Unrealized PnL:
+${account.unrealizedPnL}
+
+==================================
+`);
+   
     // ==========================================
 // PORTFOLIO CHECK
 // ==========================================
@@ -759,7 +793,8 @@ if (!drawdown.tradingEnabled) {
 // PHASE 2 RISK ENGINE
 // ==========================================
 
-const balance = 10000;
+const balance =
+  account.availableCapital;
 
 const entryPrice = livePrice;
 

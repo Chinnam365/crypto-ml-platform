@@ -688,7 +688,7 @@ Confidence: ${confidence.toFixed(2)}
     // ==========================================
 
     const entry =
-      livePrice;
+  entryPrice;
 
     const move =
       (Math.random() * 2 - 1)
@@ -714,14 +714,14 @@ Confidence: ${confidence.toFixed(2)}
     await pool.query(
       `
       INSERT INTO trades
-      (
-        symbol,
-        side,
-        rsi,
-        entry_price,
-        exit_price,
-        pnl
-      )
+(
+  symbol,
+  side,
+  rsi,
+  entry_price,
+  exit_price,
+  pnl
+)
       VALUES
       ($1,$2,$3,$4,$5,$6)
       `,

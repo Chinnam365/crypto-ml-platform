@@ -187,6 +187,7 @@ app.get("/", async (req, res) => {
       <a href="/status">Status</a><br/>
       <a href="/model">Model</a><br/>
       <a href="/history">History</a><br/>
+      <a href="/positions">Positions</a><br/>
       <a href="/reset">Reset</a>
     `);
 

@@ -1066,7 +1066,55 @@ async function startServer() {
     }
   }
 );
-  
+
+ /*
+==================================================
+TRAIN MODEL
+==================================================
+*/
+
+const {
+  getTrainingData,
+} = require("./ml/trainingData");
+
+const {
+  trainModel,
+} = require("./ml/modelTrainer");
+
+app.get(
+  "/train-model",
+
+  async (req, res) => {
+
+    try {
+
+      const data =
+        await getTrainingData(pool);
+
+      const model =
+        trainModel(data);
+
+      res.json({
+
+        success: true,
+
+        samples:
+          data.length,
+
+        message:
+          "ML model trained",
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+
+        error:
+          error.message,
+      });
+    }
+  }
+);
   app.listen(PORT, () => {
 
     console.log(

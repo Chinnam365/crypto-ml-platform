@@ -583,9 +583,9 @@ async function runEngine() {
 
     if (
 
-      rsi < 30 &&
+      rsi < 55 &&
 
-      macd > 0 &&
+      macd > -10 &&
 
       trend === "BULLISH" &&
 

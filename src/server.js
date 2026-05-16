@@ -58,6 +58,10 @@ const {
   getDrawdownStats,
 } = require("./ml/drawdownManager");
 
+const {
+  monitorPositions,
+} = require("./ml/positionMonitor");
+
 const app = express();
 
 app.use(cors());
@@ -405,7 +409,12 @@ let tradeCounter = 0;
 async function runEngine() {
 
   try {
+// ==========================================
+// MONITOR OPEN POSITIONS
+// ==========================================
 
+await monitorPositions(pool);
+    
     // ==========================================
     // AI SYMBOL SELECTION
     // ==========================================
@@ -823,30 +832,7 @@ Confidence: ${confidence.toFixed(2)}
 
 ==================================
 `);
-    // ==========================================
-    // TRADE SIMULATION
-    // ==========================================
-
-    const entry =
-  entryPrice;
-
-    const move =
-      (Math.random() * 2 - 1)
-      * 0.02;
-
-    const exit = Number(
-      (
-        entry *
-        (1 + move)
-      ).toFixed(2)
-    );
-
-    const pnl = Number(
-      (
-        exit - entry
-      ).toFixed(2)
-    );
-
+    
     // ==========================================
     // SAVE TRADE
     // ==========================================
@@ -872,24 +858,24 @@ await pool.query(
   ($1,$2,$3,$4,$5,$6,$7,$8,$9)
   `,
   [
-    randomSymbol,
+  randomSymbol,
 
-    side,
+  side,
 
-    confidence,
+  confidence,
 
-    volatility,
+  volatility,
 
-    entryPrice,
+  entryPrice,
 
-    stopLoss,
+  stopLoss,
 
-    takeProfit,
+  takeProfit,
 
-    adjustedPositionSize,
+  adjustedPositionSize,
 
-    pnl,
-  ]
+  0,
+]
 );
     await pool.query(
       `

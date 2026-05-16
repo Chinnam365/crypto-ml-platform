@@ -90,6 +90,10 @@ const {
   getRegimeMemory,
 } = require("./ml/regimeMemory");
 
+const {
+  getAdaptiveSymbolWeights,
+} = require("./ml/adaptiveSymbolWeights");
+
 const app = express();
 
 app.use(cors());
@@ -640,6 +644,37 @@ const adaptiveThreshold =
 const mlConfidence =
   mlProbability * 100;
 
+   // ==========================================
+// ADAPTIVE SYMBOL WEIGHT
+// ==========================================
+
+const symbolWeights =
+  await getAdaptiveSymbolWeights(pool);
+
+const symbolWeight =
+  symbolWeights[randomSymbol] || 1;
+
+confidence =
+  confidence *
+  symbolWeight;
+
+console.log(`
+==================================
+SYMBOL WEIGHTING
+==================================
+
+Symbol:
+${randomSymbol}
+
+Weight:
+${symbolWeight}
+
+Adjusted Confidence:
+${confidence.toFixed(2)}
+
+==================================
+`);
+   
 // ==========================================
 // COMBINE RULES + ML
 // ==========================================

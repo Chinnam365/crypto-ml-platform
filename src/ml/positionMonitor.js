@@ -169,6 +169,8 @@ await saveMLDataset({
     position.position_size || 0,
 
   pnl,
+
+  durationMinutes,
 });
         console.log(`
 ==================================

@@ -4,9 +4,6 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 
-const {
-  calculateConfidence,
-} = require("./ml/confidenceEngine");
 
 const {
   getPrice,
@@ -36,6 +33,10 @@ const {
 const {
   getBestSymbols,
 } = require("./ml/symbolSelector");
+
+const {
+  calculateConfidence,
+} = require("./ml/confidenceEngine");
 
 const app = express();
 

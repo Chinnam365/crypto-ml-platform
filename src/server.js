@@ -657,15 +657,10 @@ ${confidence.toFixed(2)}
 
     if (
 
-      rsi < 55 &&
+  rsi < 45 &&
 
-      macd > -10 &&
-
-      trend === "BULLISH" &&
-
-      regime ===
-        "TRENDING_BULLISH"
-    ) {
+  macd > -1
+) {
 
       side = "BUY";
     }
@@ -674,17 +669,12 @@ ${confidence.toFixed(2)}
     // SELL CONDITIONS
     // ==========================================
 
-    else if (
+    else if else if (
 
-      rsi > 45 &&
+  rsi > 55 &&
 
-      macd < 10 &&
-
-      trend === "BEARISH" &&
-
-      regime ===
-        "TRENDING_BEARISH"
-    ) {
+  macd < 1
+) {
 
       side = "SELL";
     }

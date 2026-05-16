@@ -16,7 +16,7 @@ function trainModel(data) {
   const network =
     new brain.NeuralNetwork({
 
-      hiddenLayers: [6, 6],
+      hiddenLayers: [8, 8],
 
       learningRate: 0.01,
     });
@@ -26,30 +26,30 @@ function trainModel(data) {
 
       input: {
 
-  rsi:
-    item.rsi / 100,
+        rsi:
+          item.rsi / 100,
 
-  macd:
-    item.macd / 10,
+        macd:
+          item.macd / 10,
 
-  volatility:
-    item.volatility / 100,
+        volatility:
+          item.volatility / 100,
 
-  confidence:
-    item.confidence / 100,
+        confidence:
+          item.confidence / 100,
 
-  bullishTrend:
-    item.bullishTrend,
+        bullishTrend:
+          item.bullishTrend,
 
-  bearishTrend:
-    item.bearishTrend,
+        bearishTrend:
+          item.bearishTrend,
 
-  trendingRegime:
-    item.trendingRegime,
+        trendingRegime:
+          item.trendingRegime,
 
-  sidewaysRegime:
-    item.sidewaysRegime,
-},
+        sidewaysRegime:
+          item.sidewaysRegime,
+      },
 
       output: {
 
@@ -73,9 +73,16 @@ function trainModel(data) {
 
   model = network;
 
-  console.log(
-    "ML model trained successfully"
-  );
+  console.log(`
+==================================
+ML MODEL TRAINED
+==================================
+
+Samples:
+${data.length}
+
+==================================
+`);
 
   return model;
 }
@@ -88,41 +95,43 @@ function predictTrade(features) {
   }
 
   const result =
-   model.run({
+    model.run({
 
-  rsi:
-    features.rsi / 100,
+      rsi:
+        features.rsi / 100,
 
-  macd:
-    features.macd / 10,
+      macd:
+        features.macd / 10,
 
-  volatility:
-    features.volatility / 100,
+      volatility:
+        features.volatility / 100,
 
-  confidence:
-    features.confidence / 100,
+      confidence:
+        features.confidence / 100,
 
-  bullishTrend:
-    features.trend === "BULLISH"
-      ? 1
-      : 0,
+      bullishTrend:
+        features.trend === "BULLISH"
+          ? 1
+          : 0,
 
-  bearishTrend:
-    features.trend === "BEARISH"
-      ? 1
-      : 0,
+      bearishTrend:
+        features.trend === "BEARISH"
+          ? 1
+          : 0,
 
-  trendingRegime:
-    features.regime &&
-    features.regime.includes("TRENDING")
-      ? 1
-      : 0,
+      trendingRegime:
+        features.regime &&
+        features.regime.includes(
+          "TRENDING"
+        )
+          ? 1
+          : 0,
 
-  sidewaysRegime:
-    features.regime === "SIDEWAYS"
-      ? 1
-      : 0,
-});
+      sidewaysRegime:
+        features.regime === "SIDEWAYS"
+          ? 1
+          : 0,
+    });
 
   return result.win || 0.5;
 }

@@ -309,7 +309,59 @@ app.get("/history", async (req, res) => {
     res.send(err.message);
   }
 });
+/*
+==================================================
+POSITIONS
+==================================================
+*/
 
+app.get("/positions", async (req, res) => {
+
+  try {
+
+    const result =
+      await pool.query(`
+        SELECT *
+        FROM positions
+        ORDER BY id DESC
+        LIMIT 50
+      `);
+
+    let html =
+      "<h1>Positions</h1>";
+
+    result.rows.forEach(
+      (position) => {
+
+        html += `
+          <p>
+            ${position.symbol}
+            |
+            ${position.side}
+            |
+            Confidence: ${position.confidence}
+            |
+            Entry: ${position.entry_price}
+            |
+            SL: ${position.stop_loss}
+            |
+            TP: ${position.take_profit}
+            |
+            Size: ${position.position_size}
+            |
+            PnL: ${position.pnl}
+          </p>
+        `;
+      }
+    );
+
+    res.send(html);
+
+  } catch (err) {
+
+    res.send(err.message);
+  }
+});
 /*
 ==================================================
 RESET

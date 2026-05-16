@@ -87,9 +87,25 @@ async function saveMLDataset({
       ]
     );
 
-    console.log(
-      `ML dataset saved for ${symbol}`
-    );
+    console.log(`
+==================================
+ML DATASET SAVED
+==================================
+
+Symbol:
+${symbol}
+
+Side:
+${side}
+
+PnL:
+${pnl}
+
+Label:
+${label}
+
+==================================
+`);
 
   } catch (err) {
 

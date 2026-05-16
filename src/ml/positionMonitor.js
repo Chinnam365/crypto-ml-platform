@@ -2,6 +2,10 @@ const {
   getPrice,
 } = require("../market/binance");
 
+const {
+  saveMLDataset,
+} = require("./datasetBuilder");
+
 async function monitorPositions(pool) {
 
   const result =
@@ -122,7 +126,39 @@ async function monitorPositions(pool) {
             position.id,
           ]
         );
+await saveMLDataset({
 
+  pool,
+
+  symbol:
+    position.symbol,
+
+  side:
+    position.side,
+
+  rsi:
+    position.rsi || 0,
+
+  macd:
+    position.macd || 0,
+
+  trend:
+    position.trend || "UNKNOWN",
+
+  regime:
+    position.regime || "UNKNOWN",
+
+  volatility:
+    position.volatility || 0,
+
+  confidence:
+    position.confidence || 0,
+
+  positionSize:
+    position.position_size || 0,
+
+  pnl,
+});
         console.log(`
 ==================================
 POSITION CLOSED

@@ -21,6 +21,8 @@ async function saveMLDataset({
   positionSize,
 
   pnl,
+
+durationMinutes,
 }) {
 
   try {
@@ -54,6 +56,8 @@ async function saveMLDataset({
 
         pnl,
 
+durationMinutes,
+
         label
       )
       VALUES
@@ -82,6 +86,8 @@ async function saveMLDataset({
         positionSize,
 
         pnl,
+
+durationMinutes,
 
         label,
       ]

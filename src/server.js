@@ -602,9 +602,9 @@ async function runEngine() {
 
     else if (
 
-      rsi > 70 &&
+      rsi > 45 &&
 
-      macd < 0 &&
+      macd < 10 &&
 
       trend === "BEARISH" &&
 

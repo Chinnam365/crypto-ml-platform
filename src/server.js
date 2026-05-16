@@ -98,6 +98,10 @@ const {
   getConfidenceCalibration,
 } = require("./ml/confidenceCalibration");
 
+const {
+  getAdaptiveSizeMultiplier,
+} = require("./ml/adaptiveSizing");
+
 const app = express();
 
 app.use(cors());
@@ -930,19 +934,55 @@ const {
   confidence,
 });
 
-const positionSize =
+let positionSize =
   calculatePositionSize({
 
-    balance,
+    equity,
 
-    confidence,
+    riskPercent: 1,
 
-    volatility,
+    entryPrice:
 
-    entryPrice,
+      currentPrice,
 
     stopLoss,
   });
+
+// ==========================================
+// ADAPTIVE SIZE MULTIPLIER
+// ==========================================
+
+const sizeMultiplier =
+  await getAdaptiveSizeMultiplier({
+
+    pool,
+
+    confidence,
+  });
+
+positionSize =
+  positionSize *
+  sizeMultiplier;
+
+console.log(`
+==================================
+FINAL POSITION SIZE
+==================================
+
+Base Size:
+${(
+  positionSize /
+  sizeMultiplier
+).toFixed(4)}
+
+Multiplier:
+${sizeMultiplier}
+
+Final Size:
+${positionSize.toFixed(4)}
+
+==================================
+`);
 const adjustedPositionSize =
   Number(
     (

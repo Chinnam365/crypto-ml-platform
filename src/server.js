@@ -972,7 +972,7 @@ ${decisionReasons.join("\n")}
   confidence <
     adaptiveThresholdValue ||
 
-  tradeQuality < 50
+  tradeQuality < 45
 ) {
 
       console.log(

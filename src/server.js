@@ -740,12 +740,7 @@ else {
 
   confidence -= 5;
 }
-// ==========================================
-// ADAPTIVE CONFIDENCE
-// ==========================================
 
-const adaptiveThreshold =
-  await getAdaptiveConfidence(pool);
 
 // ==========================================
 // SYMBOL WEIGHTING
@@ -874,7 +869,8 @@ const regimeDecision =
 
     macd,
   });
-
+const side =
+  regimeDecision.side;
    // ==========================================
 // TRADE QUALITY
 // ==========================================

@@ -123,6 +123,10 @@ const {
   getRegimeStrategy,
 } = require("./ml/regimeStrategy");
 
+const {
+  getAdaptiveThreshold,
+} = require("./ml/adaptiveThreshold");
+
 const app = express();
 
 app.use(cors());
@@ -806,6 +810,33 @@ if (
   return;
 }
 
+   // ==========================================
+// ADAPTIVE THRESHOLD
+// ==========================================
+
+const adaptiveThresholdValue =
+  getAdaptiveThreshold({
+
+    regime,
+
+    volatility,
+
+    drawdownState,
+
+    symbolWeight,
+  });
+
+console.log(`
+==================================
+ADAPTIVE THRESHOLD
+==================================
+
+Threshold:
+${adaptiveThresholdValue}
+
+==================================
+`);
+   
 console.log(`
 ==================================
 ML PREDICTION
@@ -870,7 +901,7 @@ ${regimeDecision.confidenceBoost}
   side === "HOLD" ||
 
   confidence <
-    adaptiveThreshold
+    adaptiveThresholdValue
 ) {
 
       console.log(

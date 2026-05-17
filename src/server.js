@@ -601,7 +601,84 @@ await monitorPositions(pool);
       return;
     }
 
-console.log(`
+// ==========================================
+// SYMBOL PERFORMANCE
+// ==========================================
+
+const symbolRanking =
+  rankings.find(
+    s =>
+      s.symbol ===
+      randomSymbol
+  );
+
+const avgSymbolPnL =
+  symbolRanking
+    ? symbolRanking.avgPnL
+    : 0;
+   
+// ==========================================
+// AI CONFIDENCE
+// ==========================================
+
+let confidence =
+  calculateConfidence({
+
+    rsi,
+
+    macd,
+
+    trend,
+
+    regime,
+
+    volatility,
+
+    avgSymbolPnL,
+  });
+
+// ==========================================
+// ML PREDICTION
+// ==========================================
+
+const mlProbability =
+  predictTrade({
+
+    rsi,
+
+    macd,
+
+    volatility,
+
+    confidence,
+
+    trend,
+
+    regime,
+  });
+
+const mlConfidence =
+  mlProbability * 100;
+
+// ==========================================
+// COMBINE RULES + ML
+// ==========================================
+
+confidence =
+  (
+    confidence * 0.7
+  ) +
+  (
+    mlConfidence * 0.3
+  );
+
+// ==========================================
+// ADAPTIVE CONFIDENCE
+// ==========================================
+
+const adaptiveThreshold =
+  await getAdaptiveConfidence(pool);
+
 // ==========================================
 // SYMBOL WEIGHTING
 // ==========================================
@@ -631,6 +708,46 @@ ${confidence.toFixed(2)}
 
 ==================================
 `);
+
+// ==========================================
+// DRAWDOWN STATE
+// ==========================================
+
+const drawdownState =
+  await getDrawdownState(pool);
+
+// ==========================================
+// DRAWDOWN RISK MODES
+// ==========================================
+
+if (
+  drawdownState.riskMode ===
+  "DEFENSIVE"
+) {
+
+  confidence += 5;
+}
+
+if (
+  drawdownState.riskMode ===
+  "PROTECTIVE"
+) {
+
+  confidence += 10;
+}
+
+if (
+  drawdownState.riskMode ===
+  "LOCKDOWN"
+) {
+
+  console.log(
+    "LOCKDOWN MODE ACTIVE"
+  );
+
+  return;
+}
+
 console.log(`
 ==================================
 ML PREDICTION

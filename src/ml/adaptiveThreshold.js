@@ -26,7 +26,7 @@ function getAdaptiveThreshold({
     regime === "SIDEWAYS"
   ) {
 
-    threshold += 2;
+    threshold += 0;
   }
 
   // ==========================================

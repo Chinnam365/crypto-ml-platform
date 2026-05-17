@@ -72,6 +72,7 @@ const {
 
 const {
   predictTrade,
+  trainModel,
 } = require("./ml/modelTrainer");
 
 const {
@@ -105,6 +106,10 @@ const {
 const {
   getDrawdownState,
 } = require("./ml/drawdownIntelligence");
+
+const {
+  getTrainingData,
+} = require("./ml/trainingData");
 
 const app = express();
 
@@ -613,97 +618,11 @@ await monitorPositions(pool);
         : 0;
 
     // ==========================================
-    // AI CONFIDENCE
-    // ==========================================
-
-    let confidence =
-  calculateConfidence({
-
-    rsi,
-
-    macd,
-
-    trend,
-
-    regime,
-
-    volatility,
-
-    avgSymbolPnL,
-  });
-
-// ==========================================
-// ML PREDICTION
-// ==========================================
-
-const mlProbability =
-  predictTrade({
-
-    rsi,
-
-    macd,
-
-    volatility,
-
-    confidence,
-  });
-// ==========================================
-// ADAPTIVE CONFIDENCE
-// ==========================================
-
-const adaptiveThreshold =
-  await getAdaptiveConfidence(pool);
-const mlConfidence =
-  mlProbability * 100;
-
-   // ==========================================
-// ADAPTIVE SYMBOL WEIGHT
-// ==========================================
-
-const symbolWeights =
-  await getAdaptiveSymbolWeights(pool);
-
-const symbolWeight =
-  symbolWeights[randomSymbol] || 1;
-
-confidence =
-  confidence *
-  symbolWeight;
-
-   // ==========================================
-// DRAWDOWN RISK MODES
-// ==========================================
-
-if (
-  drawdownState.riskMode ===
-  "DEFENSIVE"
-) {
-
-  confidence += 5;
-}
-
-if (
-  drawdownState.riskMode ===
-  "PROTECTIVE"
-) {
-
-  confidence += 10;
-
-  positionSize =
-    positionSize * 0.7;
-}
-
-if (
-  drawdownState.riskMode ===
-  "LOCKDOWN"
-) {
-
-  console.log(
-    "LOCKDOWN MODE ACTIVE"
   );
 
   return;
 }
+
 console.log(`
 ==================================
 SYMBOL WEIGHTING
@@ -720,18 +639,6 @@ ${confidence.toFixed(2)}
 
 ==================================
 `);
-   
-// ==========================================
-// COMBINE RULES + ML
-// ==========================================
-
-confidence =
-  (
-    confidence * 0.7
-  ) +
-  (
-    mlConfidence * 0.3
-  );
 
 console.log(`
 ==================================
@@ -747,7 +654,7 @@ ${confidence.toFixed(2)}
 ==================================
 `);
 
-  // ==========================================
+// ==========================================
 // AI DECISION
 // ==========================================
 
@@ -823,12 +730,7 @@ else if (
 
 const account =
   await getAccountStats(pool);
-// ==========================================
-// DRAWDOWN STATE
-// ==========================================
 
-const drawdownState =
-  await getDrawdownState(pool);
    
 console.log(`
 ==================================
@@ -981,13 +883,12 @@ const {
 let positionSize =
   calculatePositionSize({
 
-    equity,
+    equity:
+      account.equity,
 
     riskPercent: 1,
 
-    entryPrice:
-
-      currentPrice,
+    entryPrice,
 
     stopLoss,
   });
@@ -1126,13 +1027,13 @@ await pool.query(
       ($1,$2,$3,$4,$5,$6)
       `,
       [
-        randomSymbol,
-        side,
-        rsi,
-        entry,
-        exit,
-        pnl,
-      ]
+  randomSymbol,
+  side,
+  rsi,
+  entryPrice,
+  entryPrice,
+  0,
+]
     );
 
     tradeCounter++;
@@ -1277,14 +1178,6 @@ try {
 TRAIN MODEL
 ==================================================
 */
-
-const {
-  getTrainingData,
-} = require("./ml/trainingData");
-
-const {
-  trainModel,
-} = require("./ml/modelTrainer");
 
 app.get(
   "/train-model",

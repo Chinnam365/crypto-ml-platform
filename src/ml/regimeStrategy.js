@@ -84,7 +84,7 @@ function getRegimeStrategy({
 
     if (
 
-      rsi < 40 &&
+      rsi < 48 &&
 
       macd > -1
 
@@ -99,7 +99,7 @@ function getRegimeStrategy({
 
     else if (
 
-      rsi > 60 &&
+      rsi > 52 &&
 
       macd < 1
 

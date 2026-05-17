@@ -115,6 +115,9 @@ const {
   runBacktest,
 } = require("./backtesting/backtestRunner");
 
+const {
+  getMultiTimeframeAnalysis,
+} = require("./ml/multiTimeframe");
 
 const app = express();
 
@@ -568,7 +571,34 @@ await monitorPositions(pool);
 
     const regime =
       detectMarketRegime(closes);
+// ==========================================
+// MULTI TIMEFRAME ANALYSIS
+// ==========================================
 
+const multiTf =
+  await getMultiTimeframeAnalysis(
+    randomSymbol
+  );
+
+console.log(`
+==================================
+MULTI TIMEFRAME ANALYSIS
+==================================
+
+15m:
+${multiTf.trend15m}
+
+1h:
+${multiTf.trend1h}
+
+4h:
+${multiTf.trend4h}
+
+Overall:
+${multiTf.overallTrend}
+
+==================================
+`);
     if (!rsi) {
 
       console.log(
@@ -676,7 +706,24 @@ confidence =
   (
     mlConfidence * 0.3
   );
+// ==========================================
+// MULTI TF CONFIDENCE BOOST
+// ==========================================
 
+if (
+
+  multiTf.overallTrend ===
+  trend
+
+) {
+
+  confidence += 10;
+}
+
+else {
+
+  confidence -= 5;
+}
 // ==========================================
 // ADAPTIVE CONFIDENCE
 // ==========================================

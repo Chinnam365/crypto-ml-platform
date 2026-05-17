@@ -601,7 +601,10 @@ await monitorPositions(pool);
       return;
     }
 
-   // ==========================================
+console.log(`
+==================================
+SYMBOL WEIGHTING
+==================================
 
 Symbol:
 ${randomSymbol}

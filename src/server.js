@@ -892,30 +892,7 @@ const tradeQuality =
 
     multiTf,
   });
-// ==========================================
-// DECISION EXPLANATION
-// ==========================================
 
-const decisionReasons =
-  explainDecision({
-
-    side,
-
-    confidence,
-
-    threshold:
-      adaptiveThresholdValue,
-
-    volatility,
-
-    trend,
-
-    regime,
-
-    tradeQuality,
-
-    multiTf,
-  });
 
 console.log(`
 ==================================
@@ -962,6 +939,42 @@ ${regimeDecision.confidenceBoost}
 
 ==================================
 `);
+
+   // ==========================================
+// DECISION EXPLANATION
+// ==========================================
+
+const decisionReasons =
+  explainDecision({
+
+    side,
+
+    confidence,
+
+    threshold:
+      adaptiveThresholdValue,
+
+    volatility,
+
+    trend,
+
+    regime,
+
+    tradeQuality,
+
+    multiTf,
+  });
+
+console.log(`
+==================================
+AI DECISION REASONING
+==================================
+
+${decisionReasons.join("\n")}
+
+==================================
+`);
+   
     // ==========================================
     // SKIP HOLD / LOW CONFIDENCE
     // ==========================================

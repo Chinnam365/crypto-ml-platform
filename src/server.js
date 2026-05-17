@@ -111,6 +111,11 @@ const {
   getTrainingData,
 } = require("./ml/trainingData");
 
+const {
+  runBacktest,
+} = require("./backtesting/backtestRunner");
+
+
 const app = express();
 
 app.use(cors());
@@ -1435,6 +1440,50 @@ app.get(
     }
   }
 );
+
+ /*
+==================================================
+BACKTEST ENGINE
+==================================================
+*/
+
+app.get(
+  "/backtest",
+
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await runBacktest({
+
+          symbol:
+            req.query.symbol ||
+            "BTCUSDT",
+
+          interval:
+            req.query.interval ||
+            "15m",
+
+          limit:
+            Number(
+              req.query.limit || 300
+            ),
+        });
+
+      res.json(result);
+
+    } catch (error) {
+
+      res.status(500).json({
+
+        error:
+          error.message,
+      });
+    }
+  }
+);
+ 
   app.listen(PORT, () => {
 
     console.log(

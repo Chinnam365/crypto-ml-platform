@@ -127,6 +127,10 @@ const {
   getAdaptiveThreshold,
 } = require("./ml/adaptiveThreshold");
 
+const {
+  calculateTradeQuality,
+} = require("./ml/tradeQuality");
+
 const app = express();
 
 app.use(cors());
@@ -867,6 +871,35 @@ const regimeDecision =
     macd,
   });
 
+   // ==========================================
+// TRADE QUALITY
+// ==========================================
+
+const tradeQuality =
+  calculateTradeQuality({
+
+    confidence,
+
+    regime,
+
+    trend,
+
+    volatility,
+
+    multiTf,
+  });
+
+console.log(`
+==================================
+TRADE QUALITY
+==================================
+
+Quality Score:
+${tradeQuality}
+
+==================================
+`);
+   
 const side =
   regimeDecision.side;
 
@@ -901,7 +934,9 @@ ${regimeDecision.confidenceBoost}
   side === "HOLD" ||
 
   confidence <
-    adaptiveThresholdValue
+    adaptiveThresholdValue ||
+
+  tradeQuality < 60
 ) {
 
       console.log(

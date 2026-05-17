@@ -115,9 +115,7 @@ const {
   getMultiTimeframeAnalysis,
 } = require("./ml/multiTimeframe");
 
-const {
-  getRegimeStrategy,
-} = require("./ml/regimeStrategy");
+
 
 const {
   getAdaptiveThreshold,
@@ -183,6 +181,39 @@ async function initDB() {
       );
     `);
 
+   await pool.query(`
+  CREATE TABLE IF NOT EXISTS decision_memory (
+    id SERIAL PRIMARY KEY,
+    pattern TEXT,
+    side TEXT,
+    confidence FLOAT,
+    volatility FLOAT,
+    pnl FLOAT,
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+`);
+
+   await pool.query(`
+  CREATE TABLE IF NOT EXISTS positions (
+    id SERIAL PRIMARY KEY,
+    symbol TEXT,
+    side TEXT,
+    confidence FLOAT,
+    volatility FLOAT,
+    macd FLOAT,
+    trend TEXT,
+    regime TEXT,
+    entry_price FLOAT,
+    stop_loss FLOAT,
+    take_profit FLOAT,
+    position_size FLOAT,
+    pnl FLOAT DEFAULT 0,
+    status TEXT DEFAULT 'OPEN',
+    opened_at TIMESTAMP DEFAULT NOW(),
+    closed_at TIMESTAMP
+  );
+`);
+   
     await pool.query(`
       CREATE TABLE IF NOT EXISTS model (
         id SERIAL PRIMARY KEY,
@@ -917,10 +948,25 @@ ${side}
 
 ==================================
 `);
-const side =
-  regimeDecision.side;
-   
- // ==========================================
+
+console.log(`
+==================================
+PROBABILISTIC SIGNAL ENGINE
+==================================
+
+Buy Score:
+${signalScores.buyScore}
+
+Sell Score:
+${signalScores.sellScore}
+
+Decision:
+${side}
+
+==================================
+`);
+
+   // ==========================================
 // TRADE QUALITY
 // ==========================================
 
@@ -938,7 +984,6 @@ const tradeQuality =
     multiTf,
   });
 
-
 console.log(`
 ==================================
 TRADE QUALITY
@@ -949,31 +994,8 @@ ${tradeQuality}
 
 ==================================
 `);
+
    
-
-confidence +=
-  regimeDecision.confidenceBoost;
-
-console.log(`
-==================================
-REGIME STRATEGY
-==================================
-
-Regime:
-${regime}
-
-Trend:
-${trend}
-
-Decision:
-${side}
-
-Confidence Boost:
-${regimeDecision.confidenceBoost}
-
-==================================
-`);
-
    // ==========================================
 // DECISION EXPLANATION
 // ==========================================

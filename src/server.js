@@ -684,10 +684,12 @@ const adaptiveThreshold =
 // ==========================================
 
 const symbolWeights =
-  await getAdaptiveSymbolWeights(pool);
+  await getAdaptiveSymbolWeights(pool) || {};
 
 const symbolWeight =
-  symbolWeights[randomSymbol] || 1;
+  Number(
+    symbolWeights[randomSymbol] || 1
+  );
 
 confidence =
   confidence * symbolWeight;

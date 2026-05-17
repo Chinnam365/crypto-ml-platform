@@ -131,6 +131,11 @@ const {
   explainDecision,
 } = require("./ml/explainDecision");
 
+const {
+  saveDecisionMemory,
+  getDecisionMemory,
+} = require("./ml/decisionMemory");
+
 const app = express();
 
 app.use(cors());
@@ -1233,7 +1238,31 @@ Confidence: ${confidence.toFixed(2)}
 // ==========================================
 // SAVE POSITION DATA
 // ==========================================
+// ==========================================
+// SAVE DECISION MEMORY
+// ==========================================
 
+await saveDecisionMemory({
+
+  pool,
+
+  side,
+
+  trend,
+
+  regime,
+
+  quality:
+    tradeQuality,
+
+  confidence,
+
+  volatility,
+
+  multiTf,
+
+  pnl: 0,
+});
 await pool.query(
   `
   INSERT INTO positions
@@ -1637,7 +1666,35 @@ app.get(
     }
   }
 );
- 
+
+ /*
+==================================================
+DECISION MEMORY
+==================================================
+*/
+
+app.get(
+  "/decision-memory",
+
+  async (req, res) => {
+
+    try {
+
+      const memory =
+        await getDecisionMemory(pool);
+
+      res.json(memory);
+
+    } catch (error) {
+
+      res.status(500).json({
+
+        error:
+          error.message,
+      });
+    }
+  }
+);
   app.listen(PORT, () => {
 
     console.log(

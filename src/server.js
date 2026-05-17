@@ -601,32 +601,7 @@ await monitorPositions(pool);
       return;
     }
 
-    // ==========================================
-    // SYMBOL PERFORMANCE
-    // ==========================================
-
-    const symbolRanking =
-      rankings.find(
-        s =>
-          s.symbol ===
-          randomSymbol
-      );
-
-    const avgSymbolPnL =
-      symbolRanking
-        ? symbolRanking.avgPnL
-        : 0;
-
-    // ==========================================
-  );
-
-  return;
-}
-
-console.log(`
-==================================
-SYMBOL WEIGHTING
-==================================
+   // ==========================================
 
 Symbol:
 ${randomSymbol}
@@ -689,7 +664,6 @@ else if (
 
   side = "SELL";
 }
-
     // ==========================================
     // SKIP HOLD / LOW CONFIDENCE
     // ==========================================

@@ -80,10 +80,6 @@ const {
 } = require("./ml/modelAnalytics");
 
 const {
-  getAdaptiveConfidence,
-} = require("./ml/adaptiveConfidence");
-
-const {
   getSymbolMemory,
 } = require("./ml/symbolMemory");
 
@@ -871,7 +867,8 @@ const regimeDecision =
   });
 const side =
   regimeDecision.side;
-   // ==========================================
+   
+ // ==========================================
 // TRADE QUALITY
 // ==========================================
 

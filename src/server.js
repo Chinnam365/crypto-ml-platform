@@ -131,6 +131,10 @@ const {
   calculateTradeQuality,
 } = require("./ml/tradeQuality");
 
+const {
+  explainDecision,
+} = require("./ml/explainDecision");
+
 const app = express();
 
 app.use(cors());
@@ -888,7 +892,40 @@ const tradeQuality =
 
     multiTf,
   });
+// ==========================================
+// DECISION EXPLANATION
+// ==========================================
 
+const decisionReasons =
+  explainDecision({
+
+    side,
+
+    confidence,
+
+    threshold:
+      adaptiveThresholdValue,
+
+    volatility,
+
+    trend,
+
+    regime,
+
+    tradeQuality,
+
+    multiTf,
+  });
+
+console.log(`
+==================================
+AI DECISION REASONING
+==================================
+
+${decisionReasons.join("\n")}
+
+==================================
+`);
 console.log(`
 ==================================
 TRADE QUALITY

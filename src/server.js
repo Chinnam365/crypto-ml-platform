@@ -602,6 +602,20 @@ await monitorPositions(pool);
     }
 
 console.log(`
+// ==========================================
+// SYMBOL WEIGHTING
+// ==========================================
+
+const symbolWeights =
+  await getAdaptiveSymbolWeights(pool);
+
+const symbolWeight =
+  symbolWeights[randomSymbol] || 1;
+
+confidence =
+  confidence * symbolWeight;
+
+console.log(`
 ==================================
 SYMBOL WEIGHTING
 ==================================
@@ -617,7 +631,6 @@ ${confidence.toFixed(2)}
 
 ==================================
 `);
-
 console.log(`
 ==================================
 ML PREDICTION

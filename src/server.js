@@ -119,6 +119,10 @@ const {
   getMultiTimeframeAnalysis,
 } = require("./ml/multiTimeframe");
 
+const {
+  getRegimeStrategy,
+} = require("./ml/regimeStrategy");
+
 const app = express();
 
 app.use(cors());
@@ -817,40 +821,46 @@ ${confidence.toFixed(2)}
 `);
 
 // ==========================================
-// AI DECISION
+// REGIME STRATEGY
 // ==========================================
 
-let side = "HOLD";
+const regimeDecision =
+  getRegimeStrategy({
 
-// ==========================================
-// BUY CONDITIONS
-// ==========================================
+    regime,
 
-if (
+    trend,
 
-  rsi < 45 &&
+    rsi,
 
-  macd > -1
+    macd,
+  });
 
-) {
+const side =
+  regimeDecision.side;
 
-  side = "BUY";
-}
+confidence +=
+  regimeDecision.confidenceBoost;
 
-// ==========================================
-// SELL CONDITIONS
-// ==========================================
+console.log(`
+==================================
+REGIME STRATEGY
+==================================
 
-else if (
+Regime:
+${regime}
 
-  rsi > 55 &&
+Trend:
+${trend}
 
-  macd < 1
+Decision:
+${side}
 
-) {
+Confidence Boost:
+${regimeDecision.confidenceBoost}
 
-  side = "SELL";
-}
+==================================
+`);
     // ==========================================
     // SKIP HOLD / LOW CONFIDENCE
     // ==========================================

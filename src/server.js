@@ -136,6 +136,10 @@ const {
   getDecisionMemory,
 } = require("./ml/decisionMemory");
 
+const {
+  calculateSignalScores,
+} = require("./ml/probabilisticSignals");
+
 const app = express();
 
 app.use(cors());
@@ -856,20 +860,63 @@ ${confidence.toFixed(2)}
 `);
 
 // ==========================================
-// REGIME STRATEGY
+// PROBABILISTIC SIGNAL ENGINE
 // ==========================================
 
-const regimeDecision =
-  getRegimeStrategy({
-
-    regime,
-
-    trend,
+const signalScores =
+  calculateSignalScores({
 
     rsi,
 
     macd,
+
+    trend,
+
+    regime,
+
+    multiTf,
   });
+
+let side = "HOLD";
+
+if (
+
+  signalScores.buyScore >
+    signalScores.sellScore &&
+
+  signalScores.buyScore >= 50
+) {
+
+  side = "BUY";
+}
+
+else if (
+
+  signalScores.sellScore >
+    signalScores.buyScore &&
+
+  signalScores.sellScore >= 50
+) {
+
+  side = "SELL";
+}
+
+console.log(`
+==================================
+PROBABILISTIC SIGNAL ENGINE
+==================================
+
+Buy Score:
+${signalScores.buyScore}
+
+Sell Score:
+${signalScores.sellScore}
+
+Decision:
+${side}
+
+==================================
+`);
 const side =
   regimeDecision.side;
    

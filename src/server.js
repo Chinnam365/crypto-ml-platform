@@ -896,15 +896,6 @@ const tradeQuality =
 
 console.log(`
 ==================================
-AI DECISION REASONING
-==================================
-
-${decisionReasons.join("\n")}
-
-==================================
-`);
-console.log(`
-==================================
 TRADE QUALITY
 ==================================
 
@@ -914,8 +905,6 @@ ${tradeQuality}
 ==================================
 `);
    
-const side =
-  regimeDecision.side;
 
 confidence +=
   regimeDecision.confidenceBoost;
@@ -964,7 +953,6 @@ const decisionReasons =
 
     multiTf,
   });
-
 console.log(`
 ==================================
 AI DECISION REASONING

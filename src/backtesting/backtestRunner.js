@@ -54,17 +54,18 @@ ${limit}
 
   return {
 
-    symbol,
+  symbol,
 
-    interval,
+  interval,
 
-    candles:
-      candles.length,
+  candles:
+    candles.length,
 
-    trades,
+  metrics,
 
-    metrics,
-  };
+  sampleTrades:
+    trades.slice(0, 10),
+};
 }
 
 module.exports = {

@@ -639,7 +639,7 @@ ${multiTf.overallTrend}
     // SKIP LOW VOLATILITY
     // ==========================================
 
-    if (volatility < 0.8) {
+    if (volatility < 0.4) {
 
       console.log(
         `${randomSymbol} volatility too low`
@@ -936,7 +936,7 @@ ${regimeDecision.confidenceBoost}
   confidence <
     adaptiveThresholdValue ||
 
-  tradeQuality < 60
+  tradeQuality < 50
 ) {
 
       console.log(

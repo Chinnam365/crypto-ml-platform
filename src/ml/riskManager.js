@@ -1,58 +1,100 @@
-const {
-  MAX_RISK_PERCENT,
-  HIGH_VOLATILITY_THRESHOLD,
-  MAX_POSITION_SIZE_MULTIPLIER,
-  MIN_POSITION_SIZE_MULTIPLIER,
-} = require("../config/riskConfig");
-
 function calculatePositionSize({
-  balance,
-  confidence,
-  volatility,
+
+  equity,
+
+  riskPercent,
+
   entryPrice,
+
   stopLoss,
 }) {
-  const stopDistance = Math.abs(
-    entryPrice - stopLoss
-  );
 
-  if (stopDistance <= 0) {
+  // ==========================================
+  // SAFE INPUTS
+  // ==========================================
+
+  const safeEquity =
+    Number(equity || 0);
+
+  const safeRiskPercent =
+    Number(riskPercent || 0);
+
+  const safeEntry =
+    Number(entryPrice || 0);
+
+  const safeStop =
+    Number(stopLoss || 0);
+
+  // ==========================================
+  // VALIDATION
+  // ==========================================
+
+  if (
+
+    isNaN(safeEquity) ||
+
+    isNaN(safeRiskPercent) ||
+
+    isNaN(safeEntry) ||
+
+    isNaN(safeStop)
+
+  ) {
+
     return 0;
   }
 
-  const dollarRisk =
-    balance * MAX_RISK_PERCENT;
+  // ==========================================
+  // STOP DISTANCE
+  // ==========================================
 
-  let positionSize =
-    dollarRisk / stopDistance;
+  const stopDistance =
+    Math.abs(
+      safeEntry - safeStop
+    );
 
-  let confidenceMultiplier = confidence / 100;
-
-  if (
-    confidenceMultiplier >
-    MAX_POSITION_SIZE_MULTIPLIER
-  ) {
-    confidenceMultiplier =
-      MAX_POSITION_SIZE_MULTIPLIER;
-  }
+  // ==========================================
+  // PROTECT AGAINST ZERO
+  // ==========================================
 
   if (
-    confidenceMultiplier <
-    MIN_POSITION_SIZE_MULTIPLIER
+    stopDistance <= 0
   ) {
-    confidenceMultiplier =
-      MIN_POSITION_SIZE_MULTIPLIER;
+
+    return 0;
   }
 
-  positionSize *= confidenceMultiplier;
+  // ==========================================
+  // RISK AMOUNT
+  // ==========================================
+
+  const riskAmount =
+    safeEquity *
+    (safeRiskPercent / 100);
+
+  // ==========================================
+  // POSITION SIZE
+  // ==========================================
+
+  const positionSize =
+    riskAmount /
+    stopDistance;
+
+  // ==========================================
+  // FINAL SAFETY
+  // ==========================================
 
   if (
-    volatility >= HIGH_VOLATILITY_THRESHOLD
+    isNaN(positionSize) ||
+    !isFinite(positionSize)
   ) {
-    positionSize *= 0.5;
+
+    return 0;
   }
 
-  return Number(positionSize.toFixed(6));
+  return Number(
+    positionSize.toFixed(6)
+  );
 }
 
 module.exports = {

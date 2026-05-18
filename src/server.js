@@ -1427,9 +1427,6 @@ await pool.query(
   `
   INSERT INTO positions (
    
-await pool.query(
-  `
-  INSERT INTO positions
   (
   symbol,
   side,

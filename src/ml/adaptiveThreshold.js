@@ -9,7 +9,7 @@ function getAdaptiveThreshold({
   symbolWeight,
 }) {
 
-  let threshold = 60;
+  let threshold = 52;
 
   // ==========================================
   // REGIME ADJUSTMENTS

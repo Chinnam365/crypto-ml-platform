@@ -143,6 +143,10 @@ const {
   getReinforcementScore,
 } = require("./ml/reinforcementEngine");
 
+const {
+  getOptimizationAdjustments,
+} = require("./ml/selfOptimizer");
+
 const app = express();
 
 app.use(cors());
@@ -884,7 +888,38 @@ const adaptiveThresholdValue =
 
     symbolWeight,
   });
+// ==========================================
+// SELF OPTIMIZATION
+// ==========================================
 
+const optimization =
+  await getOptimizationAdjustments(
+    pool
+  );
+
+confidence *=
+  optimization.confidenceMultiplier;
+
+const optimizedThreshold =
+  adaptiveThresholdValue +
+  optimization.thresholdAdjustment;
+
+console.log(`
+==================================
+SELF OPTIMIZER
+==================================
+
+Avg Reward:
+${optimization.avgReward.toFixed(2)}
+
+Threshold Adjustment:
+${optimization.thresholdAdjustment}
+
+Confidence Multiplier:
+${optimization.confidenceMultiplier.toFixed(2)}
+
+==================================
+`);
 console.log(`
 ==================================
 ADAPTIVE THRESHOLD
@@ -1042,7 +1077,7 @@ ${decisionReasons.join("\n")}
   side === "HOLD" ||
 
   confidence <
-    adaptiveThresholdValue ||
+    optimizedThreshold ||
 
   tradeQuality < 45
 ) {

@@ -791,7 +791,11 @@ const symbolWeight =
   );
 
 confidence =
-  confidence * symbolWeight;
+  confidence *
+  (
+    0.5 +
+    (symbolWeight * 0.5)
+  );
 
 console.log(`
 ==================================

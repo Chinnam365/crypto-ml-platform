@@ -1370,6 +1370,63 @@ await saveDecisionMemory({
 
   pnl: 0,
 });
+
+// ==========================================
+// RISK MANAGEMENT
+// ==========================================
+
+const riskData =
+  getRiskManagement(...);
+
+// ==========================================
+// DUPLICATE POSITION CHECK
+// ==========================================
+
+const existingPosition =
+  await pool.query(
+    `
+    SELECT id
+    FROM positions
+    WHERE symbol = $1
+    AND side = $2
+    AND status = 'OPEN'
+    LIMIT 1
+    `,
+    [
+      randomSymbol,
+      side,
+    ]
+  );
+
+if (
+  existingPosition.rows.length > 0
+) {
+
+  console.log(`
+==================================
+DUPLICATE POSITION BLOCKED
+==================================
+
+Symbol:
+${randomSymbol}
+
+Side:
+${side}
+
+==================================
+`);
+
+  continue;
+}
+
+// ==========================================
+// INSERT POSITION
+// ==========================================
+
+await pool.query(
+  `
+  INSERT INTO positions (
+   
 await pool.query(
   `
   INSERT INTO positions

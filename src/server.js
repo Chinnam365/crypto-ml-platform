@@ -1426,8 +1426,6 @@ ${side}
 await pool.query(
   `
   INSERT INTO positions (
-   
-  (
   symbol,
   side,
   confidence,

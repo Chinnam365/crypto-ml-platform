@@ -92,9 +92,26 @@ function calculatePositionSize({
     return 0;
   }
 
-  return Number(
-    positionSize.toFixed(6)
+  // ==========================================
+// MAX POSITION CAP
+// ==========================================
+
+const maxPositionSize =
+  safeEquity * 0.05;
+
+// ==========================================
+// APPLY CAP
+// ==========================================
+
+const finalSize =
+  Math.min(
+    positionSize,
+    maxPositionSize
   );
+
+return Number(
+  finalSize.toFixed(6)
+);
 }
 
 module.exports = {

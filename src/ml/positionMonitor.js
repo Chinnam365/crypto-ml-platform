@@ -37,7 +37,7 @@ async function monitorPositions(pool) {
       }
 
       let shouldClose = false;
-
+let closeReason = "";
       let pnl = 0;
 
       // ==========================================
@@ -145,7 +145,43 @@ async function monitorPositions(pool) {
             position.id,
           ]
         );
+// ==========================================
+// EARLY EXIT INTELLIGENCE
+// ==========================================
 
+// LOSS LIMIT
+
+if (pnl < -25) {
+
+  shouldClose = true;
+
+  closeReason =
+    "EARLY_EXIT_LOSS";
+}
+
+// TRADE TOO OLD
+
+if (
+  durationMinutes > 240
+) {
+
+  shouldClose = true;
+
+  closeReason =
+    "TIME_EXIT";
+}
+
+// CONFIDENCE COLLAPSE
+
+if (
+  position.confidence < 45
+) {
+
+  shouldClose = true;
+
+  closeReason =
+    "CONFIDENCE_EXIT";
+}
         // ==========================================
         // SAVE ML DATASET
         // ==========================================

@@ -6,6 +6,10 @@ const {
   saveMLDataset,
 } = require("./datasetBuilder");
 
+const {
+  updateReinforcementMemory,
+} = require("./reinforcementEngine");
+
 async function monitorPositions(pool) {
 
   const result =
@@ -181,7 +185,38 @@ async function monitorPositions(pool) {
 
           durationMinutes,
         });
+// ==========================================
+// REINFORCEMENT MEMORY
+// ==========================================
 
+const quality =
+  position.confidence >= 70
+    ? 70
+    : 50;
+
+await updateReinforcementMemory({
+
+  pool,
+
+  symbol:
+    position.symbol,
+
+  side:
+    position.side,
+
+  regime:
+    position.regime,
+
+  trend:
+    position.trend,
+
+  quality,
+
+  confidence:
+    position.confidence,
+
+  pnl,
+});
         console.log(`
 ==================================
 POSITION CLOSED

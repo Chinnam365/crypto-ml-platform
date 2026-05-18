@@ -37,7 +37,9 @@ async function monitorPositions(pool) {
       }
 
       let shouldClose = false;
-let closeReason = "";
+
+      let closeReason = "";
+
       let pnl = 0;
 
       // ==========================================
@@ -52,6 +54,9 @@ let closeReason = "";
         ) {
 
           shouldClose = true;
+
+          closeReason =
+            "STOP_LOSS";
         }
 
         if (
@@ -60,6 +65,9 @@ let closeReason = "";
         ) {
 
           shouldClose = true;
+
+          closeReason =
+            "TAKE_PROFIT";
         }
 
         pnl =
@@ -82,6 +90,9 @@ let closeReason = "";
         ) {
 
           shouldClose = true;
+
+          closeReason =
+            "STOP_LOSS";
         }
 
         if (
@@ -90,6 +101,9 @@ let closeReason = "";
         ) {
 
           shouldClose = true;
+
+          closeReason =
+            "TAKE_PROFIT";
         }
 
         pnl =
@@ -114,6 +128,49 @@ let closeReason = "";
         (
           now - openedAt
         ) / 1000 / 60;
+
+      // ==========================================
+      // EARLY EXIT INTELLIGENCE
+      // ==========================================
+
+      // LOSS LIMIT
+
+      if (
+        pnl < -25 &&
+        !shouldClose
+      ) {
+
+        shouldClose = true;
+
+        closeReason =
+          "EARLY_EXIT_LOSS";
+      }
+
+      // TRADE TOO OLD
+
+      if (
+        durationMinutes > 240 &&
+        !shouldClose
+      ) {
+
+        shouldClose = true;
+
+        closeReason =
+          "TIME_EXIT";
+      }
+
+      // CONFIDENCE COLLAPSE
+
+      if (
+        position.confidence < 45 &&
+        !shouldClose
+      ) {
+
+        shouldClose = true;
+
+        closeReason =
+          "CONFIDENCE_EXIT";
+      }
 
       // ==========================================
       // CLOSE POSITION
@@ -145,43 +202,7 @@ let closeReason = "";
             position.id,
           ]
         );
-// ==========================================
-// EARLY EXIT INTELLIGENCE
-// ==========================================
 
-// LOSS LIMIT
-
-if (pnl < -25) {
-
-  shouldClose = true;
-
-  closeReason =
-    "EARLY_EXIT_LOSS";
-}
-
-// TRADE TOO OLD
-
-if (
-  durationMinutes > 240
-) {
-
-  shouldClose = true;
-
-  closeReason =
-    "TIME_EXIT";
-}
-
-// CONFIDENCE COLLAPSE
-
-if (
-  position.confidence < 45
-) {
-
-  shouldClose = true;
-
-  closeReason =
-    "CONFIDENCE_EXIT";
-}
         // ==========================================
         // SAVE ML DATASET
         // ==========================================
@@ -221,38 +242,40 @@ if (
 
           durationMinutes,
         });
-// ==========================================
-// REINFORCEMENT MEMORY
-// ==========================================
 
-const quality =
-  position.confidence >= 70
-    ? 70
-    : 50;
+        // ==========================================
+        // REINFORCEMENT MEMORY
+        // ==========================================
 
-await updateReinforcementMemory({
+        const quality =
+          position.confidence >= 70
+            ? 70
+            : 50;
 
-  pool,
+        await updateReinforcementMemory({
 
-  symbol:
-    position.symbol,
+          pool,
 
-  side:
-    position.side,
+          symbol:
+            position.symbol,
 
-  regime:
-    position.regime,
+          side:
+            position.side,
 
-  trend:
-    position.trend,
+          regime:
+            position.regime,
 
-  quality,
+          trend:
+            position.trend,
 
-  confidence:
-    position.confidence,
+          quality,
 
-  pnl,
-});
+          confidence:
+            position.confidence,
+
+          pnl,
+        });
+
         console.log(`
 ==================================
 POSITION CLOSED
@@ -269,6 +292,9 @@ ${currentPrice}
 
 PnL:
 ${pnl.toFixed(2)}
+
+Reason:
+${closeReason}
 
 Duration Minutes:
 ${durationMinutes.toFixed(2)}

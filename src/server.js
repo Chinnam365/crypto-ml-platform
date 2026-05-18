@@ -1767,6 +1767,53 @@ app.get(
     }
   }
 );
+
+ /*
+==================================================
+REINFORCEMENT MEMORY
+==================================================
+*/
+
+app.get(
+  "/reinforcement-memory",
+
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await pool.query(`
+          SELECT
+            pattern,
+
+            COUNT(*) AS trades,
+
+            AVG(reward) AS avg_reward,
+
+            AVG(pnl) AS avg_pnl
+
+          FROM reinforcement_memory
+
+          GROUP BY pattern
+
+          ORDER BY avg_reward DESC
+        `);
+
+      res.json(
+        result.rows
+      );
+
+    } catch (error) {
+
+      res.status(500).json({
+
+        error:
+          error.message,
+      });
+    }
+  }
+);
+ 
   app.listen(PORT, () => {
 
     console.log(

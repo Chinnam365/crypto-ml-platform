@@ -1372,13 +1372,6 @@ await saveDecisionMemory({
 });
 
 // ==========================================
-// RISK MANAGEMENT
-// ==========================================
-
-const riskData =
-  getRiskManagement(...);
-
-// ==========================================
 // DUPLICATE POSITION CHECK
 // ==========================================
 
@@ -1419,13 +1412,10 @@ ${side}
   continue;
 }
 
-// ==========================================
-// INSERT POSITION
-// ==========================================
-
 await pool.query(
   `
-  INSERT INTO positions (
+  INSERT INTO positions
+  (
   symbol,
   side,
   confidence,

@@ -138,6 +138,11 @@ const {
   calculateSignalScores,
 } = require("./ml/probabilisticSignals");
 
+const {
+  updateReinforcementMemory,
+  getReinforcementScore,
+} = require("./ml/reinforcementEngine");
+
 const app = express();
 
 app.use(cors());
@@ -189,6 +194,17 @@ async function initDB() {
     confidence FLOAT,
     volatility FLOAT,
     pnl FLOAT,
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+`);
+
+   await pool.query(`
+  CREATE TABLE IF NOT EXISTS reinforcement_memory (
+    id SERIAL PRIMARY KEY,
+    pattern TEXT,
+    confidence FLOAT,
+    pnl FLOAT,
+    reward FLOAT,
     created_at TIMESTAMP DEFAULT NOW()
   );
 `);

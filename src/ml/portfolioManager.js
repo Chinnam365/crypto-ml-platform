@@ -1,6 +1,6 @@
 const MAX_PORTFOLIO_EXPOSURE = 100;
 
-const MAX_OPEN_POSITIONS = 5;
+const MAX_OPEN_POSITIONS = 15;
 
 async function getPortfolioStats(pool) {
 

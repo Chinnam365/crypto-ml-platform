@@ -19,28 +19,65 @@ async function getAccountStats(pool) {
 
   positions.forEach(position => {
 
+    // ==========================================
+    // SAFE PNL
+    // ==========================================
+
     const pnl =
-      Number(position.pnl || 0);
+      Number(
+        position.pnl || 0
+      );
+
+    const safePnL =
+      isNaN(pnl)
+        ? 0
+        : pnl;
+
+    // ==========================================
+    // SAFE POSITION SIZE
+    // ==========================================
+
+    const positionSize =
+      Number(
+        position.position_size || 0
+      );
+
+    const safePositionSize =
+      isNaN(positionSize)
+        ? 0
+        : positionSize;
+
+    // ==========================================
+    // CLOSED POSITIONS
+    // ==========================================
 
     if (
       position.status === "CLOSED"
     ) {
 
-      realizedPnL += pnl;
+      realizedPnL +=
+        safePnL;
     }
+
+    // ==========================================
+    // OPEN POSITIONS
+    // ==========================================
 
     if (
       position.status === "OPEN"
     ) {
 
-      unrealizedPnL += pnl;
+      unrealizedPnL +=
+        safePnL;
 
       usedCapital +=
-        Number(
-          position.position_size || 0
-        );
+        safePositionSize;
     }
   });
+
+  // ==========================================
+  // FINAL ACCOUNT VALUES
+  // ==========================================
 
   const equity =
     startingBalance +

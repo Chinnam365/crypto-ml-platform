@@ -1,3 +1,7 @@
+const {
+  getPrice,
+} = require("../market/binance");
+
 async function getAccountStats(pool) {
 
   const result =
@@ -17,7 +21,11 @@ async function getAccountStats(pool) {
 
   let usedCapital = 0;
 
-  positions.forEach(position => {
+  // ==========================================
+  // LOOP POSITIONS
+  // ==========================================
+
+  for (const position of positions) {
 
     // ==========================================
     // SAFE PNL
@@ -67,13 +75,69 @@ async function getAccountStats(pool) {
       position.status === "OPEN"
     ) {
 
-      unrealizedPnL +=
-        safePnL;
+      // ==========================================
+      // LIVE PRICE
+      // ==========================================
+
+      const currentPrice =
+        await getPrice(
+          position.symbol
+        );
+
+      let livePnL = 0;
+
+      // ==========================================
+      // BUY POSITIONS
+      // ==========================================
+
+      if (
+        position.side === "BUY"
+      ) {
+
+        livePnL =
+          (
+            currentPrice -
+            position.entry_price
+          ) *
+          safePositionSize;
+      }
+
+      // ==========================================
+      // SELL POSITIONS
+      // ==========================================
+
+      if (
+        position.side === "SELL"
+      ) {
+
+        livePnL =
+          (
+            position.entry_price -
+            currentPrice
+          ) *
+          safePositionSize;
+      }
+
+      // ==========================================
+      // SAFE UNREALIZED PNL
+      // ==========================================
+
+      if (
+        !isNaN(livePnL)
+      ) {
+
+        unrealizedPnL +=
+          livePnL;
+      }
+
+      // ==========================================
+      // USED CAPITAL
+      // ==========================================
 
       usedCapital +=
         safePositionSize;
     }
-  });
+  }
 
   // ==========================================
   // FINAL ACCOUNT VALUES

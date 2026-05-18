@@ -753,10 +753,10 @@ const mlConfidence =
 
 confidence =
   (
-    confidence * 0.7
+    confidence * 0.9
   ) +
   (
-    mlConfidence * 0.3
+    mlConfidence * 0.1
   );
 // ==========================================
 // MULTI TF CONFIDENCE BOOST

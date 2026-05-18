@@ -14,12 +14,18 @@ async function getPortfolioStats(pool) {
 
   let totalExposure = 0;
 
-  positions.forEach(position => {
+ positions.forEach(position => {
 
-    totalExposure += Number(
+  const size =
+    Number(
       position.position_size || 0
     );
-  });
+
+  if (!isNaN(size)) {
+
+    totalExposure += size;
+  }
+});
 
   return {
 

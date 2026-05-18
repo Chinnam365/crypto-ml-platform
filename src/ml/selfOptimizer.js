@@ -1,13 +1,14 @@
 async function getOptimizationAdjustments(pool) {
 
-  const result =
-    await pool.query(`
-      SELECT
-        AVG(pnl) AS avg_pnl,
-        AVG(confidence) AS avg_confidence,
-        AVG(reward) AS avg_reward
-      FROM reinforcement_memory
-    `);
+const result =
+  await pool.query(`
+    SELECT
+      AVG(pnl) AS avg_pnl,
+      AVG(confidence) AS avg_confidence,
+      AVG(reward) AS avg_reward,
+      COUNT(*) AS trades
+    FROM reinforcement_memory
+  `);
 
   const row =
     result.rows[0];
@@ -22,7 +23,10 @@ async function getOptimizationAdjustments(pool) {
 
   const avgReward =
     Number(row.avg_reward || 0);
-
+const totalTrades =
+  Number(
+    row.trades || 0
+  );
   let thresholdAdjustment = 0;
 
   let confidenceMultiplier = 1;
@@ -30,7 +34,25 @@ async function getOptimizationAdjustments(pool) {
   // ==========================================
   // PERFORMANCE LOGIC
   // ==========================================
+// ==========================================
+// MINIMUM SAMPLE PROTECTION
+// ==========================================
 
+if (totalTrades < 30) {
+
+  return {
+
+    avgPnL,
+
+    avgConfidence,
+
+    avgReward,
+
+    thresholdAdjustment: 0,
+
+    confidenceMultiplier: 1,
+  };
+}
   if (avgReward > 0.3) {
 
     thresholdAdjustment -= 3;

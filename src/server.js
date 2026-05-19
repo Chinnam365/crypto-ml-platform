@@ -467,6 +467,57 @@ app.get("/positions", async (req, res) => {
         ORDER BY id DESC
         LIMIT 50
       `);
+    } catch (err) {
+
+      console.error(
+        "Strategy analytics error:",
+        err.message
+      );
+
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
+    let html =
+      "<h1>Positions</h1>";
+
+    result.rows.forEach(
+      (position) => {
+
+        html += `
+          <p>
+            ${position.symbol}
+            |
+            ${position.side}
+            |
+            Confidence: ${position.confidence}
+            |
+            Entry: ${position.entry_price}
+            |
+            SL: ${position.stop_loss}
+            |
+            TP: ${position.take_profit}
+            |
+            Size: ${position.position_size}
+            |
+            PnL: ${position.pnl}
+          </p>
+        `;
+      }
+    );
+
+    res.send(html);
+
+  } catch (err) {
+
+    res.send(err.message);
+  }
+});
+
 // ==========================================
 // STRATEGY PERFORMANCE ANALYTICS
 // ==========================================
@@ -532,57 +583,7 @@ app.get(
         strategies:
           result.rows,
       });
-
-    } catch (err) {
-
-      console.error(
-        "Strategy analytics error:",
-        err.message
-      );
-
-      res.status(500).json({
-
-        error:
-          err.message,
-      });
-    }
-  }
-);
-    let html =
-      "<h1>Positions</h1>";
-
-    result.rows.forEach(
-      (position) => {
-
-        html += `
-          <p>
-            ${position.symbol}
-            |
-            ${position.side}
-            |
-            Confidence: ${position.confidence}
-            |
-            Entry: ${position.entry_price}
-            |
-            SL: ${position.stop_loss}
-            |
-            TP: ${position.take_profit}
-            |
-            Size: ${position.position_size}
-            |
-            PnL: ${position.pnl}
-          </p>
-        `;
-      }
-    );
-
-    res.send(html);
-
-  } catch (err) {
-
-    res.send(err.message);
-  }
-});
+     
 /*
 ==================================================
 RESET

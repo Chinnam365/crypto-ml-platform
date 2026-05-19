@@ -1,250 +1,237 @@
-const express = require("express");
+import React, {
+  useEffect,
+  useState,
+} from "react";
 
-const app = express();
+import axios from "axios";
 
-app.use(express.json());
+function App() {
 
-// =====================================
-// ROUTES
-// =====================================
-const {
-  calculateFeatureImportance,
-} = require("./ml/featureImportance");
+  const [
+    positions,
+    setPositions,
+  ] = useState([]);
 
-const tradesRoute =
-  require("./routes/trades");
+  const [
+    strategies,
+    setStrategies,
+  ] = useState([]);
 
-const decisionsRoute =
-  require("./routes/decisions");
+  // ==========================================
+  // LOAD POSITIONS
+  // ==========================================
 
-const analyticsRoute =
-  require("./routes/analytics");
+  const loadPositions =
+    async () => {
 
-const backtestRoute =
-  require("./routes/backtest");
+      try {
 
-const optimizeRoute =
-  require("./routes/optimize");
+        const response =
+          await axios.get(
+            "https://crypto-ml-platform-02b7.onrender.com/positions"
+          );
 
-const weightsRoute =
-  require("./routes/weights");
+        setPositions(
+          response.data
+        );
 
-const dogeRoute =
-  require("./routes/doge");
+      } catch (err) {
 
-// =====================================
-// ML MODULES
-// =====================================
+        console.error(
+          err.message
+        );
+      }
+    };
 
-const {
-  exportTrainingData,
-} = require("./ml/exportTrainingData");
+  // ==========================================
+  // LOAD STRATEGIES
+  // ==========================================
 
-const {
-  trainModel,
-} = require("./ml/trainModel");
+  const loadStrategies =
+    async () => {
 
-const {
-  optimizeThresholds,
-} = require("./ml/thresholdOptimizer");
+      try {
 
-// =====================================
-// ROOT
-// =====================================
+        const response =
+          await axios.get(
+            "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
+          );
 
-app.get("/", (req, res) => {
+        setStrategies(
+          response.data.strategies
+        );
 
-  res.json({
-    status:
-      "Crypto ML Platform Running",
-  });
-});
+      } catch (err) {
 
-// =====================================
-// ROUTE REGISTRATION
-// =====================================
+        console.error(
+          err.message
+        );
+      }
+    };
 
-app.use(
-  "/api/trades",
-  tradesRoute
-);
+  // ==========================================
+  // INITIAL LOAD
+  // ==========================================
 
-app.use(
-  "/api/decisions",
-  decisionsRoute
-);
+  useEffect(() => {
 
-app.use(
-  "/api/analytics",
-  analyticsRoute
-);
+    loadPositions();
 
-app.use(
-  "/api/backtest",
-  backtestRoute
-);
+    loadStrategies();
 
-app.use(
-  "/api/optimize",
-  optimizeRoute
-);
+  }, []);
 
-app.use(
-  "/api/weights",
-  weightsRoute
-);
+  return (
 
-app.use(
-  "/api/doge",
-  dogeRoute
-);
+    <div
+      style={{
+        padding: 20,
+        fontFamily: "Arial",
+      }}
+    >
 
-// =====================================
-// EXPORT TRAINING DATA
-// =====================================
+      <h1>
+        AI Trading Dashboard
+      </h1>
 
-app.get(
-  "/api/export-training-data",
+      {/* ====================================== */}
+      {/* POSITIONS */}
+      {/* ====================================== */}
 
-  async (req, res) => {
+      <h2>
+        Open Positions
+      </h2>
 
-    try {
+      <table
+        border="1"
+        cellPadding="10"
+      >
 
-      const result =
-        await exportTrainingData();
+        <thead>
 
-      res.json(result);
+          <tr>
 
-    } catch (error) {
+            <th>Symbol</th>
 
-      console.error(error);
+            <th>Side</th>
 
-      res.status(500).json({
-        error:
-          error.message,
-      });
-    }
-  }
-);
+            <th>Confidence</th>
 
-// =====================================
-// TRAIN ML MODEL
-// =====================================
+            <th>PnL</th>
 
-app.get(
-  "/api/train-model",
+          </tr>
 
-  async (req, res) => {
+        </thead>
 
-    try {
+        <tbody>
 
-      const result =
-        await trainModel();
+          {positions.map(
+            (position, index) => (
 
-      res.json(result);
+              <tr key={index}>
 
-    } catch (error) {
+                <td>
+                  {position.symbol}
+                </td>
 
-      console.error(error);
+                <td>
+                  {position.side}
+                </td>
 
-      res.status(500).json({
-        error:
-          error.message,
-      });
-    }
-  }
-);
+                <td>
+                  {position.confidence}
+                </td>
 
-// =====================================
-// LIVE ML PREDICTION
-// =====================================
+                <td>
+                  {position.pnl}
+                </td>
 
-app.get(
-  "/api/predict",
+              </tr>
+            )
+          )}
 
-  async (req, res) => {
+        </tbody>
 
-    try {
+      </table>
 
-      const {
-        runDogeStrategy,
-      } = require(
-        "./strategies/dogeStrategy"
-      );
+      {/* ====================================== */}
+      {/* STRATEGY ANALYTICS */}
+      {/* ====================================== */}
 
-      const result =
-        await runDogeStrategy();
+      <h2
+        style={{
+          marginTop: 40,
+        }}
+      >
+        Strategy Analytics
+      </h2>
 
-      res.json(result);
+      <table
+        border="1"
+        cellPadding="10"
+      >
 
-    } catch (error) {
+        <thead>
 
-      console.error(error);
+          <tr>
 
-      res.status(500).json({
-        error:
-          error.message,
-      });
-    }
-  }
-);
+            <th>Symbol</th>
 
-// =====================================
-// OPTIMIZE ML THRESHOLDS
-// =====================================
+            <th>Side</th>
 
-app.get(
-  "/api/optimize-thresholds",
+            <th>Regime</th>
 
-  async (req, res) => {
+            <th>Trades</th>
 
-    try {
+            <th>Avg PnL</th>
 
-      const result =
-        await optimizeThresholds();
+            <th>Win Rate</th>
 
-      res.json(result);
+          </tr>
 
-    } catch (error) {
+        </thead>
 
-      console.error(error);
+        <tbody>
 
-      res.status(500).json({
-        error:
-          error.message,
-      });
-    }
-  }
-);
-// =====================================
-// FEATURE IMPORTANCE
-// =====================================
+          {strategies.map(
+            (strategy, index) => (
 
-app.get(
-  "/api/feature-importance",
+              <tr key={index}>
 
-  async (req, res) => {
+                <td>
+                  {strategy.symbol}
+                </td>
 
-    try {
+                <td>
+                  {strategy.side}
+                </td>
 
-      const result =
-        await calculateFeatureImportance();
+                <td>
+                  {strategy.regime}
+                </td>
 
-      res.json(result);
+                <td>
+                  {strategy.trades}
+                </td>
 
-    } catch (error) {
+                <td>
+                  {strategy.avg_pnl}
+                </td>
 
-      console.error(error);
+                <td>
+                  {strategy.win_rate}%
+                </td>
 
-      res.status(500).json({
-        error:
-          error.message,
-      });
-    }
-  }
-);
-// =====================================
-// EXPORT
-// =====================================
+              </tr>
+            )
+          )}
 
-module.exports = app;
+        </tbody>
+
+      </table>
+
+    </div>
+  );
+}
+
+export default App;

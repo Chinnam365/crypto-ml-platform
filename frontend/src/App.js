@@ -1,46 +1,9 @@
-import React, {
-  useEffect,
-  useState,
-} from "react";
-
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 function App() {
 
-  const [
-    strategies,
-    setStrategies,
-  ] = useState([]);
-
-  const loadStrategies =
-    async () => {
-
-      try {
-
-        const response =
-          await axios.get(
-            "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
-          );
-
-        if (
-          response.data &&
-          Array.isArray(
-            response.data.strategies
-          )
-        ) {
-
-          setStrategies(
-            response.data.strategies
-          );
-        }
-
-      } catch (err) {
-
-        console.error(
-          err.message
-        );
-      }
-    };
+  const [strategies, setStrategies] = useState([]);
 
   useEffect(() => {
 
@@ -48,63 +11,69 @@ function App() {
 
   }, []);
 
+  const loadStrategies = async () => {
+
+    try {
+
+      const response = await axios.get(
+        "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
+      );
+
+      if (
+        response.data &&
+        Array.isArray(response.data.strategies)
+      ) {
+
+        setStrategies(
+          response.data.strategies
+        );
+      }
+
+    } catch (err) {
+
+      console.error(err);
+    }
+  };
+
   return (
 
-    <div
-      style={{
-        background: "#111827",
-        color: "white",
-        minHeight: "100vh",
-        padding: "30px",
-        fontFamily: "Arial",
-      }}
-    >
+    <div style={styles.container}>
 
       <h1>
         AI Trading Dashboard
       </h1>
 
-      <h2
-        style={{
-          marginTop: "30px",
-        }}
-      >
+      <h2>
         Strategy Performance
       </h2>
 
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          background: "#1F2937",
-        }}
-      >
+      <table style={styles.table}>
 
         <thead>
 
           <tr>
 
-            <th style={headerStyle}>
+            <th style={styles.header}>
               Symbol
             </th>
 
-            <th style={headerStyle}>
+            <th style={styles.header}>
               Side
             </th>
 
-            <th style={headerStyle}>
+            <th style={styles.header}>
               Regime
             </th>
 
-            <th style={headerStyle}>
+            <th style={styles.header}>
               Trades
             </th>
 
-            <th style={headerStyle}>
+            <th style={styles.header}>
               Avg PnL
             </th>
 
-            <th style={headerStyle}>
+            <th style={styles.header}>
               Win Rate
             </th>
 
@@ -114,38 +83,37 @@ function App() {
 
         <tbody>
 
-          {strategies.map(
-            (strategy, index) => (
+          {strategies.map((strategy, index) => (
 
-              <tr key={index}>
+            <tr key={index}>
 
-                <td style={cellStyle}>
-                  {strategy.symbol}
-                </td>
+              <td style={styles.cell}>
+                {strategy.symbol}
+              </td>
 
-                <td style={cellStyle}>
-                  {strategy.side}
-                </td>
+              <td style={styles.cell}>
+                {strategy.side}
+              </td>
 
-                <td style={cellStyle}>
-                  {strategy.regime}
-                </td>
+              <td style={styles.cell}>
+                {strategy.regime}
+              </td>
 
-                <td style={cellStyle}>
-                  {strategy.trades}
-                </td>
+              <td style={styles.cell}>
+                {strategy.trades}
+              </td>
 
-                <td style={cellStyle}>
-                  {strategy.avg_pnl}
-                </td>
+              <td style={styles.cell}>
+                {strategy.avg_pnl}
+              </td>
 
-                <td style={cellStyle}>
-                  {strategy.win_rate}%
-                </td>
+              <td style={styles.cell}>
+                {strategy.win_rate}%
+              </td>
 
-              </tr>
-            )
-          )}
+            </tr>
+
+          ))}
 
         </tbody>
 
@@ -155,24 +123,49 @@ function App() {
   );
 }
 
-const headerStyle = {
+const styles = {
 
-  border:
-    "1px solid #374151",
+  container: {
 
-  padding: "12px",
+    background: "#111827",
 
-  background: "#111827",
-};
+    minHeight: "100vh",
 
-const cellStyle = {
+    color: "white",
 
-  border:
-    "1px solid #374151",
+    padding: "30px",
 
-  padding: "12px",
+    fontFamily: "Arial",
+  },
 
-  textAlign: "center",
+  table: {
+
+    width: "100%",
+
+    borderCollapse: "collapse",
+
+    marginTop: "20px",
+
+    background: "#1F2937",
+  },
+
+  header: {
+
+    border: "1px solid #374151",
+
+    padding: "12px",
+
+    background: "#111827",
+  },
+
+  cell: {
+
+    border: "1px solid #374151",
+
+    padding: "12px",
+
+    textAlign: "center",
+  },
 };
 
 export default App;

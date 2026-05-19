@@ -27,8 +27,8 @@ function App() {
           );
 
         setStrategies(
-          response.data.strategies
-        );
+  response.data?.strategies || []
+);
 
       } catch (err) {
 

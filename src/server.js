@@ -1384,7 +1384,63 @@ const existingPosition =
       side,
     ]
   );
+// ==========================================
+// TRADE VALIDATION
+// ==========================================
 
+const invalidTrade =
+
+  isNaN(confidence) ||
+
+  isNaN(entryPrice) ||
+
+  isNaN(stopLoss) ||
+
+  isNaN(takeProfit) ||
+
+  isNaN(adjustedPositionSize) ||
+
+  confidence <= 0 ||
+
+  entryPrice <= 0 ||
+
+  stopLoss <= 0 ||
+
+  takeProfit <= 0 ||
+
+  adjustedPositionSize <= 0;
+
+if (invalidTrade) {
+
+  console.log(`
+==================================
+INVALID TRADE BLOCKED
+==================================
+
+Symbol:
+${randomSymbol}
+
+Confidence:
+${confidence}
+
+Entry:
+${entryPrice}
+
+Stop Loss:
+${stopLoss}
+
+Take Profit:
+${takeProfit}
+
+Position Size:
+${adjustedPositionSize}
+
+==================================
+`);
+
+  return;
+}
+   
 if (
   existingPosition.rows.length > 0
 ) {

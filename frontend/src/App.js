@@ -10,9 +10,7 @@ function App() {
         fontFamily: "Arial",
       }}
     >
-      <h1>
-        AI Trading Dashboard
-      </h1>
+      <h1>AI Trading Dashboard</h1>
 
       <p>
         Frontend Connected Successfully

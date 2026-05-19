@@ -11,8 +11,8 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid,
   ResponsiveContainer,
+  CartesianGrid,
 } from "recharts";
 
 function App() {
@@ -28,45 +28,30 @@ function App() {
   ] = useState([]);
 
   // ==========================================
-  // LOAD STRATEGIES
+  // LOAD DATA
   // ==========================================
 
-  const loadStrategies =
+  const loadData =
     async () => {
 
       try {
 
-        const response =
+        const strategyResponse =
           await axios.get(
             "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
           );
 
         setStrategies(
-          response.data.strategies
+          strategyResponse.data.strategies
         );
 
-      } catch (err) {
-
-        console.error(err);
-      }
-    };
-
-  // ==========================================
-  // LOAD POSITIONS
-  // ==========================================
-
-  const loadPositions =
-    async () => {
-
-      try {
-
-        const response =
+        const positionsResponse =
           await axios.get(
             "https://crypto-ml-platform-02b7.onrender.com/positions"
           );
 
         setPositions(
-          response.data.positions
+          positionsResponse.data.positions
         );
 
       } catch (err) {
@@ -81,18 +66,13 @@ function App() {
 
   useEffect(() => {
 
-    loadStrategies();
-
-    loadPositions();
+    loadData();
 
     const interval =
-      setInterval(() => {
-
-        loadStrategies();
-
-        loadPositions();
-
-      }, 10000);
+      setInterval(
+        loadData,
+        10000
+      );
 
     return () =>
       clearInterval(interval);
@@ -100,7 +80,7 @@ function App() {
   }, []);
 
   // ==========================================
-  // STATS
+  // METRICS
   // ==========================================
 
   const totalPnL =
@@ -137,7 +117,8 @@ function App() {
   // CHART DATA
   // ==========================================
 
-  let cumulativePnL = 0;
+  let runningEquity =
+    10000;
 
   const equityData =
     positions.map(
@@ -146,7 +127,7 @@ function App() {
         index
       ) => {
 
-        cumulativePnL +=
+        runningEquity +=
           Number(
             position.pnl || 0
           );
@@ -156,14 +137,8 @@ function App() {
           trade:
             index + 1,
 
-          pnl:
-            Number(
-              position.pnl || 0
-            ),
-
           equity:
-            10000 +
-            cumulativePnL,
+            runningEquity,
         };
       }
     );
@@ -176,390 +151,320 @@ function App() {
 
     <div
       style={{
-        backgroundColor:
+        display: "flex",
+        background:
           "#020617",
-
         color: "white",
-
-        minHeight:
-          "100vh",
-
-        padding: "30px",
-
-        fontFamily:
-          "Arial",
+        minHeight: "100vh",
+        fontFamily: "Arial",
       }}
     >
 
-      <h1
-        style={{
-          fontSize: "42px",
-          marginBottom: "30px",
-        }}
-      >
-        AI Trading Dashboard
-      </h1>
-
-      {/* ====================================== */}
-      {/* SUMMARY */}
-      {/* ====================================== */}
+      {/* ==================================== */}
+      {/* SIDEBAR */}
+      {/* ==================================== */}
 
       <div
         style={{
-          display: "grid",
-
-          gridTemplateColumns:
-            "repeat(auto-fit, minmax(220px, 1fr))",
-
-          gap: "20px",
-
-          marginBottom: "40px",
-        }}
-      >
-
-        <DashboardCard
-          title="Open Positions"
-          value={totalPositions}
-        />
-
-        <DashboardCard
-          title="Total PnL"
-          value={
-            totalPnL.toFixed(2)
-          }
-          color={
-            totalPnL >= 0
-              ? "#22C55E"
-              : "#EF4444"
-          }
-        />
-
-        <DashboardCard
-          title="Win Rate"
-          value={
-            winRate.toFixed(2) + "%"
-          }
-          color="#38BDF8"
-        />
-
-        <DashboardCard
-          title="Strategies"
-          value={
-            strategies.length
-          }
-          color="#FACC15"
-        />
-
-      </div>
-
-      {/* ====================================== */}
-      {/* EQUITY CHART */}
-      {/* ====================================== */}
-
-      <div
-        style={{
+          width: "240px",
           background:
             "#0F172A",
-
-          border:
+          padding: "30px",
+          borderRight:
             "1px solid #1E293B",
-
-          borderRadius:
-            "14px",
-
-          padding: "20px",
-
-          marginBottom: "50px",
         }}
       >
 
-        <h2
-          style={{
-            marginBottom: "20px",
-          }}
-        >
-          Equity Curve
+        <h2>
+          AI Terminal
         </h2>
 
-        <ResponsiveContainer
-          width="100%"
-          height={350}
+        <div
+          style={{
+            marginTop: "40px",
+          }}
         >
 
-          <LineChart
-            data={equityData}
+          <SidebarItem
+            label="Dashboard"
+          />
+
+          <SidebarItem
+            label="Positions"
+          />
+
+          <SidebarItem
+            label="Strategies"
+          />
+
+          <SidebarItem
+            label="Analytics"
+          />
+
+          <SidebarItem
+            label="Risk"
+          />
+
+          <SidebarItem
+            label="AI Engine"
+          />
+
+        </div>
+
+      </div>
+
+      {/* ==================================== */}
+      {/* MAIN CONTENT */}
+      {/* ==================================== */}
+
+      <div
+        style={{
+          flex: 1,
+          padding: "30px",
+        }}
+      >
+
+        <h1
+          style={{
+            fontSize: "42px",
+            marginBottom: "30px",
+          }}
+        >
+          AI Trading Dashboard
+        </h1>
+
+        {/* ================================= */}
+        {/* SUMMARY CARDS */}
+        {/* ================================= */}
+
+        <div
+          style={{
+            display: "grid",
+
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(220px, 1fr))",
+
+            gap: "20px",
+
+            marginBottom: "40px",
+          }}
+        >
+
+          <DashboardCard
+            title="Open Positions"
+            value={totalPositions}
+          />
+
+          <DashboardCard
+            title="Total PnL"
+            value={
+              totalPnL.toFixed(2)
+            }
+            color={
+              totalPnL >= 0
+                ? "#22C55E"
+                : "#EF4444"
+            }
+          />
+
+          <DashboardCard
+            title="Win Rate"
+            value={
+              winRate.toFixed(2) + "%"
+            }
+            color="#38BDF8"
+          />
+
+          <DashboardCard
+            title="Strategies"
+            value={
+              strategies.length
+            }
+            color="#FACC15"
+          />
+
+        </div>
+
+        {/* ================================= */}
+        {/* EQUITY CHART */}
+        {/* ================================= */}
+
+        <div
+          style={{
+            background:
+              "#0F172A",
+
+            borderRadius:
+              "14px",
+
+            padding: "20px",
+
+            marginBottom: "40px",
+          }}
+        >
+
+          <h2>
+            Equity Curve
+          </h2>
+
+          <div
+            style={{
+              width: "100%",
+              height: "350px",
+            }}
           >
 
-            <CartesianGrid stroke="#334155" />
+            <ResponsiveContainer>
 
-            <XAxis dataKey="trade" />
+              <LineChart
+                data={equityData}
+              >
 
-            <YAxis />
+                <CartesianGrid
+                  stroke="#334155"
+                />
 
-            <Tooltip />
+                <XAxis
+                  dataKey="trade"
+                />
 
-            <Line
-              type="monotone"
-              dataKey="equity"
-              stroke="#22C55E"
-              strokeWidth={3}
-            />
+                <YAxis />
 
-          </LineChart>
+                <Tooltip />
 
-        </ResponsiveContainer>
+                <Line
+                  type="monotone"
+                  dataKey="equity"
+                  stroke="#22C55E"
+                  strokeWidth={3}
+                />
 
-      </div>
+              </LineChart>
 
-      {/* ====================================== */}
-      {/* STRATEGIES */}
-      {/* ====================================== */}
+            </ResponsiveContainer>
 
-      <h2
-        style={{
-          marginBottom: "20px",
-        }}
-      >
-        Strategy Performance
-      </h2>
+          </div>
 
-      <div
-        style={{
-          display: "grid",
+        </div>
 
-          gridTemplateColumns:
-            "repeat(auto-fit, minmax(300px, 1fr))",
+        {/* ================================= */}
+        {/* LIVE POSITIONS */}
+        {/* ================================= */}
 
-          gap: "20px",
+        <h2>
+          Live Positions
+        </h2>
 
-          marginBottom: "50px",
-        }}
-      >
+        <div
+          style={{
+            display: "grid",
 
-        {strategies.map(
-          (
-            strategy,
-            index
-          ) => (
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(320px, 1fr))",
 
-            <div
-              key={index}
-              style={{
-                background:
-                  "#0F172A",
+            gap: "20px",
 
-                border:
-                  "1px solid #1E293B",
+            marginTop: "20px",
+          }}
+        >
 
-                borderRadius:
-                  "14px",
+          {positions.map(
+            (
+              position,
+              index
+            ) => (
 
-                padding: "20px",
-              }}
-            >
+              <div
+                key={index}
+                style={{
+                  background:
+                    "#0F172A",
 
-              <h3>
+                  border:
+                    "1px solid #1E293B",
 
-                {strategy.symbol}
+                  borderRadius:
+                    "14px",
 
-                {" "}
+                  padding: "20px",
+                }}
+              >
 
-                <span
-                  style={{
-                    color:
-                      strategy.side === "BUY"
-                        ? "#22C55E"
-                        : "#EF4444",
-                  }}
-                >
+                <h3>
 
-                  {strategy.side}
+                  {position.symbol}
 
-                </span>
+                  {" "}
 
-              </h3>
+                  <span
+                    style={{
+                      color:
+                        position.side === "BUY"
+                          ? "#22C55E"
+                          : "#EF4444",
+                    }}
+                  >
 
-              <p>
-                Regime:
-                {" "}
-                {strategy.regime}
-              </p>
+                    {position.side}
 
-              <p>
-                Trades:
-                {" "}
-                {strategy.trades}
-              </p>
+                  </span>
 
-              <p>
-                Avg PnL:
-                {" "}
+                </h3>
 
-                <span
-                  style={{
-                    color:
-                      Number(
-                        strategy.avg_pnl
-                      ) >= 0
-                        ? "#22C55E"
-                        : "#EF4444",
-                  }}
-                >
-
-                  {strategy.avg_pnl}
-
-                </span>
-
-              </p>
-
-              <p>
-                Win Rate:
-                {" "}
-                {strategy.win_rate}%
-              </p>
-
-            </div>
-          )
-        )}
-
-      </div>
-
-      {/* ====================================== */}
-      {/* POSITIONS */}
-      {/* ====================================== */}
-
-      <h2
-        style={{
-          marginBottom: "20px",
-        }}
-      >
-        Live Positions
-      </h2>
-
-      <div
-        style={{
-          display: "grid",
-
-          gridTemplateColumns:
-            "repeat(auto-fit, minmax(350px, 1fr))",
-
-          gap: "20px",
-        }}
-      >
-
-        {positions.map(
-          (
-            position,
-            index
-          ) => (
-
-            <div
-              key={index}
-              style={{
-                background:
-                  "#0F172A",
-
-                border:
-                  "1px solid #1E293B",
-
-                borderRadius:
-                  "14px",
-
-                padding: "20px",
-              }}
-            >
-
-              <h3>
-
-                {position.symbol}
-
-                {" "}
-
-                <span
-                  style={{
-                    color:
-                      position.side === "BUY"
-                        ? "#22C55E"
-                        : "#EF4444",
-                  }}
-                >
-
-                  {position.side}
-
-                </span>
-
-              </h3>
-
-              <p>
-                Confidence:
-                {" "}
-                {Number(
-                  position.confidence
-                ).toFixed(2)}
-              </p>
-
-              <p>
-                Entry:
-                {" "}
-                {position.entry_price}
-              </p>
-
-              <p>
-                Stop Loss:
-                {" "}
-                {position.stop_loss}
-              </p>
-
-              <p>
-                Take Profit:
-                {" "}
-                {position.take_profit}
-              </p>
-
-              <p>
-                Position Size:
-                {" "}
-                {position.position_size}
-              </p>
-
-              <p>
-
-                PnL:
-
-                {" "}
-
-                <span
-                  style={{
-                    color:
-                      Number(
-                        position.pnl
-                      ) >= 0
-                        ? "#22C55E"
-                        : "#EF4444",
-                  }}
-                >
-
-                  {position.pnl}
-
-                </span>
-
-              </p>
-
-              <p>
-                Trend:
-                {" "}
-                {position.trend}
-              </p>
-
-              <p>
-                Regime:
-                {" "}
-                {position.regime}
-              </p>
-
-            </div>
-          )
-        )}
+                <p>
+                  Confidence:
+                  {" "}
+                  {Number(
+                    position.confidence
+                  ).toFixed(2)}
+                </p>
+
+                <p>
+                  Entry:
+                  {" "}
+                  {position.entry_price}
+                </p>
+
+                <p>
+                  Stop Loss:
+                  {" "}
+                  {position.stop_loss}
+                </p>
+
+                <p>
+                  Take Profit:
+                  {" "}
+                  {position.take_profit}
+                </p>
+
+                <p>
+
+                  PnL:
+
+                  {" "}
+
+                  <span
+                    style={{
+                      color:
+                        Number(
+                          position.pnl
+                        ) >= 0
+                          ? "#22C55E"
+                          : "#EF4444",
+                    }}
+                  >
+
+                    {position.pnl}
+
+                  </span>
+
+                </p>
+
+              </div>
+            )
+          )}
+
+        </div>
 
       </div>
 
@@ -568,7 +473,33 @@ function App() {
 }
 
 // ==========================================
-// CARD COMPONENT
+// SIDEBAR ITEM
+// ==========================================
+
+function SidebarItem({
+  label,
+}) {
+
+  return (
+
+    <div
+      style={{
+        padding: "14px",
+        marginBottom: "10px",
+        borderRadius: "10px",
+        cursor: "pointer",
+        background: "#111827",
+      }}
+    >
+
+      {label}
+
+    </div>
+  );
+}
+
+// ==========================================
+// DASHBOARD CARD
 // ==========================================
 
 function DashboardCard({
@@ -584,9 +515,6 @@ function DashboardCard({
         background:
           "#0F172A",
 
-        border:
-          "1px solid #1E293B",
-
         borderRadius:
           "14px",
 
@@ -597,7 +525,6 @@ function DashboardCard({
       <h3
         style={{
           color: "#94A3B8",
-          marginBottom: "10px",
         }}
       >
         {title}
@@ -606,7 +533,8 @@ function DashboardCard({
       <h1
         style={{
           color,
-          fontSize: "34px",
+          marginTop: "15px",
+          fontSize: "36px",
         }}
       >
         {value}

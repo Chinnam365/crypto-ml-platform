@@ -528,7 +528,9 @@ app.get(
 
             COALESCE(
               ROUND(
-                AVG(pnl)::numeric,
+                AVG(
+  NULLIF(pnl::text, 'NaN')::numeric
+),
                 2
               ),
               0

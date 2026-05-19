@@ -489,19 +489,14 @@ app.get(
 
             COUNT(*) AS trades,
 
-            ROUND(
-              AVG(
-    CASE
-      WHEN pnl IS NOT NULL
-      THEN pnl
-      ELSE 0
-    END
-  )::numeric,
-  2
+            COALESCE(
+  ROUND(
+    AVG(pnl)::numeric,
+    2
+  ),
+  0
 ) AS avg_pnl,
-              2
-            ) AS avg_pnl,
-
+            
             ROUND(
               SUM(
                 CASE

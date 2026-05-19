@@ -114,7 +114,8 @@ function App() {
 
         <tbody>
 
-          {strategies.map(
+         {Array.isArray(strategies) &&
+  strategies.map(
             (strategy, index) => (
 
               <tr key={index}>

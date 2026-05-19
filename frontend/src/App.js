@@ -12,37 +12,33 @@ function App() {
     setStrategies,
   ] = useState([]);
 
-  // ==========================================
-  // LOAD STRATEGY ANALYTICS
-  // ==========================================
-
-  const loadStrategies =
-    async () => {
-
-      try {
-
-        const response =
-          await axios.get(
-            "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
-          );
-
-        setStrategies(
-          response.data.strategies
-        );
-
-      } catch (err) {
-
-        console.error(err);
-      }
-    };
-
-  // ==========================================
-  // INITIAL LOAD
-  // ==========================================
-
   useEffect(() => {
 
-    loadStrategies();
+    const loadData =
+      async () => {
+
+        try {
+
+          const response =
+            await axios.get(
+              "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
+            );
+
+          console.log(
+            response.data
+          );
+
+          setStrategies(
+            response.data.strategies
+          );
+
+        } catch (err) {
+
+          console.error(err);
+        }
+      };
+
+    loadData();
 
   }, []);
 
@@ -50,154 +46,68 @@ function App() {
 
     <div
       style={{
-        backgroundColor: "#0F172A",
+        backgroundColor: "#111827",
         color: "white",
         minHeight: "100vh",
-        padding: "30px",
+        padding: "40px",
         fontFamily: "Arial",
       }}
     >
 
-      <h1
-        style={{
-          marginBottom: "30px",
-        }}
-      >
+      <h1>
         AI Trading Dashboard
       </h1>
 
-      {/* ====================================== */}
-      {/* STRATEGY PERFORMANCE */}
-      {/* ====================================== */}
+      <h2>
+        Strategy Performance
+      </h2>
 
-      <div
-        style={{
-          background: "#1E293B",
-          padding: "20px",
-          borderRadius: "10px",
-        }}
-      >
+      {strategies.map(
+        (
+          strategy,
+          index
+        ) => (
 
-        <h2>
-          Strategy Performance
-        </h2>
+          <div
+            key={index}
+            style={{
+              marginBottom: "12px",
+              padding: "10px",
+              border:
+                "1px solid gray",
+            }}
+          >
 
-        <table
-          style={{
-            width: "100%",
-            borderCollapse:
-              "collapse",
-            marginTop: "20px",
-          }}
-        >
+            <p>
+              Symbol:
+              {" "}
+              {strategy.symbol}
+            </p>
 
-          <thead>
+            <p>
+              Side:
+              {" "}
+              {strategy.side}
+            </p>
 
-            <tr>
+            <p>
+              Avg PnL:
+              {" "}
+              {strategy.avg_pnl}
+            </p>
 
-              <th style={styles.header}>
-                Symbol
-              </th>
+            <p>
+              Win Rate:
+              {" "}
+              {strategy.win_rate}%
+            </p>
 
-              <th style={styles.header}>
-                Side
-              </th>
-
-              <th style={styles.header}>
-                Regime
-              </th>
-
-              <th style={styles.header}>
-                Trades
-              </th>
-
-              <th style={styles.header}>
-                Avg PnL
-              </th>
-
-              <th style={styles.header}>
-                Win Rate
-              </th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            {strategies.map(
-              (
-                strategy,
-                index
-              ) => (
-
-                <tr key={index}>
-
-                  <td style={styles.cell}>
-                    {strategy.symbol}
-                  </td>
-
-                  <td style={styles.cell}>
-                    {strategy.side}
-                  </td>
-
-                  <td style={styles.cell}>
-                    {strategy.regime}
-                  </td>
-
-                  <td style={styles.cell}>
-                    {strategy.trades}
-                  </td>
-
-                  <td style={styles.cell}>
-                    {strategy.avg_pnl}
-                  </td>
-
-                  <td style={styles.cell}>
-                    {strategy.win_rate}%
-                  </td>
-
-                </tr>
-              )
-            )}
-
-          </tbody>
-
-        </table>
-
-      </div>
+          </div>
+        )
+      )}
 
     </div>
   );
 }
-
-// ==========================================
-// TABLE STYLES
-// ==========================================
-
-const styles = {
-
-  header: {
-
-    border:
-      "1px solid #334155",
-
-    padding: "12px",
-
-    background:
-      "#0F172A",
-  },
-
-  cell: {
-
-    border:
-      "1px solid #334155",
-
-    padding: "12px",
-
-    textAlign:
-      "center",
-  },
-};
 
 export default App;

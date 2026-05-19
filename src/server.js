@@ -461,53 +461,57 @@ POSITIONS
 ==================================================
 */
 
-app.get("/positions", async (req, res) => {
+// ==========================================
+// POSITIONS API
+// ==========================================
 
-  try {
+app.get(
+  "/positions",
+  async (req, res) => {
 
-    const result =
-      await pool.query(`
-        SELECT *
-        FROM positions
-        ORDER BY id DESC
-        LIMIT 50
-      `);
+    try {
 
-    let html =
-      "<h1>Positions</h1>";
+      const result =
+        await pool.query(`
+          SELECT
+            id,
+            symbol,
+            side,
+            confidence,
+            entry_price,
+            stop_loss,
+            take_profit,
+            position_size,
+            pnl,
+            trend,
+            regime,
+            created_at
+          FROM positions
+          ORDER BY id DESC
+          LIMIT 50
+        `);
 
-    result.rows.forEach(
-      (position) => {
+      res.json({
 
-        html += `
-          <p>
-            ${position.symbol}
-            |
-            ${position.side}
-            |
-            Confidence: ${position.confidence}
-            |
-            Entry: ${position.entry_price}
-            |
-            SL: ${position.stop_loss}
-            |
-            TP: ${position.take_profit}
-            |
-            Size: ${position.position_size}
-            |
-            PnL: ${position.pnl}
-          </p>
-        `;
-      }
-    );
+        positions:
+          result.rows,
+      });
 
-    res.send(html);
+    } catch (err) {
 
-  } catch (err) {
+      console.error(
+        "Positions API error:",
+        err.message
+      );
 
-    res.send(err.message);
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
   }
-});
+);
 
 // ==========================================
 // STRATEGY PERFORMANCE ANALYTICS

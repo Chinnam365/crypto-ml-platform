@@ -8,12 +8,43 @@ import axios from "axios";
 function App() {
 
   const [
+    positions,
+    setPositions,
+  ] = useState([]);
+
+  const [
     strategies,
     setStrategies,
   ] = useState([]);
 
   // ==========================================
-  // LOAD STRATEGY ANALYTICS
+  // LOAD POSITIONS
+  // ==========================================
+
+  const loadPositions =
+    async () => {
+
+      try {
+
+        const response =
+          await axios.get(
+            "https://crypto-ml-platform-02b7.onrender.com/positions"
+          );
+
+        setPositions(
+          response.data
+        );
+
+      } catch (err) {
+
+        console.error(
+          err.message
+        );
+      }
+    };
+
+  // ==========================================
+  // LOAD STRATEGIES
   // ==========================================
 
   const loadStrategies =
@@ -44,6 +75,8 @@ function App() {
 
   useEffect(() => {
 
+    loadPositions();
+
     loadStrategies();
 
   }, []);
@@ -52,65 +85,107 @@ function App() {
 
     <div
       style={{
-        padding: 30,
+        padding: 20,
         fontFamily: "Arial",
-        background: "#111827",
-        minHeight: "100vh",
-        color: "white",
       }}
     >
 
-      <h1
-        style={{
-          marginBottom: 30,
-        }}
-      >
+      <h1>
         AI Trading Dashboard
       </h1>
 
       {/* ====================================== */}
-      {/* STRATEGY TABLE */}
+      {/* POSITIONS */}
       {/* ====================================== */}
 
       <h2>
-        Strategy Performance
+        Open Positions
       </h2>
 
       <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          background: "#1F2937",
-        }}
+        border="1"
+        cellPadding="10"
       >
 
         <thead>
 
           <tr>
 
-            <th style={tableHeader}>
-              Symbol
-            </th>
+            <th>Symbol</th>
 
-            <th style={tableHeader}>
-              Side
-            </th>
+            <th>Side</th>
 
-            <th style={tableHeader}>
-              Regime
-            </th>
+            <th>Confidence</th>
 
-            <th style={tableHeader}>
-              Trades
-            </th>
+            <th>PnL</th>
 
-            <th style={tableHeader}>
-              Avg PnL
-            </th>
+          </tr>
 
-            <th style={tableHeader}>
-              Win Rate
-            </th>
+        </thead>
+
+        <tbody>
+
+          {positions.map(
+            (position, index) => (
+
+              <tr key={index}>
+
+                <td>
+                  {position.symbol}
+                </td>
+
+                <td>
+                  {position.side}
+                </td>
+
+                <td>
+                  {position.confidence}
+                </td>
+
+                <td>
+                  {position.pnl}
+                </td>
+
+              </tr>
+            )
+          )}
+
+        </tbody>
+
+      </table>
+
+      {/* ====================================== */}
+      {/* STRATEGY ANALYTICS */}
+      {/* ====================================== */}
+
+      <h2
+        style={{
+          marginTop: 40,
+        }}
+      >
+        Strategy Analytics
+      </h2>
+
+      <table
+        border="1"
+        cellPadding="10"
+      >
+
+        <thead>
+
+          <tr>
+
+            <th>Symbol</th>
+
+            <th>Side</th>
+
+            <th>Regime</th>
+
+            <th>Trades</th>
+
+            <th>Avg PnL</th>
+
+            <th>Win Rate</th>
 
           </tr>
 
@@ -123,27 +198,27 @@ function App() {
 
               <tr key={index}>
 
-                <td style={tableCell}>
+                <td>
                   {strategy.symbol}
                 </td>
 
-                <td style={tableCell}>
+                <td>
                   {strategy.side}
                 </td>
 
-                <td style={tableCell}>
+                <td>
                   {strategy.regime}
                 </td>
 
-                <td style={tableCell}>
+                <td>
                   {strategy.trades}
                 </td>
 
-                <td style={tableCell}>
+                <td>
                   {strategy.avg_pnl}
                 </td>
 
-                <td style={tableCell}>
+                <td>
                   {strategy.win_rate}%
                 </td>
 
@@ -158,29 +233,5 @@ function App() {
     </div>
   );
 }
-
-// ==========================================
-// TABLE STYLES
-// ==========================================
-
-const tableHeader = {
-
-  border:
-    "1px solid #374151",
-
-  padding: "12px",
-
-  background: "#111827",
-};
-
-const tableCell = {
-
-  border:
-    "1px solid #374151",
-
-  padding: "12px",
-
-  textAlign: "center",
-};
 
 export default App;

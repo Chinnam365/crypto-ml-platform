@@ -12,59 +12,35 @@ function App() {
     setStrategies,
   ] = useState([]);
 
-  // ==========================================
-  // LOAD STRATEGY ANALYTICS
-  // ==========================================
+  const loadStrategies =
+    async () => {
 
-const loadStrategies =
-  async () => {
+      try {
 
-    try {
+        const response =
+          await axios.get(
+            "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
+          );
 
-      const response =
-        await axios.get(
-          "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
-        );
+        if (
+          response.data &&
+          Array.isArray(
+            response.data.strategies
+          )
+        ) {
 
-      console.log(
-        "API RESPONSE:",
-        response.data
-      );
+          setStrategies(
+            response.data.strategies
+          );
+        }
 
-      if (
-        response.data &&
-        Array.isArray(
-          response.data.strategies
-        )
-      ) {
-
-        setStrategies(
-          response.data.strategies
-        );
-
-      } else {
+      } catch (err) {
 
         console.error(
-          "Invalid strategy response"
+          err.message
         );
-
-        setStrategies([]);
       }
-
-    } catch (err) {
-
-      console.error(
-        "API ERROR:",
-        err
-      );
-
-      setStrategies([]);
-    }
-  };
-
-  // ==========================================
-  // INITIAL LOAD
-  // ==========================================
+    };
 
   useEffect(() => {
 
@@ -76,11 +52,11 @@ const loadStrategies =
 
     <div
       style={{
-        padding: 30,
-        fontFamily: "Arial",
         background: "#111827",
-        minHeight: "100vh",
         color: "white",
+        minHeight: "100vh",
+        padding: "30px",
+        fontFamily: "Arial",
       }}
     >
 
@@ -90,7 +66,7 @@ const loadStrategies =
 
       <h2
         style={{
-          marginTop: 30,
+          marginTop: "30px",
         }}
       >
         Strategy Performance
@@ -108,27 +84,27 @@ const loadStrategies =
 
           <tr>
 
-            <th style={tableHeader}>
+            <th style={headerStyle}>
               Symbol
             </th>
 
-            <th style={tableHeader}>
+            <th style={headerStyle}>
               Side
             </th>
 
-            <th style={tableHeader}>
+            <th style={headerStyle}>
               Regime
             </th>
 
-            <th style={tableHeader}>
+            <th style={headerStyle}>
               Trades
             </th>
 
-            <th style={tableHeader}>
+            <th style={headerStyle}>
               Avg PnL
             </th>
 
-            <th style={tableHeader}>
+            <th style={headerStyle}>
               Win Rate
             </th>
 
@@ -138,33 +114,32 @@ const loadStrategies =
 
         <tbody>
 
-         {Array.isArray(strategies) &&
-  strategies.map(
+          {strategies.map(
             (strategy, index) => (
 
               <tr key={index}>
 
-                <td style={tableCell}>
+                <td style={cellStyle}>
                   {strategy.symbol}
                 </td>
 
-                <td style={tableCell}>
+                <td style={cellStyle}>
                   {strategy.side}
                 </td>
 
-                <td style={tableCell}>
+                <td style={cellStyle}>
                   {strategy.regime}
                 </td>
 
-                <td style={tableCell}>
+                <td style={cellStyle}>
                   {strategy.trades}
                 </td>
 
-                <td style={tableCell}>
+                <td style={cellStyle}>
                   {strategy.avg_pnl}
                 </td>
 
-                <td style={tableCell}>
+                <td style={cellStyle}>
                   {strategy.win_rate}%
                 </td>
 
@@ -180,7 +155,7 @@ const loadStrategies =
   );
 }
 
-const tableHeader = {
+const headerStyle = {
 
   border:
     "1px solid #374151",
@@ -190,7 +165,7 @@ const tableHeader = {
   background: "#111827",
 };
 
-const tableCell = {
+const cellStyle = {
 
   border:
     "1px solid #374151",

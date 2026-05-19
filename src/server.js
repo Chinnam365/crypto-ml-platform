@@ -490,8 +490,7 @@ app.get(
             COUNT(*) AS trades,
 
             ROUND(
-              ROUND(
-  AVG(
+              AVG(
     CASE
       WHEN pnl IS NOT NULL
       THEN pnl

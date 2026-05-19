@@ -5,6 +5,16 @@ import React, {
 
 import axios from "axios";
 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
+
 function App() {
 
   const [
@@ -90,7 +100,7 @@ function App() {
   }, []);
 
   // ==========================================
-  // DASHBOARD STATS
+  // STATS
   // ==========================================
 
   const totalPnL =
@@ -124,6 +134,41 @@ function App() {
       : 0;
 
   // ==========================================
+  // CHART DATA
+  // ==========================================
+
+  let cumulativePnL = 0;
+
+  const equityData =
+    positions.map(
+      (
+        position,
+        index
+      ) => {
+
+        cumulativePnL +=
+          Number(
+            position.pnl || 0
+          );
+
+        return {
+
+          trade:
+            index + 1,
+
+          pnl:
+            Number(
+              position.pnl || 0
+            ),
+
+          equity:
+            10000 +
+            cumulativePnL,
+        };
+      }
+    );
+
+  // ==========================================
   // UI
   // ==========================================
 
@@ -146,10 +191,6 @@ function App() {
       }}
     >
 
-      {/* ====================================== */}
-      {/* HEADER */}
-      {/* ====================================== */}
-
       <h1
         style={{
           fontSize: "42px",
@@ -160,7 +201,7 @@ function App() {
       </h1>
 
       {/* ====================================== */}
-      {/* SUMMARY CARDS */}
+      {/* SUMMARY */}
       {/* ====================================== */}
 
       <div
@@ -208,6 +249,65 @@ function App() {
           }
           color="#FACC15"
         />
+
+      </div>
+
+      {/* ====================================== */}
+      {/* EQUITY CHART */}
+      {/* ====================================== */}
+
+      <div
+        style={{
+          background:
+            "#0F172A",
+
+          border:
+            "1px solid #1E293B",
+
+          borderRadius:
+            "14px",
+
+          padding: "20px",
+
+          marginBottom: "50px",
+        }}
+      >
+
+        <h2
+          style={{
+            marginBottom: "20px",
+          }}
+        >
+          Equity Curve
+        </h2>
+
+        <ResponsiveContainer
+          width="100%"
+          height={350}
+        >
+
+          <LineChart
+            data={equityData}
+          >
+
+            <CartesianGrid stroke="#334155" />
+
+            <XAxis dataKey="trade" />
+
+            <YAxis />
+
+            <Tooltip />
+
+            <Line
+              type="monotone"
+              dataKey="equity"
+              stroke="#22C55E"
+              strokeWidth={3}
+            />
+
+          </LineChart>
+
+        </ResponsiveContainer>
 
       </div>
 
@@ -325,7 +425,7 @@ function App() {
       </div>
 
       {/* ====================================== */}
-      {/* LIVE POSITIONS */}
+      {/* POSITIONS */}
       {/* ====================================== */}
 
       <h2
@@ -468,7 +568,7 @@ function App() {
 }
 
 // ==========================================
-// DASHBOARD CARD COMPONENT
+// CARD COMPONENT
 // ==========================================
 
 function DashboardCard({

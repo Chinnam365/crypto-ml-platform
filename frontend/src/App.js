@@ -1,57 +1,203 @@
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
 import axios from "axios";
 
 function App() {
 
-  const testBackend = async () => {
+  const [
+    strategies,
+    setStrategies,
+  ] = useState([]);
 
-    try {
+  // ==========================================
+  // LOAD STRATEGY ANALYTICS
+  // ==========================================
 
-      const response =
-        await axios.get(
-          "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
+  const loadStrategies =
+    async () => {
+
+      try {
+
+        const response =
+          await axios.get(
+            "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
+          );
+
+        setStrategies(
+          response.data.strategies
         );
 
-      console.log(response.data);
+      } catch (err) {
 
-      alert("Backend Connected!");
+        console.error(err);
+      }
+    };
 
-    } catch (err) {
+  // ==========================================
+  // INITIAL LOAD
+  // ==========================================
 
-      console.error(err);
+  useEffect(() => {
 
-      alert("Backend Failed");
-    }
-  };
+    loadStrategies();
+
+  }, []);
 
   return (
 
     <div
       style={{
-        backgroundColor: "#111827",
+        backgroundColor: "#0F172A",
         color: "white",
         minHeight: "100vh",
-        padding: "40px",
+        padding: "30px",
         fontFamily: "Arial",
       }}
     >
 
-      <h1>
+      <h1
+        style={{
+          marginBottom: "30px",
+        }}
+      >
         AI Trading Dashboard
       </h1>
 
-      <button
-        onClick={testBackend}
+      {/* ====================================== */}
+      {/* STRATEGY PERFORMANCE */}
+      {/* ====================================== */}
+
+      <div
         style={{
-          padding: "12px",
-          marginTop: "20px",
-          fontSize: "16px",
+          background: "#1E293B",
+          padding: "20px",
+          borderRadius: "10px",
         }}
       >
-        Test Backend Connection
-      </button>
+
+        <h2>
+          Strategy Performance
+        </h2>
+
+        <table
+          style={{
+            width: "100%",
+            borderCollapse:
+              "collapse",
+            marginTop: "20px",
+          }}
+        >
+
+          <thead>
+
+            <tr>
+
+              <th style={styles.header}>
+                Symbol
+              </th>
+
+              <th style={styles.header}>
+                Side
+              </th>
+
+              <th style={styles.header}>
+                Regime
+              </th>
+
+              <th style={styles.header}>
+                Trades
+              </th>
+
+              <th style={styles.header}>
+                Avg PnL
+              </th>
+
+              <th style={styles.header}>
+                Win Rate
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {strategies.map(
+              (
+                strategy,
+                index
+              ) => (
+
+                <tr key={index}>
+
+                  <td style={styles.cell}>
+                    {strategy.symbol}
+                  </td>
+
+                  <td style={styles.cell}>
+                    {strategy.side}
+                  </td>
+
+                  <td style={styles.cell}>
+                    {strategy.regime}
+                  </td>
+
+                  <td style={styles.cell}>
+                    {strategy.trades}
+                  </td>
+
+                  <td style={styles.cell}>
+                    {strategy.avg_pnl}
+                  </td>
+
+                  <td style={styles.cell}>
+                    {strategy.win_rate}%
+                  </td>
+
+                </tr>
+              )
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
 
     </div>
   );
 }
+
+// ==========================================
+// TABLE STYLES
+// ==========================================
+
+const styles = {
+
+  header: {
+
+    border:
+      "1px solid #334155",
+
+    padding: "12px",
+
+    background:
+      "#0F172A",
+  },
+
+  cell: {
+
+    border:
+      "1px solid #334155",
+
+    padding: "12px",
+
+    textAlign:
+      "center",
+  },
+};
 
 export default App;

@@ -467,21 +467,7 @@ app.get("/positions", async (req, res) => {
         ORDER BY id DESC
         LIMIT 50
       `);
-    } catch (err) {
 
-      console.error(
-        "Strategy analytics error:",
-        err.message
-      );
-
-      res.status(500).json({
-
-        error:
-          err.message,
-      });
-    }
-  }
-);
     let html =
       "<h1>Positions</h1>";
 
@@ -549,19 +535,19 @@ app.get(
             ) AS avg_pnl,
 
             ROUND(
-              SUM(
-                CASE
-                  WHEN pnl > 0
-                  THEN 1
-                  ELSE 0
-                END
-              )::numeric
+              (
+                SUM(
+                  CASE
+                    WHEN pnl > 0
+                    THEN 1
+                    ELSE 0
+                  END
+                )::numeric
 
-              /
+                /
 
-              COUNT(*)::numeric
-
-              * 100,
+                COUNT(*)::numeric
+              ) * 100,
               2
             ) AS win_rate
 
@@ -583,7 +569,22 @@ app.get(
         strategies:
           result.rows,
       });
-     
+
+    } catch (err) {
+
+      console.error(
+        "Strategy analytics error:",
+        err.message
+      );
+
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
 /*
 ==================================================
 RESET

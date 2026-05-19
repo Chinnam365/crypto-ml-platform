@@ -66,7 +66,7 @@ function App() {
     };
 
   // ==========================================
-  // INITIAL LOAD
+  // AUTO REFRESH
   // ==========================================
 
   useEffect(() => {
@@ -75,81 +75,254 @@ function App() {
 
     loadPositions();
 
+    const interval =
+      setInterval(() => {
+
+        loadStrategies();
+
+        loadPositions();
+
+      }, 10000);
+
+    return () =>
+      clearInterval(interval);
+
   }, []);
+
+  // ==========================================
+  // DASHBOARD STATS
+  // ==========================================
+
+  const totalPnL =
+    positions.reduce(
+      (
+        total,
+        position
+      ) =>
+        total +
+        Number(
+          position.pnl || 0
+        ),
+      0
+    );
+
+  const totalPositions =
+    positions.length;
+
+  const profitableTrades =
+    positions.filter(
+      position =>
+        Number(position.pnl) > 0
+    ).length;
+
+  const winRate =
+    totalPositions > 0
+      ? (
+          profitableTrades /
+          totalPositions
+        ) * 100
+      : 0;
+
+  // ==========================================
+  // UI
+  // ==========================================
 
   return (
 
     <div
       style={{
-        backgroundColor: "#0F172A",
+        backgroundColor:
+          "#020617",
+
         color: "white",
-        minHeight: "100vh",
+
+        minHeight:
+          "100vh",
+
         padding: "30px",
-        fontFamily: "Arial",
+
+        fontFamily:
+          "Arial",
       }}
     >
 
-      <h1>
+      {/* ====================================== */}
+      {/* HEADER */}
+      {/* ====================================== */}
+
+      <h1
+        style={{
+          fontSize: "42px",
+          marginBottom: "30px",
+        }}
+      >
         AI Trading Dashboard
       </h1>
 
       {/* ====================================== */}
-      {/* STRATEGY PERFORMANCE */}
+      {/* SUMMARY CARDS */}
+      {/* ====================================== */}
+
+      <div
+        style={{
+          display: "grid",
+
+          gridTemplateColumns:
+            "repeat(auto-fit, minmax(220px, 1fr))",
+
+          gap: "20px",
+
+          marginBottom: "40px",
+        }}
+      >
+
+        <DashboardCard
+          title="Open Positions"
+          value={totalPositions}
+        />
+
+        <DashboardCard
+          title="Total PnL"
+          value={
+            totalPnL.toFixed(2)
+          }
+          color={
+            totalPnL >= 0
+              ? "#22C55E"
+              : "#EF4444"
+          }
+        />
+
+        <DashboardCard
+          title="Win Rate"
+          value={
+            winRate.toFixed(2) + "%"
+          }
+          color="#38BDF8"
+        />
+
+        <DashboardCard
+          title="Strategies"
+          value={
+            strategies.length
+          }
+          color="#FACC15"
+        />
+
+      </div>
+
+      {/* ====================================== */}
+      {/* STRATEGIES */}
       {/* ====================================== */}
 
       <h2
         style={{
-          marginTop: "40px",
+          marginBottom: "20px",
         }}
       >
         Strategy Performance
       </h2>
 
-      {strategies.map(
-        (
-          strategy,
-          index
-        ) => (
+      <div
+        style={{
+          display: "grid",
 
-          <div
-            key={index}
-            style={{
-              marginBottom: "12px",
-              padding: "10px",
-              border:
-                "1px solid gray",
-              borderRadius:
-                "10px",
-            }}
-          >
+          gridTemplateColumns:
+            "repeat(auto-fit, minmax(300px, 1fr))",
 
-            <p>
-              Symbol:
-              {" "}
-              {strategy.symbol}
-            </p>
+          gap: "20px",
 
-            <p>
-              Side:
-              {" "}
-              {strategy.side}
-            </p>
+          marginBottom: "50px",
+        }}
+      >
 
-            <p>
-              Avg PnL:
-              {" "}
-              {strategy.avg_pnl}
-            </p>
+        {strategies.map(
+          (
+            strategy,
+            index
+          ) => (
 
-            <p>
-              Win Rate:
-              {" "}
-              {strategy.win_rate}%
-            </p>
+            <div
+              key={index}
+              style={{
+                background:
+                  "#0F172A",
 
-          </div>
-        )
-      )}
+                border:
+                  "1px solid #1E293B",
+
+                borderRadius:
+                  "14px",
+
+                padding: "20px",
+              }}
+            >
+
+              <h3>
+
+                {strategy.symbol}
+
+                {" "}
+
+                <span
+                  style={{
+                    color:
+                      strategy.side === "BUY"
+                        ? "#22C55E"
+                        : "#EF4444",
+                  }}
+                >
+
+                  {strategy.side}
+
+                </span>
+
+              </h3>
+
+              <p>
+                Regime:
+                {" "}
+                {strategy.regime}
+              </p>
+
+              <p>
+                Trades:
+                {" "}
+                {strategy.trades}
+              </p>
+
+              <p>
+                Avg PnL:
+                {" "}
+
+                <span
+                  style={{
+                    color:
+                      Number(
+                        strategy.avg_pnl
+                      ) >= 0
+                        ? "#22C55E"
+                        : "#EF4444",
+                  }}
+                >
+
+                  {strategy.avg_pnl}
+
+                </span>
+
+              </p>
+
+              <p>
+                Win Rate:
+                {" "}
+                {strategy.win_rate}%
+              </p>
+
+            </div>
+          )
+        )}
+
+      </div>
 
       {/* ====================================== */}
       {/* LIVE POSITIONS */}
@@ -157,127 +330,187 @@ function App() {
 
       <h2
         style={{
-          marginTop: "50px",
+          marginBottom: "20px",
         }}
       >
         Live Positions
       </h2>
 
-      {positions.map(
-        (
-          position,
-          index
-        ) => (
+      <div
+        style={{
+          display: "grid",
 
-          <div
-            key={index}
-            style={{
-              background:
-                "#111827",
+          gridTemplateColumns:
+            "repeat(auto-fit, minmax(350px, 1fr))",
 
-              border:
-                "1px solid #334155",
+          gap: "20px",
+        }}
+      >
 
-              borderRadius:
-                "10px",
+        {positions.map(
+          (
+            position,
+            index
+          ) => (
 
-              padding: "15px",
+            <div
+              key={index}
+              style={{
+                background:
+                  "#0F172A",
 
-              marginBottom: "15px",
-            }}
-          >
+                border:
+                  "1px solid #1E293B",
 
-            <h3>
+                borderRadius:
+                  "14px",
 
-              {position.symbol}
+                padding: "20px",
+              }}
+            >
 
-              {" "}
+              <h3>
 
-              <span
-                style={{
-                  color:
-                    position.side === "BUY"
-                      ? "#22C55E"
-                      : "#EF4444",
-                }}
-              >
+                {position.symbol}
 
-                {position.side}
+                {" "}
 
-              </span>
+                <span
+                  style={{
+                    color:
+                      position.side === "BUY"
+                        ? "#22C55E"
+                        : "#EF4444",
+                  }}
+                >
 
-            </h3>
+                  {position.side}
 
-            <p>
-              Confidence:
-              {" "}
-              {Number(
-                position.confidence
-              ).toFixed(2)}
-            </p>
+                </span>
 
-            <p>
-              Entry:
-              {" "}
-              {position.entry_price}
-            </p>
+              </h3>
 
-            <p>
-              Stop Loss:
-              {" "}
-              {position.stop_loss}
-            </p>
+              <p>
+                Confidence:
+                {" "}
+                {Number(
+                  position.confidence
+                ).toFixed(2)}
+              </p>
 
-            <p>
-              Take Profit:
-              {" "}
-              {position.take_profit}
-            </p>
+              <p>
+                Entry:
+                {" "}
+                {position.entry_price}
+              </p>
 
-            <p>
-              Position Size:
-              {" "}
-              {position.position_size}
-            </p>
+              <p>
+                Stop Loss:
+                {" "}
+                {position.stop_loss}
+              </p>
 
-            <p>
+              <p>
+                Take Profit:
+                {" "}
+                {position.take_profit}
+              </p>
 
-              PnL:
+              <p>
+                Position Size:
+                {" "}
+                {position.position_size}
+              </p>
 
-              {" "}
+              <p>
 
-              <span
-                style={{
-                  color:
-                    Number(
-                      position.pnl
-                    ) >= 0
-                      ? "#22C55E"
-                      : "#EF4444",
-                }}
-              >
+                PnL:
 
-                {position.pnl}
+                {" "}
 
-              </span>
+                <span
+                  style={{
+                    color:
+                      Number(
+                        position.pnl
+                      ) >= 0
+                        ? "#22C55E"
+                        : "#EF4444",
+                  }}
+                >
 
-            </p>
+                  {position.pnl}
 
-            <p>
-              Trend:
-              {" "}
-              {position.trend}
-            </p>
+                </span>
 
-            <p>
-              Regime:
-              {" "}
-              {position.regime}
-            </p>
+              </p>
 
-          </div>
-        )
-      )}
+              <p>
+                Trend:
+                {" "}
+                {position.trend}
+              </p>
+
+              <p>
+                Regime:
+                {" "}
+                {position.regime}
+              </p>
+
+            </div>
+          )
+        )}
+
+      </div>
+
+    </div>
+  );
+}
+
+// ==========================================
+// DASHBOARD CARD COMPONENT
+// ==========================================
+
+function DashboardCard({
+  title,
+  value,
+  color = "white",
+}) {
+
+  return (
+
+    <div
+      style={{
+        background:
+          "#0F172A",
+
+        border:
+          "1px solid #1E293B",
+
+        borderRadius:
+          "14px",
+
+        padding: "25px",
+      }}
+    >
+
+      <h3
+        style={{
+          color: "#94A3B8",
+          marginBottom: "10px",
+        }}
+      >
+        {title}
+      </h3>
+
+      <h1
+        style={{
+          color,
+          fontSize: "34px",
+        }}
+      >
+        {value}
+      </h1>
 
     </div>
   );

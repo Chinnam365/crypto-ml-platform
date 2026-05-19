@@ -16,27 +16,51 @@ function App() {
   // LOAD STRATEGY ANALYTICS
   // ==========================================
 
-  const loadStrategies =
-    async () => {
+const loadStrategies =
+  async () => {
 
-      try {
+    try {
 
-        const response =
-          await axios.get(
-            "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
-          );
+      const response =
+        await axios.get(
+          "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
+        );
+
+      console.log(
+        "API RESPONSE:",
+        response.data
+      );
+
+      if (
+        response.data &&
+        Array.isArray(
+          response.data.strategies
+        )
+      ) {
 
         setStrategies(
-  response.data?.strategies || []
-);
+          response.data.strategies
+        );
 
-      } catch (err) {
+      } else {
 
         console.error(
-          err.message
+          "Invalid strategy response"
         );
+
+        setStrategies([]);
       }
-    };
+
+    } catch (err) {
+
+      console.error(
+        "API ERROR:",
+        err
+      );
+
+      setStrategies([]);
+    }
+  };
 
   // ==========================================
   // INITIAL LOAD

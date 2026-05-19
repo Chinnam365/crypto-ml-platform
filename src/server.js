@@ -467,7 +467,84 @@ app.get("/positions", async (req, res) => {
         ORDER BY id DESC
         LIMIT 50
       `);
+// ==========================================
+// STRATEGY PERFORMANCE ANALYTICS
+// ==========================================
 
+app.get(
+  "/strategy-performance",
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await pool.query(`
+          SELECT
+
+            symbol,
+
+            side,
+
+            regime,
+
+            COUNT(*) AS trades,
+
+            ROUND(
+              AVG(pnl)::numeric,
+              2
+            ) AS avg_pnl,
+
+            ROUND(
+              SUM(
+                CASE
+                  WHEN pnl > 0
+                  THEN 1
+                  ELSE 0
+                END
+              )::numeric
+
+              /
+
+              COUNT(*)::numeric
+
+              * 100,
+              2
+            ) AS win_rate
+
+          FROM positions
+
+          WHERE status = 'CLOSED'
+
+          GROUP BY
+            symbol,
+            side,
+            regime
+
+          ORDER BY
+            avg_pnl DESC
+        `);
+
+      res.json({
+
+        strategies:
+          result.rows,
+      });
+
+    } catch (err) {
+
+      console.error(
+        "Strategy analytics error:",
+        err.message
+      );
+
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
     let html =
       "<h1>Positions</h1>";
 

@@ -2,33 +2,26 @@ import axios from "axios";
 
 function App() {
 
-  const testBackend =
-    async () => {
+  const testBackend = async () => {
 
-      try {
+    try {
 
-        const response =
-          await axios.get(
-            "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
-          );
-
-        console.log(
-          response.data
+      const response =
+        await axios.get(
+          "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
         );
 
-        alert(
-          "Backend Connected!"
-        );
+      console.log(response.data);
 
-      } catch (err) {
+      alert("Backend Connected!");
 
-        console.error(err);
+    } catch (err) {
 
-        alert(
-          "Backend Failed"
-        );
-      }
-    };
+      console.error(err);
+
+      alert("Backend Failed");
+    }
+  };
 
   return (
 

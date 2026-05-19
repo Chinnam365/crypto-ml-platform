@@ -60,19 +60,15 @@ function App() {
       }}
     >
 
-      <h1
-        style={{
-          marginBottom: 30,
-        }}
-      >
+      <h1>
         AI Trading Dashboard
       </h1>
 
-      {/* ====================================== */}
-      {/* STRATEGY TABLE */}
-      {/* ====================================== */}
-
-      <h2>
+      <h2
+        style={{
+          marginTop: 30,
+        }}
+      >
         Strategy Performance
       </h2>
 
@@ -158,10 +154,6 @@ function App() {
     </div>
   );
 }
-
-// ==========================================
-// TABLE STYLES
-// ==========================================
 
 const tableHeader = {
 

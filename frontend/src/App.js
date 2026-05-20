@@ -533,7 +533,9 @@ const [signals, setSignals] =
         {/* ================================= */}
         {/* LIVE POSITIONS */}
         {/* ================================= */}
- 
+ <h2>
+  Live Positions
+</h2>
 <div
           style={{
             display: "grid",

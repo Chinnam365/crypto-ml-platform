@@ -527,9 +527,7 @@ const [signals, setSignals] =
   )}
 
 </div>
-<h2>
-  Live AI Signals
-</h2>
+
         {/* ================================= */}
         {/* LIVE POSITIONS */}
         {/* ================================= */}

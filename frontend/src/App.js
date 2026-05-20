@@ -531,8 +531,7 @@ const [signals, setSignals] =
         {/* ================================= */}
         {/* LIVE POSITIONS */}
         {/* ================================= */}
-
-        <h2>
+ <h2>
   Live AI Signals
 </h2>
 
@@ -639,6 +638,122 @@ const [signals, setSignals] =
 <h2>
   Live Positions
 </h2>
+<div
+          style={{
+            display: "grid",
+
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(320px, 1fr))",
+
+            gap: "20px",
+
+            marginTop: "20px",
+          }}
+        >
+
+          {positions.map(
+            (
+              position,
+              index
+            ) => (
+
+              <div
+                key={index}
+                style={{
+                  background:
+                    "#0F172A",
+
+                  border:
+                    "1px solid #1E293B",
+
+                  borderRadius:
+                    "14px",
+
+                  padding: "20px",
+                }}
+              >
+
+                <h3>
+
+                  {position.symbol}
+
+                  {" "}
+
+                  <span
+                    style={{
+                      color:
+                        position.side === "BUY"
+                          ? "#22C55E"
+                          : "#EF4444",
+                    }}
+                  >
+
+                    {position.side}
+
+                  </span>
+
+                </h3>
+
+                <p>
+                  Confidence:
+                  {" "}
+                  {Number(
+                    position.confidence
+                  ).toFixed(2)}
+                </p>
+
+                <p>
+                  Entry:
+                  {" "}
+                  {position.entry_price}
+                </p>
+
+                <p>
+                  Stop Loss:
+                  {" "}
+                  {position.stop_loss}
+                </p>
+
+                <p>
+                  Take Profit:
+                  {" "}
+                  {position.take_profit}
+                </p>
+
+                <p>
+
+                  PnL:
+
+                  {" "}
+
+                  <span
+                    style={{
+                      color:
+                        Number(
+                          position.pnl
+                        ) >= 0
+                          ? "#22C55E"
+                          : "#EF4444",
+                    }}
+                  >
+
+                    {position.pnl}
+
+                  </span>
+
+                </p>
+
+              </div>
+            )
+          )}
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
 
 // ==========================================
 // SIDEBAR ITEM

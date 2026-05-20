@@ -382,7 +382,7 @@ const [signals, setSignals] =
     marginBottom: "20px",
   }}
 >
-  Live AI Signals
+  🚨🚨🚨 LIVE AI SIGNALS 🚨🚨🚨
 </h2>
 
 <div

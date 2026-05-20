@@ -298,25 +298,25 @@ function App() {
 
         {/* LIVE AI SIGNALS */}
 
-        <div
-          style={{
-            marginBottom: "40px",
-          }}
-        >
+<div
+  style={{
+    marginBottom: "40px",
+  }}
+>
 
-          <h2
-            style={{
-              color: "#00FF85",
-              marginBottom: "20px",
-            }}
-          >
-            🚨 LIVE AI SIGNALS
-          </h2>
+  <h2
+    style={{
+      color: "#00FF85",
+      marginBottom: "20px",
+    }}
+  >
+    🚨 LIVE AI SIGNALS
+  </h2>
 
-          <div style={positionsGrid}>
+  <div style={positionsGrid}>
 
-            {signals.map(
-              (signal, index) => (
+    {signals.map(
+      (signal, index) => (
 
                 <div
                   key={index}

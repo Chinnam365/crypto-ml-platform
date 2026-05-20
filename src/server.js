@@ -150,6 +150,11 @@ const {
 const liveSignalsRoute =
   require("./routes/liveSignals");
 
+const {
+  startBinanceWebsocket,
+  liveMarketData,
+} = require("./market/binanceWebsocket");
+
 const app = express();
 
 app.use(
@@ -348,7 +353,35 @@ app.get("/", async (req, res) => {
     res.send("Server running");
   }
 });
+/*
+==================================================
+LIVE MARKET DATA
+==================================================
+*/
 
+app.get(
+  "/market-data",
+  async (req, res) => {
+
+    try {
+
+      res.json({
+
+        success: true,
+
+        data: liveMarketData,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
 /*
 ==================================================
 STATUS
@@ -2040,12 +2073,15 @@ app.get(
   }
 );
  
-  app.listen(PORT, () => {
+app.listen(PORT, () => {
 
-    console.log(
-      `🚀 Running on port ${PORT}`
-    );
-  });
+  console.log(
+    `🚀 Running on port ${PORT}`
+  );
+
+  // START LIVE MARKET ENGINE
+  startBinanceWebsocket();
+});
 }
 
 startServer();

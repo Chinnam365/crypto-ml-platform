@@ -377,13 +377,28 @@ const [signals, setSignals] =
 {/* LIVE AI SIGNALS */}
 {/* ================================= */}
 
-<h2
+<div
   style={{
+    marginTop: "40px",
     marginBottom: "20px",
+    padding: "20px",
+    background: "#111827",
+    borderRadius: "14px",
+    border: "2px solid #00FF85",
   }}
 >
-  🚨🚨🚨 LIVE AI SIGNALS 🚨🚨🚨
-</h2>
+
+  <h2
+    style={{
+      color: "#00FF85",
+      fontSize: "32px",
+      margin: 0,
+    }}
+  >
+    🚨 LIVE AI SIGNALS 🚨
+  </h2>
+
+</div>
 
 <div
   style={{

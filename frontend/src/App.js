@@ -23,9 +23,6 @@ function App() {
   const [strategies, setStrategies] =
     useState([]);
 
-  const [signals, setSignals] =
-    useState([]);
-
   const [equityCurve, setEquityCurve] =
     useState([]);
 
@@ -43,11 +40,6 @@ function App() {
           "https://crypto-ml-platform-02b7.onrender.com/strategy-performance"
         );
 
-      const signalsResponse =
-        await axios.get(
-          "https://crypto-ml-platform-02b7.onrender.com/live-signals"
-        );
-
       const positionsData =
         positionsResponse.data.positions || [];
 
@@ -57,10 +49,6 @@ function App() {
 
       setStrategies(
         strategyResponse.data.strategies || []
-      );
-
-      setSignals(
-        signalsResponse.data.signals || []
       );
 
       let runningEquity = 10000;
@@ -199,8 +187,6 @@ function App() {
           AI Trading Dashboard
         </h1>
 
-        {/* STATS */}
-
         <div style={cardsContainer}>
 
           <div style={statCard}>
@@ -254,8 +240,6 @@ function App() {
 
         </div>
 
-        {/* EQUITY CURVE */}
-
         <div
           style={{
             background: "#0B1739",
@@ -295,87 +279,6 @@ function App() {
           </ResponsiveContainer>
 
         </div>
-
-        {/* LIVE AI SIGNALS */}
-
-        <div
-          style={{
-            marginBottom: "40px",
-          }}
-        >
-
-          <h2
-            style={{
-              color: "#00FF85",
-              marginBottom: "20px",
-            }}
-          >
-            🚨 LIVE AI SIGNALS
-          </h2>
-
-          <div style={positionsGrid}>
-
-            {signals.map(
-              (signal, index) => (
-
-                <div
-                  key={index}
-                  style={positionCard}
-                >
-
-                  <h2>
-
-                    {signal.symbol}
-                    {" "}
-
-                    <span
-                      style={{
-                        color:
-                          signal.side === "BUY"
-                            ? "#00FF85"
-                            : "#FF4D4F",
-                      }}
-                    >
-                      {signal.side}
-                    </span>
-
-                  </h2>
-
-                  <p>
-                    Confidence:
-                    {" "}
-                    {Number(
-                      signal.confidence
-                    ).toFixed(2)}
-                  </p>
-
-                  <p>
-                    Trend:
-                    {" "}
-                    {signal.trend}
-                  </p>
-
-                  <p>
-                    Regime:
-                    {" "}
-                    {signal.regime}
-                  </p>
-
-                  <p>
-                    Strength:
-                    {" "}
-                    {signal.signal_strength}
-                  </p>
-
-                </div>
-              )
-            )}
-
-          </div>
-
-        </div>
-
-        {/* LIVE POSITIONS */}
 
         <div>
 

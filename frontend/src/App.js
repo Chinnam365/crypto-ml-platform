@@ -533,125 +533,112 @@ const [signals, setSignals] =
         {/* ================================= */}
 
         <h2>
-          Live Positions
-        </h2>
+  Live AI Signals
+</h2>
 
-        <div
-          style={{
-            display: "grid",
+<div
+  style={{
+    display: "grid",
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(260px, 1fr))",
+    gap: "20px",
+    marginBottom: "40px",
+  }}
+>
 
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(320px, 1fr))",
+  {signals.map(
+    (signal, index) => (
 
-            gap: "20px",
+      <div
+        key={index}
+        style={{
+          background:
+            "#09142A",
 
-            marginTop: "20px",
-          }}
-        >
+          border:
+            "1px solid #1E293B",
 
-          {positions.map(
-            (
-              position,
-              index
-            ) => (
+          borderRadius:
+            "14px",
 
-              <div
-                key={index}
-                style={{
-                  background:
-                    "#0F172A",
+          padding: "20px",
+        }}
+      >
 
-                  border:
-                    "1px solid #1E293B",
+        <h3>
 
-                  borderRadius:
-                    "14px",
+          {signal.symbol}
 
-                  padding: "20px",
-                }}
-              >
+          {" "}
 
-                <h3>
+          <span
+            style={{
+              color:
+                signal.side === "BUY"
+                  ? "#22C55E"
+                  : "#EF4444",
+            }}
+          >
 
-                  {position.symbol}
+            {signal.side}
 
-                  {" "}
+          </span>
 
-                  <span
-                    style={{
-                      color:
-                        position.side === "BUY"
-                          ? "#22C55E"
-                          : "#EF4444",
-                    }}
-                  >
+        </h3>
 
-                    {position.side}
+        <p>
+          Confidence:
+          {" "}
+          {Number(
+            signal.confidence
+          ).toFixed(2)}
+        </p>
 
-                  </span>
+        <p>
+          Trend:
+          {" "}
+          {signal.trend}
+        </p>
 
-                </h3>
+        <p>
+          Regime:
+          {" "}
+          {signal.regime}
+        </p>
 
-                <p>
-                  Confidence:
-                  {" "}
-                  {Number(
-                    position.confidence
-                  ).toFixed(2)}
-                </p>
+        <p>
 
-                <p>
-                  Entry:
-                  {" "}
-                  {position.entry_price}
-                </p>
+          Strength:
+          {" "}
 
-                <p>
-                  Stop Loss:
-                  {" "}
-                  {position.stop_loss}
-                </p>
+          <span
+            style={{
+              color:
+                signal.signal_strength === "STRONG"
+                  ? "#22C55E"
 
-                <p>
-                  Take Profit:
-                  {" "}
-                  {position.take_profit}
-                </p>
+                  : signal.signal_strength === "MODERATE"
+                  ? "#FACC15"
 
-                <p>
+                  : "#EF4444",
+            }}
+          >
 
-                  PnL:
+            {signal.signal_strength}
 
-                  {" "}
+          </span>
 
-                  <span
-                    style={{
-                      color:
-                        Number(
-                          position.pnl
-                        ) >= 0
-                          ? "#22C55E"
-                          : "#EF4444",
-                    }}
-                  >
-
-                    {position.pnl}
-
-                  </span>
-
-                </p>
-
-              </div>
-            )
-          )}
-
-        </div>
+        </p>
 
       </div>
+    )
+  )}
 
-    </div>
-  );
-}
+</div>
+
+<h2>
+  Live Positions
+</h2>
 
 // ==========================================
 // SIDEBAR ITEM

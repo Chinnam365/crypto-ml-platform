@@ -17,11 +17,12 @@ import {
 
 function App() {
 
-  const [
-    strategies,
-    setStrategies,
-  ] = useState([]);
+const [strategies, setStrategies] =
+  useState([]);
 
+const [signals, setSignals] =
+  useState([]);
+  
   const [
     positions,
     setPositions,
@@ -60,24 +61,49 @@ function App() {
       }
     };
 
+  const loadSignals =
+  async () => {
+
+    try {
+
+      const response =
+        await axios.get(
+          "https://crypto-ml-platform-02b7.onrender.com/live-signals"
+        );
+
+      setSignals(
+        response.data.signals
+      );
+
+    } catch (err) {
+
+      console.error(err);
+    }
+  };
+  
   // ==========================================
   // AUTO REFRESH
   // ==========================================
 
   useEffect(() => {
 
-    loadData();
+  loadData();
 
-    const interval =
-      setInterval(
-        loadData,
-        10000
-      );
+  loadSignals();
 
-    return () =>
-      clearInterval(interval);
+  const interval =
+    setInterval(() => {
 
-  }, []);
+      loadData();
+
+      loadSignals();
+
+    }, 10000);
+
+  return () =>
+    clearInterval(interval);
+
+}, []);
 
   // ==========================================
   // METRICS
@@ -346,6 +372,161 @@ function App() {
           </div>
 
         </div>
+
+{/* ================================= */}
+{/* LIVE AI SIGNALS */}
+{/* ================================= */}
+
+<h2
+  style={{
+    marginBottom: "20px",
+  }}
+>
+  Live AI Signals
+</h2>
+
+<div
+  style={{
+    display: "grid",
+
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(260px, 1fr))",
+
+    gap: "20px",
+
+    marginBottom: "40px",
+  }}
+>
+
+  {signals.map(
+    (signal, index) => (
+
+      <div
+        key={index}
+        style={{
+          background:
+            "#09142A",
+
+          border:
+            "1px solid #1E293B",
+
+          borderRadius:
+            "14px",
+
+          padding: "20px",
+        }}
+      >
+
+        <div
+          style={{
+            display: "flex",
+
+            justifyContent:
+              "space-between",
+
+            marginBottom:
+              "15px",
+          }}
+        >
+
+          <h3>
+            {signal.symbol}
+          </h3>
+
+          <span
+            style={{
+              color:
+                signal.side === "BUY"
+                  ? "#00FF85"
+                  : "#FF4D4D",
+
+              fontWeight:
+                "bold",
+            }}
+          >
+
+            {signal.side}
+
+          </span>
+
+        </div>
+
+        <p>
+          Confidence:
+          {" "}
+
+          {Number(
+            signal.confidence
+          ).toFixed(2)}
+        </p>
+
+        <p>
+          Trend:
+          {" "}
+
+          {signal.trend}
+        </p>
+
+        <p>
+          Regime:
+          {" "}
+
+          {signal.regime}
+        </p>
+
+        <p>
+
+          Strength:
+          {" "}
+
+          <span
+            style={{
+              color:
+                signal.signal_strength === "STRONG"
+                  ? "#00FF85"
+
+                  : signal.signal_strength === "MODERATE"
+                  ? "#FFD700"
+
+                  : "#FF4D4D",
+            }}
+          >
+
+            {signal.signal_strength}
+
+          </span>
+
+        </p>
+
+        <p>
+
+          PnL:
+          {" "}
+
+          <span
+            style={{
+              color:
+                Number(
+                  signal.pnl
+                ) >= 0
+                  ? "#22C55E"
+                  : "#EF4444",
+            }}
+          >
+
+            {Number(
+              signal.pnl
+            ).toFixed(2)}
+
+          </span>
+
+        </p>
+
+      </div>
+    )
+  )}
+
+</div>
 
         {/* ================================= */}
         {/* LIVE POSITIONS */}

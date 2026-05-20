@@ -527,117 +527,13 @@ const [signals, setSignals] =
   )}
 
 </div>
-
+<h2>
+  Live AI Signals
+</h2>
         {/* ================================= */}
         {/* LIVE POSITIONS */}
         {/* ================================= */}
- <h2>
-  Live AI Signals
-</h2>
-
-<div
-  style={{
-    display: "grid",
-    gridTemplateColumns:
-      "repeat(auto-fit, minmax(260px, 1fr))",
-    gap: "20px",
-    marginBottom: "40px",
-  }}
->
-
-  {signals.map(
-    (signal, index) => (
-
-      <div
-        key={index}
-        style={{
-          background:
-            "#09142A",
-
-          border:
-            "1px solid #1E293B",
-
-          borderRadius:
-            "14px",
-
-          padding: "20px",
-        }}
-      >
-
-        <h3>
-
-          {signal.symbol}
-
-          {" "}
-
-          <span
-            style={{
-              color:
-                signal.side === "BUY"
-                  ? "#22C55E"
-                  : "#EF4444",
-            }}
-          >
-
-            {signal.side}
-
-          </span>
-
-        </h3>
-
-        <p>
-          Confidence:
-          {" "}
-          {Number(
-            signal.confidence
-          ).toFixed(2)}
-        </p>
-
-        <p>
-          Trend:
-          {" "}
-          {signal.trend}
-        </p>
-
-        <p>
-          Regime:
-          {" "}
-          {signal.regime}
-        </p>
-
-        <p>
-
-          Strength:
-          {" "}
-
-          <span
-            style={{
-              color:
-                signal.signal_strength === "STRONG"
-                  ? "#22C55E"
-
-                  : signal.signal_strength === "MODERATE"
-                  ? "#FACC15"
-
-                  : "#EF4444",
-            }}
-          >
-
-            {signal.signal_strength}
-
-          </span>
-
-        </p>
-
-      </div>
-    )
-  )}
-
-</div>
-
-<h2>
-  Live Positions
-</h2>
+ 
 <div
           style={{
             display: "grid",

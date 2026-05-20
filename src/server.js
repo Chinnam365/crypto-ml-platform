@@ -147,6 +147,9 @@ const {
   getOptimizationAdjustments,
 } = require("./ml/selfOptimizer");
 
+const liveSignalsRoute =
+  require("./routes/liveSignals");
+
 const app = express();
 
 app.use(
@@ -154,7 +157,10 @@ app.use(
     origin: "*",
   })
 );
-
+app.use(
+  "/live-signals",
+  liveSignalsRoute
+);
 app.use(express.json());
 
 /*

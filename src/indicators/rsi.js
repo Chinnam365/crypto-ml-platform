@@ -4,8 +4,8 @@ function calculateRSI(
 ) {
 
   if (
-    !closes ||
-    closes.length < period + 1
+    closes.length <
+    period + 1
   ) {
     return null;
   }
@@ -20,33 +20,46 @@ function calculateRSI(
   ) {
 
     const difference =
-      closes[i] - closes[i - 1];
+      closes[i] -
+      closes[i - 1];
 
-    if (difference >= 0) {
-      gains += difference;
+    if (
+      difference >= 0
+    ) {
+
+      gains +=
+        difference;
+
     } else {
-      losses += Math.abs(
-        difference
-      );
+
+      losses +=
+        Math.abs(
+          difference
+        );
     }
   }
 
-  const avgGain =
+  const averageGain =
     gains / period;
 
-  const avgLoss =
+  const averageLoss =
     losses / period;
 
-  if (avgLoss === 0) {
+  if (
+    averageLoss === 0
+  ) {
     return 100;
   }
 
   const rs =
-    avgGain / avgLoss;
+    averageGain /
+    averageLoss;
 
   const rsi =
-    100 - (
-      100 / (1 + rs)
+    100 -
+    (
+      100 /
+      (1 + rs)
     );
 
   return Number(

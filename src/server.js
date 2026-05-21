@@ -17,6 +17,10 @@ const {
 } = require("./indicators/rsi");
 
 const {
+  calculateEMA,
+} = require("./indicators/ema");
+
+const {
   calculateMACD,
 } = require("./indicators/macd");
 
@@ -2070,7 +2074,76 @@ app.get(
     }
   }
 );
- 
+
+  /*
+==================================================
+INDICATOR TEST
+==================================================
+*/
+
+app.get(
+  "/indicator-test",
+  async (req, res) => {
+
+    try {
+
+      const closes = [
+
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+      ];
+
+      const rsi =
+        calculateRSI(
+          closes
+        );
+
+      const ema =
+        calculateEMA(
+          closes
+        );
+
+      res.json({
+
+        success: true,
+
+        indicators: {
+
+          rsi,
+
+          ema,
+        },
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
+  
 app.listen(PORT, () => {
 
   console.log(

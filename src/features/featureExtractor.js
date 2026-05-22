@@ -1,6 +1,8 @@
 const pool =
   require("../db/db");
-
+const {
+  detectMarketRegime,
+} = require("./marketRegime");
 const {
   calculateRSI,
 } = require("../indicators/rsi");
@@ -116,7 +118,15 @@ async function generateFeatures(
     // =========================
     // FEATURE OBJECT
     // =========================
+const regime =
+  detectMarketRegime({
 
+    rsi,
+
+    emaDistance,
+
+    trend,
+  });
     return {
 
       symbol,
@@ -126,6 +136,7 @@ async function generateFeatures(
       rsi,
 
       ema,
+      regime,
 
       emaDistance:
         Number(

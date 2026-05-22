@@ -14,6 +14,10 @@ const {
   calculateVolatility,
 } = require("./volatilityEngine");
 
+const {
+  calculateSignalQuality,
+} = require("../ml/signalQualityEngine");
+
 async function generateFeatures(
   symbol = "BTCUSDT"
 ) {
@@ -136,6 +140,22 @@ const regime =
 
     trend,
   });
+
+    const signalQuality =
+  calculateSignalQuality({
+
+    rsi,
+
+    trend,
+
+    regime,
+
+    volatilityRegime:
+      volatilityData?.volatilityRegime,
+
+    emaDistance,
+  });
+    
    return {
 
   symbol,

@@ -10,6 +10,13 @@ const {
 const {
   calculateEMA,
 } = require("../indicators/ema");
+const {
+  calculateVolatility,
+} = require("./volatilityEngine");
+
+const {
+  calculateVolatility,
+} = require("./volatilityEngine");
 
 async function generateFeatures(
   symbol = "BTCUSDT"
@@ -118,6 +125,17 @@ async function generateFeatures(
     // =========================
     // FEATURE OBJECT
     // =========================
+
+    const volatilityData =
+  calculateVolatility(
+    candles
+  );
+    
+    const volatilityData =
+  calculateVolatility(
+    candles
+  );
+
 const regime =
   detectMarketRegime({
 
@@ -127,27 +145,31 @@ const regime =
 
     trend,
   });
-    return {
+   return {
 
-      symbol,
+  symbol,
 
-      currentPrice,
+  currentPrice,
 
-      rsi,
+  rsi,
 
-      ema,
-      regime,
+  ema,
 
-      emaDistance:
-        Number(
-          emaDistance.toFixed(2)
-        ),
+  emaDistance,
 
-      trend,
+  trend,
 
-      candleCount:
-        candles.length,
-    };
+  regime,
+
+  volatility:
+    volatilityData?.volatility,
+
+  volatilityRegime:
+    volatilityData?.volatilityRegime,
+
+  candleCount:
+    candles.length,
+};
 
   } catch (err) {
 

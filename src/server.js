@@ -157,6 +157,10 @@ const {
   liveMarketData,
 } = require("./market/binanceWebsocket");
 
+const {
+  generateFeatures,
+} = require("./features/featureExtractor");
+
 const app = express();
 
 app.use(
@@ -2173,6 +2177,44 @@ app.get(
 
         candles:
           result.rows,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
+
+  /*
+==================================================
+FEATURE ENGINE TEST
+==================================================
+*/
+
+app.get(
+  "/features/:symbol",
+  async (req, res) => {
+
+    try {
+
+      const symbol =
+        req.params.symbol;
+
+      const features =
+        await generateFeatures(
+          symbol
+        );
+
+      res.json({
+
+        success: true,
+
+        features,
       });
 
     } catch (err) {

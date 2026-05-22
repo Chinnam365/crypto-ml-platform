@@ -14,10 +14,6 @@ const {
   calculateVolatility,
 } = require("./volatilityEngine");
 
-const {
-  calculateVolatility,
-} = require("./volatilityEngine");
-
 async function generateFeatures(
   symbol = "BTCUSDT"
 ) {
@@ -131,11 +127,6 @@ async function generateFeatures(
     candles
   );
     
-    const volatilityData =
-  calculateVolatility(
-    candles
-  );
-
 const regime =
   detectMarketRegime({
 

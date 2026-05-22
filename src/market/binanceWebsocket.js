@@ -42,6 +42,10 @@ function startBinanceWebsocket() {
     "Starting Binance WebSocket..."
   );
 
+  const {
+  saveMarketCandle,
+} = require("../db/saveMarketCandle");
+  
   const ws =
     new WebSocket(wsUrl);
 
@@ -105,6 +109,32 @@ function startBinanceWebsocket() {
             candle.T,
         };
 
+        if (candle.x) {
+
+  saveMarketCandle({
+
+    symbol,
+
+    open:
+      Number(candle.o),
+
+    high:
+      Number(candle.h),
+
+    low:
+      Number(candle.l),
+
+    close:
+      Number(candle.c),
+
+    volume:
+      Number(candle.v),
+
+    closeTime:
+      candle.T,
+  });
+}
+        
       } catch (err) {
 
         console.error(

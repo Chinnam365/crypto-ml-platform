@@ -178,6 +178,12 @@ const regime =
   volatilityRegime:
     volatilityData?.volatilityRegime,
 
+     confidence:
+  signalQuality.confidence,
+
+signalQuality:
+  signalQuality.quality,
+
   candleCount:
     candles.length,
 };

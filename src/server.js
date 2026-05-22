@@ -2143,6 +2143,48 @@ app.get(
     }
   }
 );
+
+  /*
+==================================================
+RECENT MARKET CANDLES
+==================================================
+*/
+
+app.get(
+  "/recent-candles",
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await pool.query(
+
+          `
+          SELECT *
+          FROM market_candles
+          ORDER BY id DESC
+          LIMIT 20
+          `
+        );
+
+      res.json({
+
+        success: true,
+
+        candles:
+          result.rows,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
   
 app.listen(PORT, () => {
 

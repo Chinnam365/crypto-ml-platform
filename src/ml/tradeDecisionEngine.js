@@ -12,54 +12,50 @@ function generateTradeDecision(
 
       confidence,
 
-      signalQuality,
-
       regime,
 
-      volatilityRegime,
-
     } = features;
-
-    // =========================
-    // DEFAULT
-    // =========================
 
     let action =
       "HOLD";
 
     // =========================
-    // BUY CONDITIONS
+    // AGGRESSIVE BUY
     // =========================
 
     if (
 
-      trend === "BULLISH" &&
+      trend === "BULLISH"
 
-      rsi > 50 &&
+      &&
 
-      confidence >= 45 &&
+      rsi >= 50
 
-      volatilityRegime !==
-        "HIGH"
+      &&
+
+      confidence >= 40
+
     ) {
 
       action = "BUY";
     }
 
     // =========================
-    // SELL CONDITIONS
+    // AGGRESSIVE SELL
     // =========================
 
     if (
 
-      trend === "BEARISH" &&
+      trend === "BEARISH"
 
-      rsi < 50 &&
+      &&
 
-      confidence >= 45 &&
+      rsi <= 50
 
-      volatilityRegime !==
-        "HIGH"
+      &&
+
+      confidence >= 40
+
     ) {
 
       action = "SELL";
@@ -70,8 +66,13 @@ function generateTradeDecision(
     // =========================
 
     if (
-      regime === "SIDEWAYS" &&
-      confidence < 70
+
+      regime === "SIDEWAYS"
+
+      &&
+
+      confidence < 45
+
     ) {
 
       action = "HOLD";

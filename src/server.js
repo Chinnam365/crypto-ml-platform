@@ -2227,18 +2227,7 @@ app.get(
     }
   }
 );
-  
-app.listen(PORT, () => {
-
-  console.log(
-    `🚀 Running on port ${PORT}`
-  );
-
-  // START LIVE MARKET ENGINE
-  startBinanceWebsocket();
-});
-}
-/*
+  /*
 ==================================================
 TRADE MEMORY
 ==================================================
@@ -2279,4 +2268,14 @@ app.get(
     }
   }
 );
+app.listen(PORT, () => {
+
+  console.log(
+    `🚀 Running on port ${PORT}`
+  );
+
+  // START LIVE MARKET ENGINE
+  startBinanceWebsocket();
+});
+}
 startServer();

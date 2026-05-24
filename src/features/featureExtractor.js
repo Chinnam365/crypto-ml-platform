@@ -26,6 +26,10 @@ const {
   saveTradeMemory,
 } = require("../ml/saveTradeMemory");
 
+const {
+  calculatePositionSize,
+} = require("../risk/positionSizing");
+
 async function generateFeatures(
   symbol = "BTCUSDT"
 ) {
@@ -183,6 +187,19 @@ const regime =
       volatilityData?.volatilityRegime,
   });
 
+    const positionSizing =
+  calculatePositionSize({
+
+    confidence:
+      signalQuality.confidence,
+
+    volatilityRegime:
+      volatilityData?.volatilityRegime,
+
+    signalQuality:
+      signalQuality.quality,
+  });
+    
     if (
   tradeDecision.action !==
   "HOLD"
@@ -217,7 +234,7 @@ const regime =
   });
 }
     
- return {
+return {
 
   symbol,
 
@@ -247,6 +264,9 @@ const regime =
 
   decision:
     tradeDecision.action,
+
+  recommendedPositionSize:
+    positionSizing.recommendedPositionSize,
 
   candleCount:
     candles.length,

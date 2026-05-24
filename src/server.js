@@ -165,6 +165,10 @@ const {
   updateTradeOutcomes,
 } = require("./ml/updateTradeOutcomes");
 
+const {
+  generateStrategyAnalytics,
+} = require("./ml/strategyAnalytics");
+
 const app = express();
 
 app.use(
@@ -2314,6 +2318,39 @@ app.get(
 
         trades:
           result.rows,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
+
+  /*
+==================================================
+STRATEGY ANALYTICS
+==================================================
+*/
+
+app.get(
+  "/strategy-analytics",
+  async (req, res) => {
+
+    try {
+
+      const analytics =
+        await generateStrategyAnalytics();
+
+      res.json({
+
+        success: true,
+
+        analytics,
       });
 
     } catch (err) {

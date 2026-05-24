@@ -2238,5 +2238,45 @@ app.listen(PORT, () => {
   startBinanceWebsocket();
 });
 }
+/*
+==================================================
+TRADE MEMORY
+==================================================
+*/
 
+app.get(
+  "/trade-memory",
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await pool.query(
+
+          `
+          SELECT *
+          FROM trade_history
+          ORDER BY id DESC
+          LIMIT 20
+          `
+        );
+
+      res.json({
+
+        success: true,
+
+        trades:
+          result.rows,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
 startServer();

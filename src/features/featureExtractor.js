@@ -22,6 +22,10 @@ const {
   generateTradeDecision,
 } = require("../ml/tradeDecisionEngine");
 
+const {
+  saveTradeMemory,
+} = require("../ml/saveTradeMemory");
+
 async function generateFeatures(
   symbol = "BTCUSDT"
 ) {
@@ -178,6 +182,40 @@ const regime =
     volatilityRegime:
       volatilityData?.volatilityRegime,
   });
+
+    if (
+  tradeDecision.action !==
+  "HOLD"
+) {
+
+  saveTradeMemory({
+
+    symbol,
+
+    decision:
+      tradeDecision.action,
+
+    confidence:
+      signalQuality.confidence,
+
+    signalQuality:
+      signalQuality.quality,
+
+    trend,
+
+    regime,
+
+    volatilityRegime:
+      volatilityData?.volatilityRegime,
+
+    rsi,
+
+    emaDistance,
+
+    entryPrice:
+      currentPrice,
+  });
+}
     
  return {
 

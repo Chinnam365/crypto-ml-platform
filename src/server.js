@@ -161,6 +161,10 @@ const {
   generateFeatures,
 } = require("./features/featureExtractor");
 
+const {
+  updateTradeOutcomes,
+} = require("./ml/updateTradeOutcomes");
+
 const app = express();
 
 app.use(
@@ -2268,6 +2272,61 @@ app.get(
     }
   }
 );
+
+  /*
+==================================================
+OUTCOME TRACKING ENGINE
+==================================================
+*/
+
+setInterval(() => {
+
+  updateTradeOutcomes();
+
+}, 30000);
+
+  /*
+==================================================
+TRADE OUTCOMES
+==================================================
+*/
+
+app.get(
+  "/trade-outcomes",
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await pool.query(
+
+          `
+          SELECT *
+          FROM trade_history
+          ORDER BY id DESC
+          LIMIT 20
+          `
+        );
+
+      res.json({
+
+        success: true,
+
+        trades:
+          result.rows,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
+  
 app.listen(PORT, () => {
 
   console.log(

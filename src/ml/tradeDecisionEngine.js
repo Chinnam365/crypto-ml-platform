@@ -35,9 +35,9 @@ function generateTradeDecision(
 
       trend === "BULLISH" &&
 
-      rsi > 55 &&
+      rsi > 50 &&
 
-      confidence >= 60 &&
+      confidence >= 45 &&
 
       signalQuality !==
         "LOW" &&
@@ -57,9 +57,9 @@ function generateTradeDecision(
 
       trend === "BEARISH" &&
 
-      rsi < 45 &&
+      rsi < 50 &&
 
-      confidence >= 60 &&
+      confidence >= 45 &&
 
       signalQuality !==
         "LOW" &&

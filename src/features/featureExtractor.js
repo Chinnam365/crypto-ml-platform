@@ -34,6 +34,10 @@ const {
   calculateTradeRisk,
 } = require("../risk/tradeRiskEngine");
 
+const {
+  evaluatePortfolioRisk,
+} = require("../risk/portfolioRiskManager");
+
 async function generateFeatures(
   symbol = "BTCUSDT"
 ) {
@@ -214,10 +218,18 @@ const regime =
     decision:
       tradeDecision.action,
   });
+
+    const portfolioRisk =
+  await evaluatePortfolioRisk();
     
     if (
+
   tradeDecision.action !==
   "HOLD"
+
+  &&
+
+  portfolioRisk.allowNewTrades
 ) {
 
   saveTradeMemory({
@@ -291,6 +303,15 @@ takeProfit:
 
 riskRewardRatio:
   tradeRisk.riskRewardRatio,
+
+portfolioRisk:
+  portfolioRisk.portfolioRisk,
+
+activeTrades:
+  portfolioRisk.activeTrades,
+
+allowNewTrades:
+  portfolioRisk.allowNewTrades,
 
 candleCount:
   candles.length,

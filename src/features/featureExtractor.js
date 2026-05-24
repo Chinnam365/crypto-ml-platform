@@ -18,6 +18,10 @@ const {
   calculateSignalQuality,
 } = require("../ml/signalQualityEngine");
 
+const {
+  generateTradeDecision,
+} = require("../ml/tradeDecisionEngine");
+
 async function generateFeatures(
   symbol = "BTCUSDT"
 ) {
@@ -155,8 +159,27 @@ const regime =
 
     emaDistance,
   });
+
+    const tradeDecision =
+  generateTradeDecision({
+
+    trend,
+
+    rsi,
+
+    confidence:
+      signalQuality.confidence,
+
+    signalQuality:
+      signalQuality.quality,
+
+    regime,
+
+    volatilityRegime:
+      volatilityData?.volatilityRegime,
+  });
     
-   return {
+ return {
 
   symbol,
 
@@ -178,11 +201,14 @@ const regime =
   volatilityRegime:
     volatilityData?.volatilityRegime,
 
-     confidence:
-  signalQuality.confidence,
+  confidence:
+    signalQuality.confidence,
 
-signalQuality:
-  signalQuality.quality,
+  signalQuality:
+    signalQuality.quality,
+
+  decision:
+    tradeDecision.action,
 
   candleCount:
     candles.length,

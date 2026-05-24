@@ -169,6 +169,10 @@ const {
   generateStrategyAnalytics,
 } = require("./ml/strategyAnalytics");
 
+const {
+  buildTrainingDataset,
+} = require("./ml/trainingDatasetBuilder");
+
 const app = express();
 
 app.use(
@@ -2351,6 +2355,42 @@ app.get(
         success: true,
 
         analytics,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
+
+  /*
+==================================================
+ML TRAINING DATASET
+==================================================
+*/
+
+app.get(
+  "/ml-dataset",
+  async (req, res) => {
+
+    try {
+
+      const dataset =
+        await buildTrainingDataset();
+
+      res.json({
+
+        success: true,
+
+        samples:
+          dataset.length,
+
+        dataset,
       });
 
     } catch (err) {

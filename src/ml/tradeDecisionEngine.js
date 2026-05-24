@@ -39,9 +39,6 @@ function generateTradeDecision(
 
       confidence >= 45 &&
 
-      signalQuality !==
-        "LOW" &&
-
       volatilityRegime !==
         "HIGH"
     ) {
@@ -60,9 +57,6 @@ function generateTradeDecision(
       rsi < 50 &&
 
       confidence >= 45 &&
-
-      signalQuality !==
-        "LOW" &&
 
       volatilityRegime !==
         "HIGH"

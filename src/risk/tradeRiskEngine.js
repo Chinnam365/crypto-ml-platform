@@ -18,9 +18,9 @@ function calculateTradeRisk(
     // DEFAULTS
     // =========================
 
-    let stopLoss = currentPrice;
+    let stopLoss = null;
 
-    let takeProfit = currentPrice;
+    let takeProfit = null;
 
     // =========================
     // VOLATILITY FACTOR

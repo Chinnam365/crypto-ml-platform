@@ -88,7 +88,10 @@ function calculateTradeRisk(
     // =========================
 
     const riskRewardRatio =
-      2;
+
+  decision === "HOLD"
+    ? null
+    : 2;
 
     return {
 

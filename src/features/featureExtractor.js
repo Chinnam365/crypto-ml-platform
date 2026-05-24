@@ -30,6 +30,10 @@ const {
   calculatePositionSize,
 } = require("../risk/positionSizing");
 
+const {
+  calculateTradeRisk,
+} = require("../risk/tradeRiskEngine");
+
 async function generateFeatures(
   symbol = "BTCUSDT"
 ) {
@@ -199,6 +203,17 @@ const regime =
     signalQuality:
       signalQuality.quality,
   });
+    const tradeRisk =
+  calculateTradeRisk({
+
+    currentPrice,
+
+    volatility:
+      volatilityData?.volatility,
+
+    decision:
+      tradeDecision.action,
+  });
     
     if (
   tradeDecision.action !==
@@ -263,13 +278,22 @@ return {
     signalQuality.quality,
 
   decision:
-    tradeDecision.action,
+  tradeDecision.action,
 
-  recommendedPositionSize:
-    positionSizing.recommendedPositionSize,
+recommendedPositionSize:
+  positionSizing.recommendedPositionSize,
 
-  candleCount:
-    candles.length,
+stopLoss:
+  tradeRisk.stopLoss,
+
+takeProfit:
+  tradeRisk.takeProfit,
+
+riskRewardRatio:
+  tradeRisk.riskRewardRatio,
+
+candleCount:
+  candles.length,
 };
 
   } catch (err) {

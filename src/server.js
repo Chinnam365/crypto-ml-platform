@@ -1744,7 +1744,7 @@ await pool.query(
       WinRate ${winRate}%
       `
     );
-
+    
   } catch (err) {
 
     console.error(
@@ -2319,7 +2319,7 @@ app.get(
         trades:
           result.rows,
       });
-
+    }
     } catch (err) {
 
       res.status(500).json({

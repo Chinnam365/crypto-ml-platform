@@ -75,13 +75,22 @@ async function saveTradeMemory(
         volatility_regime,
         rsi,
         ema_distance,
-        entry_price
+        entry_price,
+
+        macd,
+        volatility,
+        trade_quality,
+        overall_trend,
+        buy_score,
+        sell_score
 
       )
 
       VALUES (
 
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,
+
+        $11,$12,$13,$14,$15,$16
       )
       `,
 
@@ -106,6 +115,18 @@ async function saveTradeMemory(
         trade.emaDistance,
 
         trade.entryPrice,
+
+        trade.macd,
+
+        trade.volatility,
+
+        trade.tradeQuality,
+
+        trade.overallTrend,
+
+        trade.buyScore,
+
+        trade.sellScore,
       ]
     );
 

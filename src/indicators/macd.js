@@ -3,7 +3,7 @@
 EMA HELPER
 ==================================================
 */
-
+ 
 function calculateEMA(
   prices,
   period

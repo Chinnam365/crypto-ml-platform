@@ -38,6 +38,10 @@ const {
   evaluatePortfolioRisk,
 } = require("../risk/portfolioRiskManager");
 
+const {
+  getMultiTimeframeTrend,
+} = require("../ml/multiTimeframeTrend");
+
 async function generateFeatures(
   symbol = "BTCUSDT"
 ) {
@@ -142,15 +146,10 @@ const macd = 0;
 
       trend =
         "BEARISH";
-    }
-const multiTf = {
-
-  trend15m: trend,
-
-  trend1h: trend,
-
-  trend4h: trend,
-};
+const multiTf =
+  await getMultiTimeframeTrend(
+    symbol
+  );
     // =========================
     // FEATURE OBJECT
     // =========================
@@ -183,6 +182,12 @@ const regime =
       volatilityData?.volatilityRegime,
 
     emaDistance,
+
+    alignmentScore:
+      multiTf.alignmentScore,
+
+    overallTrend:
+      multiTf.overallTrend,
   });
 
     const tradeDecision =
@@ -202,6 +207,12 @@ const regime =
 
     volatilityRegime:
       volatilityData?.volatilityRegime,
+
+    alignmentScore:
+      multiTf.alignmentScore,
+
+    overallTrend:
+      multiTf.overallTrend,
   });
 
     const positionSizing =

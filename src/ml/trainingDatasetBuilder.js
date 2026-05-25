@@ -122,7 +122,7 @@ async function buildTrainingDataset() {
             Number(
               trade.pnl || 0
             ),
-        }))
+        })
       );
 
     return dataset;

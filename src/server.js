@@ -2319,7 +2319,7 @@ app.get(
         trades:
           result.rows,
       });
-    }
+
     } catch (err) {
 
       res.status(500).json({

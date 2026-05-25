@@ -234,31 +234,57 @@ const regime =
 
   saveTradeMemory({
 
-    symbol,
+  symbol,
 
-    decision:
-      tradeDecision.action,
+  decision:
+    tradeDecision.action,
 
-    confidence:
-      signalQuality.confidence,
+  confidence:
+    signalQuality.confidence,
 
-    signalQuality:
-      signalQuality.quality,
+  signalQuality:
+    signalQuality.quality,
 
+  trend,
+
+  regime,
+
+  volatilityRegime:
+    volatilityData?.volatilityRegime,
+
+  rsi,
+
+  emaDistance,
+
+  entryPrice:
+    currentPrice,
+
+  // =========================
+  // NEW ML FEATURES
+  // =========================
+
+  macd:
+    macd || 0,
+
+  volatility:
+    volatilityData?.volatility || 0,
+
+  tradeQuality:
+    signalQuality.confidence || 0,
+
+  overallTrend:
     trend,
 
-    regime,
+  buyScore:
+    tradeDecision.action === "BUY"
+      ? signalQuality.confidence
+      : 0,
 
-    volatilityRegime:
-      volatilityData?.volatilityRegime,
-
-    rsi,
-
-    emaDistance,
-
-    entryPrice:
-      currentPrice,
-  });
+  sellScore:
+    tradeDecision.action === "SELL"
+      ? signalQuality.confidence
+      : 0,
+});
 }
     
 return {

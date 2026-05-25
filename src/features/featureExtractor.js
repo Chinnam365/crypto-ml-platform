@@ -49,6 +49,10 @@ const {
   getMultiTimeframeTrend,
 } = require("../ml/multiTimeframeTrend");
 
+const {
+  getReinforcementScore,
+} = require("../ml/reinforcementMemory");
+
 /*
 ==================================================
 MAIN FEATURE ENGINE
@@ -247,7 +251,26 @@ async function generateFeatures(
     momentumStrength:
       macdData?.momentumStrength,
   });
+/*
+==================================================
+REINFORCEMENT MEMORY
+==================================================
+*/
 
+const reinforcementData =
+  await getReinforcementScore({
+
+    trend,
+
+    momentumState:
+      macdData?.momentumState,
+
+    volatilityRegime:
+      volatilityData?.volatilityRegime,
+
+    overallTrend:
+      multiTf?.overallTrend,
+  });
     /*
     ==================================================
     TRADE DECISION
@@ -439,7 +462,19 @@ async function generateFeatures(
         volatilityData?.volatilityRegime,
 
       confidence:
-        signalQuality.confidence,
+  Number(
+    (
+      (
+        signalQuality.confidence
+        * 0.7
+      )
+      +
+      (
+        reinforcementData.reinforcementScore
+        * 0.3
+      )
+    ).toFixed(2)
+  ),
 
       signalQuality:
         signalQuality.quality,
@@ -470,7 +505,14 @@ async function generateFeatures(
 
       candleCount:
         candles.length,
+reinforcementScore:
+  reinforcementData.reinforcementScore,
 
+historicalWinRate:
+  reinforcementData.winRate,
+
+historicalSampleSize:
+  reinforcementData.sampleSize,
       /*
       ==================================================
       MACD FEATURES

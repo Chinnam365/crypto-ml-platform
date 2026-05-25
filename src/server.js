@@ -761,7 +761,7 @@ await monitorPositions(pool);
         `No candles for ${randomSymbol}`
       );
 
-      return;
+      continue;
     }
 
     // ==========================================
@@ -823,7 +823,7 @@ ${multiTf.overallTrend}
         `RSI unavailable for ${randomSymbol}`
       );
 
-      return;
+      continue;
     }
 
     // ==========================================
@@ -851,7 +851,7 @@ ${multiTf.overallTrend}
         `${randomSymbol} volatility too low`
       );
 
-      return;
+      continue;
     }
 
 // ==========================================
@@ -1016,7 +1016,7 @@ if (
     "LOCKDOWN MODE ACTIVE"
   );
 
-  return;
+  continue;
 }
 
    // ==========================================
@@ -1247,7 +1247,7 @@ ${decisionReasons.join("\n")}
         | Confidence ${confidence.toFixed(2)}`
       );
 
-      return;
+      continue;
     }
 
    // ==========================================
@@ -1311,7 +1311,7 @@ if (!portfolio.canTrade) {
     "Portfolio risk limit reached"
   );
 
-  return;
+  continue;
 }
 
     // ==========================================
@@ -1350,7 +1350,7 @@ if (!drawdown.tradingEnabled) {
     "Trading disabled due to drawdown protection"
   );
 
-  return;
+  continue;
 }
     
     
@@ -1369,7 +1369,7 @@ if (!drawdown.tradingEnabled) {
         `Price unavailable for ${randomSymbol}`
       );
 
-      return;
+       continue;
     }
 // ==========================================
 // PHASE 2 RISK ENGINE
@@ -1584,7 +1584,7 @@ ${adjustedPositionSize}
 ==================================
 `);
 
-  return;
+  continue;
 }
    
 if (
@@ -1605,7 +1605,7 @@ ${side}
 ==================================
 `);
 
-  return;
+  continue;
 }
 
 await pool.query(

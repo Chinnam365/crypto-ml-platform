@@ -65,20 +65,7 @@ function generateTradeDecision(
     // SIDEWAYS FILTER
     // =========================
 
-    if (
-
-      regime === "SIDEWAYS"
-
-      &&
-
-      confidence < 45
-
-    ) {
-
-      action = "HOLD";
-    }
-
-    return {
+       return {
 
       action,
     };

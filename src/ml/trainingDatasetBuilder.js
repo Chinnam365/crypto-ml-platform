@@ -98,7 +98,19 @@ async function buildTrainingDataset() {
               Number(
                 trade.sell_score || 0
               ),
+trend15m:
+  trade.trend_15m,
 
+trend1h:
+  trade.trend_1h,
+
+trend4h:
+  trade.trend_4h,
+
+alignmentScore:
+  Number(
+    trade.alignment_score || 0
+  ),
             // =========================
             // LABELS
             // =========================

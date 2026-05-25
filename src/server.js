@@ -740,13 +740,9 @@ await monitorPositions(pool);
       symbols
     );
 
-    const randomSymbol =
-      symbols[
-        Math.floor(
-          Math.random() *
-          symbols.length
-        )
-      ];
+    for (
+  const randomSymbol of symbols
+) {
 
     // ==========================================
     // GET REAL CANDLES

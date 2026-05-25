@@ -1,8 +1,10 @@
 const pool =
   require("../db/db");
+
 const {
   detectMarketRegime,
 } = require("./marketRegime");
+
 const {
   calculateRSI,
 } = require("../indicators/rsi");
@@ -10,6 +12,7 @@ const {
 const {
   calculateEMA,
 } = require("../indicators/ema");
+
 const {
   calculateMACD,
 } = require("../indicators/macd");
@@ -46,15 +49,23 @@ const {
   getMultiTimeframeTrend,
 } = require("../ml/multiTimeframeTrend");
 
+/*
+==================================================
+MAIN FEATURE ENGINE
+==================================================
+*/
+
 async function generateFeatures(
   symbol = "BTCUSDT"
 ) {
 
   try {
 
-    // =========================
-    // LOAD RECENT CANDLES
-    // =========================
+    /*
+    ==================================================
+    LOAD MARKET CANDLES
+    ==================================================
+    */
 
     const result =
       await pool.query(
@@ -64,7 +75,7 @@ async function generateFeatures(
         FROM market_candles
         WHERE symbol = $1
         ORDER BY candle_time ASC
-        LIMIT 50
+        LIMIT 240
         `,
 
         [symbol]
@@ -74,15 +85,17 @@ async function generateFeatures(
       result.rows;
 
     if (
-      candles.length < 20
+      candles.length < 35
     ) {
 
       return null;
     }
 
-    // =========================
-    // EXTRACT CLOSES
-    // =========================
+    /*
+    ==================================================
+    CLOSE PRICES
+    ==================================================
+    */
 
     const closes =
       candles.map(
@@ -92,19 +105,12 @@ async function generateFeatures(
             candle.close
           )
       );
-/*
-==================================================
-MACD
-==================================================
-*/
 
-const macdData =
-  calculateMACD(
-    closes
-  );
-    // =========================
-    // INDICATORS
-    // =========================
+    /*
+    ==================================================
+    INDICATORS
+    ==================================================
+    */
 
     const rsi =
       calculateRSI(
@@ -112,24 +118,31 @@ const macdData =
       );
 
     const ema =
-  calculateEMA(
-    closes
-  );
+      calculateEMA(
+        closes
+      );
 
-const macd = 0;
+    const macdData =
+      calculateMACD(
+        closes
+      );
 
-    // =========================
-    // CURRENT PRICE
-    // =========================
+    /*
+    ==================================================
+    CURRENT PRICE
+    ==================================================
+    */
 
     const currentPrice =
       closes[
         closes.length - 1
       ];
 
-    // =========================
-    // EMA DISTANCE
-    // =========================
+    /*
+    ==================================================
+    EMA DISTANCE
+    ==================================================
+    */
 
     const emaDistance =
       (
@@ -139,9 +152,11 @@ const macd = 0;
         ) / ema
       ) * 100;
 
-    // =========================
-    // TREND
-    // =========================
+    /*
+    ==================================================
+    TREND
+    ==================================================
+    */
 
     let trend =
       "SIDEWAYS";
@@ -152,260 +167,346 @@ const macd = 0;
 
       trend =
         "BULLISH";
+    }
 
-    } else if (
+    else if (
       currentPrice < ema
     ) {
 
       trend =
         "BEARISH";
-const multiTf =
-  await getMultiTimeframeTrend(
-    symbol
-  );
-    // =========================
-    // FEATURE OBJECT
-    // =========================
+    }
+
+    /*
+    ==================================================
+    MULTI TIMEFRAME
+    ==================================================
+    */
+
+    const multiTf =
+      await getMultiTimeframeTrend(
+        symbol
+      );
+
+    /*
+    ==================================================
+    VOLATILITY
+    ==================================================
+    */
 
     const volatilityData =
-  calculateVolatility(
-    candles
-  );
-   
-const regime =
-  detectMarketRegime({
+      calculateVolatility(
+        candles
+      );
 
-    rsi,
+    /*
+    ==================================================
+    MARKET REGIME
+    ==================================================
+    */
 
-    emaDistance,
+    const regime =
+      detectMarketRegime({
 
-    trend,
-  });
+        rsi,
+
+        emaDistance,
+
+        trend,
+      });
+
+    /*
+    ==================================================
+    SIGNAL QUALITY
+    ==================================================
+    */
 
     const signalQuality =
-  calculateSignalQuality({
+      calculateSignalQuality({
 
-    rsi,
+        rsi,
 
-    trend,
+        trend,
 
-    regime,
+        regime,
 
-    volatilityRegime:
-      volatilityData?.volatilityRegime,
+        volatilityRegime:
+          volatilityData?.volatilityRegime,
 
-    emaDistance,
+        emaDistance,
 
-    alignmentScore:
-      multiTf.alignmentScore,
+        alignmentScore:
+          multiTf?.alignmentScore,
 
-    overallTrend:
-      multiTf.overallTrend,
-  });
+        overallTrend:
+          multiTf?.overallTrend,
+      });
+
+    /*
+    ==================================================
+    TRADE DECISION
+    ==================================================
+    */
 
     const tradeDecision =
-  generateTradeDecision({
+      generateTradeDecision({
 
-    trend,
+        trend,
 
-    rsi,
+        rsi,
 
-    confidence:
-      signalQuality.confidence,
+        confidence:
+          signalQuality.confidence,
 
-    signalQuality:
-      signalQuality.quality,
+        signalQuality:
+          signalQuality.quality,
 
-    regime,
+        regime,
 
-    volatilityRegime:
-      volatilityData?.volatilityRegime,
+        volatilityRegime:
+          volatilityData?.volatilityRegime,
 
-    alignmentScore:
-      multiTf.alignmentScore,
+        alignmentScore:
+          multiTf?.alignmentScore,
 
-    overallTrend:
-      multiTf.overallTrend,
-  });
+        overallTrend:
+          multiTf?.overallTrend,
+      });
+
+    /*
+    ==================================================
+    POSITION SIZING
+    ==================================================
+    */
 
     const positionSizing =
-  calculatePositionSize({
+      calculatePositionSize({
 
-    confidence:
-      signalQuality.confidence,
+        confidence:
+          signalQuality.confidence,
 
-    volatilityRegime:
-      volatilityData?.volatilityRegime,
+        volatilityRegime:
+          volatilityData?.volatilityRegime,
 
-    signalQuality:
-      signalQuality.quality,
-  });
+        signalQuality:
+          signalQuality.quality,
+      });
+
+    /*
+    ==================================================
+    TRADE RISK
+    ==================================================
+    */
+
     const tradeRisk =
-  calculateTradeRisk({
+      calculateTradeRisk({
 
-    currentPrice,
+        currentPrice,
 
-    volatility:
-      volatilityData?.volatility,
+        volatility:
+          volatilityData?.volatility,
 
-    decision:
-      tradeDecision.action,
-  });
+        decision:
+          tradeDecision.action,
+      });
+
+    /*
+    ==================================================
+    PORTFOLIO RISK
+    ==================================================
+    */
 
     const portfolioRisk =
-  await evaluatePortfolioRisk();
-    
+      await evaluatePortfolioRisk();
+
+    /*
+    ==================================================
+    SAVE TRADE MEMORY
+    ==================================================
+    */
+
     if (
 
-  tradeDecision.action !==
-  "HOLD"
+      tradeDecision.action !==
+      "HOLD"
 
-  &&
+      &&
 
-  portfolioRisk.allowNewTrades
-) {
+      portfolioRisk.allowNewTrades
+    ) {
 
-  saveTradeMemory({
+      await saveTradeMemory({
 
-  symbol,
+        symbol,
 
-  decision:
-    tradeDecision.action,
+        decision:
+          tradeDecision.action,
 
-  confidence:
-    signalQuality.confidence,
+        confidence:
+          signalQuality.confidence,
 
-  signalQuality:
-    signalQuality.quality,
+        signalQuality:
+          signalQuality.quality,
 
-  trend,
-trend15m:
-  multiTf?.trend15m,
+        trend,
 
-trend1h:
-  multiTf?.trend1h,
+        trend15m:
+          multiTf?.trend15m,
 
-trend4h:
-  multiTf?.trend4h,
+        trend1h:
+          multiTf?.trend1h,
 
-alignmentScore:
+        trend4h:
+          multiTf?.trend4h,
 
-  trend === multiTf?.trend15m &&
-  trend === multiTf?.trend1h
-    ? 100
-    : 50,
-    
-  regime,
+        alignmentScore:
+          multiTf?.alignmentScore || 0,
 
-  volatilityRegime:
-    volatilityData?.volatilityRegime,
+        regime,
 
-  rsi,
+        volatilityRegime:
+          volatilityData?.volatilityRegime,
 
-  emaDistance,
+        rsi,
 
-  entryPrice:
-    currentPrice,
+        emaDistance,
 
-  // =========================
-  // NEW ML FEATURES
-  // =========================
+        entryPrice:
+          currentPrice,
 
-  macd:
-    macd || 0,
+        /*
+        ==================================================
+        ML FEATURES
+        ==================================================
+        */
 
-  volatility:
-    volatilityData?.volatility || 0,
+        macd:
+          macdData?.macd || 0,
 
-  tradeQuality:
-    signalQuality.confidence || 0,
+        volatility:
+          volatilityData?.volatility || 0,
 
-  overallTrend:
-    trend,
+        tradeQuality:
+          signalQuality.confidence || 0,
 
-  buyScore:
-    tradeDecision.action === "BUY"
-      ? signalQuality.confidence
-      : 0,
+        overallTrend:
+          multiTf?.overallTrend || "UNKNOWN",
 
-  sellScore:
-    tradeDecision.action === "SELL"
-      ? signalQuality.confidence
-      : 0,
-});
-}
-    
-return {
+        buyScore:
+          tradeDecision.action === "BUY"
+            ? signalQuality.confidence
+            : 0,
 
-  symbol,
+        sellScore:
+          tradeDecision.action === "SELL"
+            ? signalQuality.confidence
+            : 0,
+      });
+    }
 
-  currentPrice,
+    /*
+    ==================================================
+    RETURN FEATURES
+    ==================================================
+    */
 
-  rsi,
+    return {
 
-  ema,
+      symbol,
 
-  emaDistance,
+      currentPrice,
 
-  trend,
+      rsi,
 
-  regime,
+      ema,
 
-  volatility:
-    volatilityData?.volatility,
+      emaDistance,
 
-  volatilityRegime:
-    volatilityData?.volatilityRegime,
+      trend,
 
-  confidence:
-    signalQuality.confidence,
+      regime,
 
-  signalQuality:
-    signalQuality.quality,
+      volatility:
+        volatilityData?.volatility,
 
-  decision:
-  tradeDecision.action,
+      volatilityRegime:
+        volatilityData?.volatilityRegime,
 
-recommendedPositionSize:
-  positionSizing.recommendedPositionSize,
+      confidence:
+        signalQuality.confidence,
 
-stopLoss:
-  tradeRisk.stopLoss,
+      signalQuality:
+        signalQuality.quality,
 
-takeProfit:
-  tradeRisk.takeProfit,
+      decision:
+        tradeDecision.action,
 
-riskRewardRatio:
-  tradeRisk.riskRewardRatio,
+      recommendedPositionSize:
+        positionSizing.recommendedPositionSize,
 
-portfolioRisk:
-  portfolioRisk.portfolioRisk,
+      stopLoss:
+        tradeRisk.stopLoss,
 
-activeTrades:
-  portfolioRisk.activeTrades,
+      takeProfit:
+        tradeRisk.takeProfit,
 
-allowNewTrades:
-  portfolioRisk.allowNewTrades,
+      riskRewardRatio:
+        tradeRisk.riskRewardRatio,
 
-candleCount:
-  candles.length,
+      portfolioRisk:
+        portfolioRisk.portfolioRisk,
 
-  macd:
-  macdData.macd,
+      activeTrades:
+        portfolioRisk.activeTrades,
 
-signalLine:
-  macdData.signalLine,
+      allowNewTrades:
+        portfolioRisk.allowNewTrades,
 
-histogram:
-  macdData.histogram,
+      candleCount:
+        candles.length,
 
-momentumState:
-  macdData.momentumState,
+      /*
+      ==================================================
+      MACD FEATURES
+      ==================================================
+      */
 
-momentumStrength:
-  macdData.momentumStrength,
-  
-};
+      macd:
+        macdData.macd,
+
+      signalLine:
+        macdData.signalLine,
+
+      histogram:
+        macdData.histogram,
+
+      momentumState:
+        macdData.momentumState,
+
+      momentumStrength:
+        macdData.momentumStrength,
+
+      /*
+      ==================================================
+      MULTI TF
+      ==================================================
+      */
+
+      trend15m:
+        multiTf?.trend15m,
+
+      trend1h:
+        multiTf?.trend1h,
+
+      trend4h:
+        multiTf?.trend4h,
+
+      alignmentScore:
+        multiTf?.alignmentScore,
+
+      overallTrend:
+        multiTf?.overallTrend,
+    };
 
   } catch (err) {
 

@@ -38,6 +38,15 @@ const {
   evaluatePortfolioRisk,
 } = require("../risk/portfolioRiskManager");
 
+const multiTf = {
+
+  trend15m: trend,
+
+  trend1h: trend,
+
+  trend4h: trend,
+};
+
 async function generateFeatures(
   symbol = "BTCUSDT"
 ) {
@@ -246,7 +255,22 @@ const regime =
     signalQuality.quality,
 
   trend,
+trend15m:
+  multiTf?.trend15m,
 
+trend1h:
+  multiTf?.trend1h,
+
+trend4h:
+  multiTf?.trend4h,
+
+alignmentScore:
+
+  trend === multiTf?.trend15m &&
+  trend === multiTf?.trend1h
+    ? 100
+    : 50,
+    
   regime,
 
   volatilityRegime:

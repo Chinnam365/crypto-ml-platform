@@ -29,101 +29,100 @@ async function buildTrainingDataset() {
     const dataset =
       trades.map(
 
-        trade => {
+        trade => ({
 
-          return {
+          // =========================
+          // CORE FEATURES
+          // =========================
 
-            // =========================
-            // CORE FEATURES
-            // =========================
+          symbol:
+            trade.symbol || "",
 
-            symbol:
-              trade.symbol,
+          rsi:
+            Number(
+              trade.rsi || 0
+            ),
 
-            rsi:
-              Number(
-                trade.rsi
-              ),
+          confidence:
+            Number(
+              trade.confidence || 0
+            ),
 
-            confidence:
-              Number(
-                trade.confidence
-              ),
+          emaDistance:
+            Number(
+              trade.ema_distance || 0
+            ),
 
-            emaDistance:
-              Number(
-                trade.ema_distance
-              ),
+          trend:
+            trade.trend || "UNKNOWN",
 
-            trend:
-              trade.trend,
+          regime:
+            trade.regime || "UNKNOWN",
 
-            regime:
-              trade.regime,
+          volatilityRegime:
+            trade.volatility_regime || "UNKNOWN",
 
-            volatilityRegime:
-              trade.volatility_regime,
+          signalQuality:
+            trade.signal_quality || "UNKNOWN",
 
-            signalQuality:
-              trade.signal_quality,
+          // =========================
+          // ADVANCED ML FEATURES
+          // =========================
 
-            // =========================
-            // ADVANCED ML FEATURES
-            // =========================
+          macd:
+            Number(
+              trade.macd || 0
+            ),
 
-            macd:
-              Number(
-                trade.macd || 0
-              ),
+          volatility:
+            Number(
+              trade.volatility || 0
+            ),
 
-            volatility:
-              Number(
-                trade.volatility || 0
-              ),
+          tradeQuality:
+            Number(
+              trade.trade_quality || 0
+            ),
 
-            tradeQuality:
-              Number(
-                trade.trade_quality || 0
-              ),
+          overallTrend:
+            trade.overall_trend || "UNKNOWN",
 
-            overallTrend:
-              trade.overall_trend,
+          buyScore:
+            Number(
+              trade.buy_score || 0
+            ),
 
-            buyScore:
-              Number(
-                trade.buy_score || 0
-              ),
+          sellScore:
+            Number(
+              trade.sell_score || 0
+            ),
 
-            sellScore:
-              Number(
-                trade.sell_score || 0
-              ),
-trend15m:
-  trade.trend_15m,
+          trend15m:
+            trade.trend_15m || "UNKNOWN",
 
-trend1h:
-  trade.trend_1h,
+          trend1h:
+            trade.trend_1h || "UNKNOWN",
 
-trend4h:
-  trade.trend_4h,
+          trend4h:
+            trade.trend_4h || "UNKNOWN",
 
-alignmentScore:
-  Number(
-    trade.alignment_score || 0
-  ),
-            // =========================
-            // LABELS
-            // =========================
+          alignmentScore:
+            Number(
+              trade.alignment_score || 0
+            ),
 
-            outcome:
-              trade.outcome,
+          // =========================
+          // LABELS
+          // =========================
 
-            pnl:
-              Number(
-                trade.pnl
-              ),
-          };
-        }
+          outcome:
+            trade.outcome || "UNKNOWN",
+
+          pnl:
+            Number(
+              trade.pnl || 0
+            ),
+        }))
       );
 
     return dataset;

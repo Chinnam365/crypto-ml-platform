@@ -7,6 +7,60 @@ async function saveTradeMemory(
 
   try {
 
+    // =========================
+    // DUPLICATE CHECK
+    // =========================
+
+    const existingTrade =
+      await pool.query(
+
+        `
+        SELECT *
+        FROM trade_history
+
+        WHERE
+
+          symbol = $1
+
+          AND
+
+          decision = $2
+
+          AND
+
+          outcome = 'PENDING'
+
+        LIMIT 1
+        `,
+
+        [
+
+          trade.symbol,
+
+          trade.decision,
+        ]
+      );
+
+    // =========================
+    // SKIP DUPLICATES
+    // =========================
+
+    if (
+      existingTrade.rows.length > 0
+    ) {
+
+      console.log(
+
+        `Duplicate trade skipped: ${trade.symbol}`
+      );
+
+      return;
+    }
+
+    // =========================
+    // SAVE TRADE
+    // =========================
+
     await pool.query(
 
       `

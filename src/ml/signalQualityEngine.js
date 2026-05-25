@@ -1,107 +1,307 @@
-function calculateSignalQuality(
-  features
-) {
+/*
+==================================================
+PROBABILISTIC SIGNAL QUALITY ENGINE
+==================================================
+*/
+
+function calculateSignalQuality({
+
+  rsi,
+
+  trend,
+
+  regime,
+
+  volatilityRegime,
+
+  emaDistance,
+
+  alignmentScore = 0,
+
+  overallTrend = "SIDEWAYS",
+
+  momentumState = "NEUTRAL",
+
+  momentumStrength = 0,
+}) {
 
   try {
 
-    let confidence = 50;
+    /*
+    ==================================================
+    SCORES
+    ==================================================
+    */
 
-    const {
+    let bullishScore = 0;
 
-      rsi,
+    let bearishScore = 0;
 
-      trend,
+    let uncertaintyScore = 0;
 
-      regime,
-
-      volatilityRegime,
-
-      emaDistance,
-
-    } = features;
-
-    // =========================
-    // TREND ALIGNMENT
-    // =========================
+    /*
+    ==================================================
+    TREND WEIGHT
+    25%
+    ==================================================
+    */
 
     if (
       trend === "BULLISH"
     ) {
 
-      confidence += 10;
+      bullishScore += 25;
     }
 
-    if (
+    else if (
       trend === "BEARISH"
     ) {
 
-      confidence += 10;
+      bearishScore += 25;
     }
 
-    // =========================
-    // STRONG RSI CONDITIONS
-    // =========================
+    else {
+
+      uncertaintyScore += 15;
+    }
+
+    /*
+    ==================================================
+    MULTI TIMEFRAME ALIGNMENT
+    20%
+    ==================================================
+    */
 
     if (
-      rsi > 60 ||
-      rsi < 40
+      alignmentScore >= 90
     ) {
 
-      confidence += 15;
+      bullishScore += 20;
     }
 
-    // =========================
-    // SIDEWAYS PENALTY
-    // =========================
-
-    if (
-      regime === "SIDEWAYS"
+    else if (
+      alignmentScore >= 70
     ) {
 
-      confidence -= 10;
+      bullishScore += 15;
     }
 
-    // =========================
-    // VOLATILITY PENALTY
-    // =========================
+    else {
+
+      uncertaintyScore += 10;
+    }
+
+    /*
+    ==================================================
+    OVERALL TREND
+    10%
+    ==================================================
+    */
 
     if (
+      overallTrend === "BULLISH"
+    ) {
+
+      bullishScore += 10;
+    }
+
+    else if (
+      overallTrend === "BEARISH"
+    ) {
+
+      bearishScore += 10;
+    }
+
+    else {
+
+      uncertaintyScore += 5;
+    }
+
+    /*
+    ==================================================
+    RSI CONTEXT
+    15%
+    ==================================================
+    */
+
+    if (
+      rsi >= 55 &&
+      rsi <= 70
+    ) {
+
+      bullishScore += 15;
+    }
+
+    else if (
+      rsi <= 45 &&
+      rsi >= 30
+    ) {
+
+      bearishScore += 15;
+    }
+
+    else {
+
+      uncertaintyScore += 10;
+    }
+
+    /*
+    ==================================================
+    MOMENTUM STATE
+    25%
+    ==================================================
+    */
+
+    if (
+      momentumState ===
+      "BULLISH_ACCELERATION"
+    ) {
+
+      bullishScore += 25;
+    }
+
+    else if (
+      momentumState ===
+      "BEARISH_ACCELERATION"
+    ) {
+
+      bearishScore += 25;
+    }
+
+    else if (
+
+      momentumState ===
+      "BULLISH_WEAKENING"
+
+    ) {
+
+      bullishScore += 10;
+
+      uncertaintyScore += 10;
+    }
+
+    else if (
+
+      momentumState ===
+      "BEARISH_WEAKENING"
+
+    ) {
+
+      bearishScore += 10;
+
+      uncertaintyScore += 10;
+    }
+
+    else {
+
+      uncertaintyScore += 15;
+    }
+
+    /*
+    ==================================================
+    MOMENTUM STRENGTH
+    10%
+    ==================================================
+    */
+
+    if (
+      momentumStrength >= 70
+    ) {
+
+      bullishScore += 10;
+    }
+
+    else if (
+      momentumStrength <= 30
+    ) {
+
+      uncertaintyScore += 10;
+    }
+
+    /*
+    ==================================================
+    VOLATILITY
+    15%
+    ==================================================
+    */
+
+    if (
+      volatilityRegime ===
+      "NORMAL"
+    ) {
+
+      bullishScore += 15;
+    }
+
+    else if (
       volatilityRegime ===
       "HIGH"
     ) {
 
-      confidence -= 15;
+      uncertaintyScore += 15;
     }
 
-    // =========================
-    // EMA DISTANCE BONUS
-    // =========================
-
-    if (
-      Math.abs(
-        emaDistance
-      ) > 0.3
+    else if (
+      volatilityRegime ===
+      "LOW"
     ) {
 
-      confidence += 10;
+      uncertaintyScore += 10;
     }
 
-    // =========================
-    // LIMIT RANGE
-    // =========================
+    /*
+    ==================================================
+    EMA DISTANCE
+    ==================================================
+    */
+
+    if (
+      Math.abs(emaDistance) > 1.5
+    ) {
+
+      uncertaintyScore += 10;
+    }
+
+    /*
+    ==================================================
+    FINAL CONFIDENCE
+    ==================================================
+    */
+
+    const totalScore =
+
+      bullishScore +
+
+      bearishScore +
+
+      uncertaintyScore;
+
+    let confidence = 50;
+
+    if (
+      totalScore > 0
+    ) {
+
+      confidence =
+        Math.max(
+
+          bullishScore,
+
+          bearishScore
+
+        ) / totalScore * 100;
+    }
 
     confidence =
-      Math.max(
-        0,
-        Math.min(
-          confidence,
-          100
-        )
+      Number(
+        confidence.toFixed(2)
       );
 
-    // =========================
-    // QUALITY LABEL
-    // =========================
+    /*
+    ==================================================
+    SIGNAL QUALITY
+    ==================================================
+    */
 
     let quality =
       "LOW";
@@ -110,39 +310,95 @@ function calculateSignalQuality(
       confidence >= 75
     ) {
 
-      quality =
-        "HIGH";
+      quality = "HIGH";
+    }
 
-    } else if (
+    else if (
       confidence >= 60
     ) {
 
-      quality =
-        "MEDIUM";
+      quality = "MEDIUM";
     }
+
+    /*
+    ==================================================
+    MARKET BIAS
+    ==================================================
+    */
+
+    let marketBias =
+      "NEUTRAL";
+
+    if (
+      bullishScore >
+      bearishScore
+    ) {
+
+      marketBias =
+        "BULLISH";
+    }
+
+    else if (
+      bearishScore >
+      bullishScore
+    ) {
+
+      marketBias =
+        "BEARISH";
+    }
+
+    /*
+    ==================================================
+    RETURN
+    ==================================================
+    */
 
     return {
 
       confidence,
 
       quality,
+
+      bullishScore:
+        Number(
+          bullishScore.toFixed(2)
+        ),
+
+      bearishScore:
+        Number(
+          bearishScore.toFixed(2)
+        ),
+
+      uncertaintyScore:
+        Number(
+          uncertaintyScore.toFixed(2)
+        ),
+
+      marketBias,
     };
 
   } catch (err) {
 
-    console.error(
+    console.log(
 
-      "Signal Quality Error:",
+      "Signal quality error:",
 
       err.message
     );
 
     return {
 
-      confidence: 0,
+      confidence: 50,
 
-      quality:
-        "UNKNOWN",
+      quality: "LOW",
+
+      bullishScore: 0,
+
+      bearishScore: 0,
+
+      uncertaintyScore: 100,
+
+      marketBias: "NEUTRAL",
     };
   }
 }

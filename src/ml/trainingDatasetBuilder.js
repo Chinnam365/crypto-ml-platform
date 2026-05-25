@@ -33,7 +33,12 @@ async function buildTrainingDataset() {
 
           return {
 
-            // FEATURES
+            // =========================
+            // CORE FEATURES
+            // =========================
+
+            symbol:
+              trade.symbol,
 
             rsi:
               Number(
@@ -62,7 +67,41 @@ async function buildTrainingDataset() {
             signalQuality:
               trade.signal_quality,
 
+            // =========================
+            // ADVANCED ML FEATURES
+            // =========================
+
+            macd:
+              Number(
+                trade.macd || 0
+              ),
+
+            volatility:
+              Number(
+                trade.volatility || 0
+              ),
+
+            tradeQuality:
+              Number(
+                trade.trade_quality || 0
+              ),
+
+            overallTrend:
+              trade.overall_trend,
+
+            buyScore:
+              Number(
+                trade.buy_score || 0
+              ),
+
+            sellScore:
+              Number(
+                trade.sell_score || 0
+              ),
+
+            // =========================
             // LABELS
+            // =========================
 
             outcome:
               trade.outcome,

@@ -38,15 +38,6 @@ const {
   evaluatePortfolioRisk,
 } = require("../risk/portfolioRiskManager");
 
-const multiTf = {
-
-  trend15m: trend,
-
-  trend1h: trend,
-
-  trend4h: trend,
-};
-
 async function generateFeatures(
   symbol = "BTCUSDT"
 ) {
@@ -104,9 +95,11 @@ async function generateFeatures(
       );
 
     const ema =
-      calculateEMA(
-        closes
-      );
+  calculateEMA(
+    closes
+  );
+
+const macd = 0;
 
     // =========================
     // CURRENT PRICE
@@ -150,7 +143,14 @@ async function generateFeatures(
       trend =
         "BEARISH";
     }
+const multiTf = {
 
+  trend15m: trend,
+
+  trend1h: trend,
+
+  trend4h: trend,
+};
     // =========================
     // FEATURE OBJECT
     // =========================
@@ -159,7 +159,7 @@ async function generateFeatures(
   calculateVolatility(
     candles
   );
-    
+   
 const regime =
   detectMarketRegime({
 

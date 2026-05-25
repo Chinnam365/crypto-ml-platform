@@ -92,7 +92,16 @@ async function generateFeatures(
             candle.close
           )
       );
+/*
+==================================================
+MACD
+==================================================
+*/
 
+const macdData =
+  calculateMACD(
+    closes
+  );
     // =========================
     // INDICATORS
     // =========================
@@ -380,6 +389,22 @@ allowNewTrades:
 
 candleCount:
   candles.length,
+
+  macd:
+  macdData.macd,
+
+signalLine:
+  macdData.signalLine,
+
+histogram:
+  macdData.histogram,
+
+momentumState:
+  macdData.momentumState,
+
+momentumStrength:
+  macdData.momentumStrength,
+  
 };
 
   } catch (err) {

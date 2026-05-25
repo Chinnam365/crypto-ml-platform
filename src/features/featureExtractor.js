@@ -11,6 +11,10 @@ const {
   calculateEMA,
 } = require("../indicators/ema");
 const {
+  calculateMACD,
+} = require("../indicators/macd");
+
+const {
   calculateVolatility,
 } = require("./volatilityEngine");
 

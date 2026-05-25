@@ -222,25 +222,31 @@ async function generateFeatures(
     */
 
     const signalQuality =
-      calculateSignalQuality({
+  calculateSignalQuality({
 
-        rsi,
+    rsi,
 
-        trend,
+    trend,
 
-        regime,
+    regime,
 
-        volatilityRegime:
-          volatilityData?.volatilityRegime,
+    volatilityRegime:
+      volatilityData?.volatilityRegime,
 
-        emaDistance,
+    emaDistance,
 
-        alignmentScore:
-          multiTf?.alignmentScore,
+    alignmentScore:
+      multiTf?.alignmentScore,
 
-        overallTrend:
-          multiTf?.overallTrend,
-      });
+    overallTrend:
+      multiTf?.overallTrend,
+
+    momentumState:
+      macdData?.momentumState,
+
+    momentumStrength:
+      macdData?.momentumStrength,
+  });
 
     /*
     ==================================================

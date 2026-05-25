@@ -637,7 +637,7 @@ app.get(
         strategies:
           result.rows,
       });
-
+    
     } catch (err) {
 
       console.error(
@@ -1744,7 +1744,7 @@ await pool.query(
       WinRate ${winRate}%
       `
     );
-    
+    }
   } catch (err) {
 
     console.error(

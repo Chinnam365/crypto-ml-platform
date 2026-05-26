@@ -311,6 +311,9 @@ const reinforcementData =
     const positionSizing =
       calculatePositionSize({
 
+        explorationTrade:
+  tradeDecision.explorationTrade,
+        
         confidence:
           signalQuality.confidence,
 

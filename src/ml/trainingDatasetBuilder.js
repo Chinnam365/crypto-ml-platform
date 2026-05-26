@@ -1,137 +1,258 @@
 const pool =
   require("../db/db");
 
+/*
+==================================================
+BUILD TRAINING DATASET
+==================================================
+*/
+
 async function buildTrainingDataset() {
 
   try {
 
-    // =========================
-    // LOAD CLOSED TRADES
-    // =========================
+    /*
+    ==================================================
+    LOAD SIGNAL MEMORY
+    ==================================================
+    */
 
     const result =
       await pool.query(
 
         `
         SELECT *
-        FROM trade_history
-        WHERE outcome != 'PENDING'
+
+        FROM signal_memory
+
+        WHERE
+
+          signal_outcome IS NOT NULL
+
+          AND
+
+          outcome_checked = TRUE
+
+        ORDER BY id DESC
+
+        LIMIT 5000
         `
       );
 
-    const trades =
+    const signals =
       result.rows;
 
-    // =========================
-    // BUILD DATASET
-    // =========================
+    /*
+    ==================================================
+    DATASET
+    ==================================================
+    */
 
     const dataset =
-      trades.map(
+      signals.map(signal => {
 
-        trade => ({
+        /*
+        ================================================
+        TARGET LABEL
+        ================================================
+        */
 
-          // =========================
-          // CORE FEATURES
-          // =========================
+        let label = 0;
 
-          symbol:
-            trade.symbol || "",
+        if (
+          signal.signal_outcome ===
+          "SUCCESS"
+        ) {
 
-          rsi:
-            Number(
-              trade.rsi || 0
-            ),
+          label = 1;
+        }
+
+        /*
+        ================================================
+        NUMERIC FEATURES
+        ================================================
+        */
+
+        return {
+
+          /*
+          ==============================================
+          TARGET
+          ==============================================
+          */
+
+          label,
+
+          /*
+          ==============================================
+          CORE FEATURES
+          ==============================================
+          */
 
           confidence:
             Number(
-              trade.confidence || 0
+              signal.confidence || 0
+            ),
+
+          alignmentScore:
+            Number(
+              signal.alignment_score || 0
+            ),
+
+          momentumStrength:
+            Number(
+              signal.momentum_strength || 0
+            ),
+
+          rsi:
+            Number(
+              signal.rsi || 0
             ),
 
           emaDistance:
             Number(
-              trade.ema_distance || 0
+              signal.ema_distance || 0
             ),
 
-          trend:
-            trade.trend || "UNKNOWN",
+          /*
+          ==============================================
+          TEMPORAL FEATURES
+          ==============================================
+          */
 
-          regime:
-            trade.regime || "UNKNOWN",
-
-          volatilityRegime:
-            trade.volatility_regime || "UNKNOWN",
-
-          signalQuality:
-            trade.signal_quality || "UNKNOWN",
-
-          // =========================
-          // ADVANCED ML FEATURES
-          // =========================
-
-          macd:
+          marketHour:
             Number(
-              trade.macd || 0
+              signal.market_hour || 0
             ),
 
-          volatility:
-            Number(
-              trade.volatility || 0
-            ),
+          isWeekend:
+            signal.is_weekend
+              ? 1
+              : 0,
 
-          tradeQuality:
-            Number(
-              trade.trade_quality || 0
-            ),
+          /*
+          ==============================================
+          DECISION FEATURES
+          ==============================================
+          */
 
-          overallTrend:
-            trade.overall_trend || "UNKNOWN",
+          isBuy:
+            signal.decision === "BUY"
+              ? 1
+              : 0,
 
-          buyScore:
-            Number(
-              trade.buy_score || 0
-            ),
+          isSell:
+            signal.decision === "SELL"
+              ? 1
+              : 0,
 
-          sellScore:
-            Number(
-              trade.sell_score || 0
-            ),
+          isHold:
+            signal.decision === "HOLD"
+              ? 1
+              : 0,
 
-          trend15m:
-            trade.trend_15m || "UNKNOWN",
+          /*
+          ==============================================
+          TREND FEATURES
+          ==============================================
+          */
 
-          trend1h:
-            trade.trend_1h || "UNKNOWN",
+          bullishTrend:
+            signal.trend === "BULLISH"
+              ? 1
+              : 0,
 
-          trend4h:
-            trade.trend_4h || "UNKNOWN",
+          bearishTrend:
+            signal.trend === "BEARISH"
+              ? 1
+              : 0,
 
-          alignmentScore:
-            Number(
-              trade.alignment_score || 0
-            ),
+          /*
+          ==============================================
+          REGIME FEATURES
+          ==============================================
+          */
 
-          // =========================
-          // LABELS
-          // =========================
+          trendingRegime:
+            signal.regime === "TRENDING"
+              ? 1
+              : 0,
 
-          outcome:
-            trade.outcome || "UNKNOWN",
+          rangingRegime:
+            signal.regime === "RANGING"
+              ? 1
+              : 0,
 
-          pnl:
-            Number(
-              trade.pnl || 0
-            ),
-        })
-      );
+          chaoticRegime:
+            signal.regime === "CHAOTIC"
+              ? 1
+              : 0,
+
+          /*
+          ==============================================
+          VOLATILITY FEATURES
+          ==============================================
+          */
+
+          highVolatility:
+            signal.volatility_regime === "HIGH"
+              ? 1
+              : 0,
+
+          lowVolatility:
+            signal.volatility_regime === "LOW"
+              ? 1
+              : 0,
+
+          /*
+          ==============================================
+          MOMENTUM FEATURES
+          ==============================================
+          */
+
+          bullishAcceleration:
+            signal.momentum_state ===
+            "BULLISH_ACCELERATION"
+              ? 1
+              : 0,
+
+          bearishAcceleration:
+            signal.momentum_state ===
+            "BEARISH_ACCELERATION"
+              ? 1
+              : 0,
+
+          /*
+          ==============================================
+          TRANSITION FEATURES
+          ==============================================
+          */
+
+          trendTransition:
+            signal.transition_type?.includes("_TO_")
+              ? 1
+              : 0,
+
+          /*
+          ==============================================
+          EXPLORATION FEATURES
+          ==============================================
+          */
+
+          explorationTrade:
+            signal.exploration_trade
+              ? 1
+              : 0,
+        };
+      });
 
     return dataset;
 
   } catch (err) {
 
-    console.error(
+    console.log(
 
-      "Dataset Builder Error:",
+      "Dataset builder error:",
 
       err.message
     );

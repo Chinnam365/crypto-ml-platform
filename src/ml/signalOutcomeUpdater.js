@@ -122,7 +122,7 @@ async function updateSignalOutcomes() {
 
       const signalPrice =
         Number(
-          signal.ema_distance || 0
+          signal.signal_price || 0
         );
 
       /*

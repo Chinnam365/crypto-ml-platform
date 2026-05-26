@@ -162,10 +162,6 @@ const {
 } = require("./features/featureExtractor");
 
 const {
-  updateTradeOutcomes,
-} = require("./ml/updateTradeOutcomes");
-
-const {
   generateStrategyAnalytics,
 } = require("./ml/strategyAnalytics");
 
@@ -181,6 +177,9 @@ const {
   calculateRegimeAnalytics,
 } = require("./ml/regimeAnalytics");
 
+const {
+  updateTradeOutcomes,
+} = require("./ml/autoTradeOutcomeUpdater");
 
 const app = express();
 
@@ -1125,7 +1124,7 @@ if (
   signalScores.buyScore >
     signalScores.sellScore &&
 
-  signalScores.buyScore >= 50
+  signalScores.buyScore >= 35
 ) {
 
   side = "BUY";
@@ -1136,7 +1135,7 @@ else if (
   signalScores.sellScore >
     signalScores.buyScore &&
 
-  signalScores.sellScore >= 50
+  signalScores.sellScore >= 35
 ) {
 
   side = "SELL";
@@ -1234,7 +1233,7 @@ ${decisionReasons.join("\n")}
   confidence <
     optimizedThreshold ||
 
-  tradeQuality < 45
+  tradeQuality < 30
 ) {
 
       console.log(

@@ -118,7 +118,7 @@ function generateTradeDecision({
 
     else if (
 
-      confidence >= 35
+      confidence >= 20
 
       &&
 
@@ -156,7 +156,7 @@ function generateTradeDecision({
       */
 
       if (
-        explorationChance <= 0.65
+        explorationChance <= 1
       ) {
 
         explorationTrade =

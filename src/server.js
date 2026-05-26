@@ -185,6 +185,10 @@ const {
   updateSignalOutcomes,
 } = require("./ml/signalOutcomeUpdater");
 
+const {
+  analyzeFeatureImportance,
+} = require("./ml/featureImportanceAnalyzer");
+
 const app = express();
 
 app.use(
@@ -2520,6 +2524,36 @@ app.get(
         signals:
           result.rows,
       });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        success: false,
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
+
+  /*
+==================================================
+FEATURE IMPORTANCE V2
+==================================================
+*/
+
+app.get(
+  "/feature-importance-v2",
+  async (req, res) => {
+
+    try {
+
+      const report =
+        await analyzeFeatureImportance();
+
+      res.json(report);
 
     } catch (err) {
 

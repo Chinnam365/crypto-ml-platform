@@ -181,6 +181,10 @@ const {
   updateTradeOutcomes,
 } = require("./ml/autoTradeOutcomeUpdater");
 
+const {
+  updateSignalOutcomes,
+} = require("./ml/signalOutcomeUpdater");
+
 const app = express();
 
 app.use(
@@ -2285,12 +2289,25 @@ OUTCOME TRACKING ENGINE
 ==================================================
 */
 
-setInterval(() => {
+setInterval(async () => {
 
-  updateTradeOutcomes();
+  /*
+  ==================================================
+  UPDATE TRADE OUTCOMES
+  ==================================================
+  */
+
+  await updateTradeOutcomes();
+
+  /*
+  ==================================================
+  UPDATE SIGNAL OUTCOMES
+  ==================================================
+  */
+
+  await updateSignalOutcomes();
 
 }, 30000);
-
   /*
 ==================================================
 TRADE OUTCOMES

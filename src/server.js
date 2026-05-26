@@ -176,6 +176,12 @@ const {
 const {
   calculateFeatureImportance,
 } = require("./ml/featureImportanceEngine");
+
+const {
+  calculateRegimeAnalytics,
+} = require("./ml/regimeAnalytics");
+
+
 const app = express();
 
 app.use(
@@ -2431,6 +2437,38 @@ app.get(
     }
   }
 );
+
+  /*
+==================================================
+REGIME ANALYTICS
+==================================================
+*/
+
+app.get(
+  "/regime-analytics",
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await calculateRegimeAnalytics();
+
+      res.json(result);
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        success: false,
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
+
+  
 app.listen(PORT, () => {
 
   console.log(

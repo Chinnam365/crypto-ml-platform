@@ -141,11 +141,7 @@ async function saveSignalMemory({
         $18,
         $19,
         $20,
-        $21,
-        $22,
-        $23,
-        $24,
-        $25
+     
       )
       `,
 
@@ -186,11 +182,20 @@ async function saveSignalMemory({
         emaDistance,
 
         explorationTrade,
-        marketHour,
+
+marketHour,
 
 marketDay,
 
 isWeekend,
+
+previousTrend,
+
+previousRegime,
+
+previousVolatilityRegime,
+
+transitionType,
         
       ]
     );

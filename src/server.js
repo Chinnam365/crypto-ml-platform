@@ -2480,7 +2480,52 @@ app.get(
     }
   }
 );
+/*
+==================================================
+SIGNAL MEMORY
+==================================================
+*/
 
+app.get(
+  "/signal-memory",
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await pool.query(
+
+          `
+          SELECT *
+
+          FROM signal_memory
+
+          ORDER BY id DESC
+
+          LIMIT 50
+          `
+        );
+
+      res.json({
+
+        success: true,
+
+        signals:
+          result.rows,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        success: false,
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
   
 app.listen(PORT, () => {
 

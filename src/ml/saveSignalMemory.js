@@ -44,6 +44,13 @@ async function saveSignalMemory({
   emaDistance,
 
   explorationTrade = false,
+
+  marketHour,
+
+marketDay,
+
+isWeekend,
+  
 }) {
 
   try {
@@ -87,7 +94,13 @@ async function saveSignalMemory({
 
         ema_distance,
 
-        exploration_trade
+        exploration_trade,
+
+market_hour,
+
+market_day,
+
+is_weekend
 
       )
 
@@ -110,7 +123,10 @@ async function saveSignalMemory({
         $15,
         $16,
         $17,
-        $18
+        $18,
+$19,
+$20,
+$21
       )
       `,
 
@@ -151,6 +167,12 @@ async function saveSignalMemory({
         emaDistance,
 
         explorationTrade,
+        marketHour,
+
+marketDay,
+
+isWeekend,
+        
       ]
     );
 

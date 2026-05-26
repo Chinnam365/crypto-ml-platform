@@ -1609,22 +1609,6 @@ if (
 
   console.log(`
 ==================================
-DUPLICATE POSITION DETECTED
-LEARNING MODE ALLOWS CONTINUATION
-==================================
-
-Symbol:
-${randomSymbol}
-
-Side:
-${side}
-
-==================================
-`);
-} {
-
-  console.log(`
-==================================
 DUPLICATE POSITION BLOCKED
 ==================================
 

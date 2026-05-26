@@ -307,7 +307,7 @@ const reinforcementData =
     POSITION SIZING
     ==================================================
     */
-
+ 
     const positionSizing =
       calculatePositionSize({
 

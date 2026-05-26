@@ -58,6 +58,8 @@ async function saveSignalMemory({
   previousVolatilityRegime,
 
   transitionType,
+  signalPrice,
+  
 }) {
 
   try {

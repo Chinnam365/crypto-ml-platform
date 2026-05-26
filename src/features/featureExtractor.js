@@ -267,6 +267,116 @@ async function generateFeatures(
       });
 
     /*
+==================================================
+PREVIOUS MARKET STATE
+==================================================
+*/
+
+const previousSignalResult =
+  await pool.query(
+
+    `
+    SELECT *
+
+    FROM signal_memory
+
+    WHERE symbol = $1
+
+    ORDER BY id DESC
+
+    LIMIT 1
+    `,
+
+    [symbol]
+  );
+
+let previousTrend =
+  "UNKNOWN";
+
+let previousRegime =
+  "UNKNOWN";
+
+let previousVolatilityRegime =
+  "UNKNOWN";
+
+if (
+  previousSignalResult.rows.length > 0
+) {
+
+  const previousSignal =
+    previousSignalResult.rows[0];
+
+  previousTrend =
+    previousSignal.trend ||
+    "UNKNOWN";
+
+  previousRegime =
+    previousSignal.regime ||
+    "UNKNOWN";
+
+  previousVolatilityRegime =
+    previousSignal.volatility_regime ||
+    "UNKNOWN";
+}
+
+/*
+==================================================
+TRANSITION DETECTION
+==================================================
+*/
+
+let transitionType =
+  "STABLE";
+
+/*
+==================================================
+TREND TRANSITION
+==================================================
+*/
+
+if (
+  previousTrend !== trend
+) {
+
+  transitionType =
+
+    `${previousTrend}_TO_${trend}`;
+}
+
+/*
+==================================================
+REGIME TRANSITION
+==================================================
+*/
+
+if (
+  previousRegime !== regime
+) {
+
+  transitionType =
+
+    `${previousRegime}_TO_${regime}`;
+}
+
+/*
+==================================================
+VOLATILITY TRANSITION
+==================================================
+*/
+
+if (
+
+  previousVolatilityRegime !==
+  volatilityData?.volatilityRegime
+
+) {
+
+  transitionType =
+
+    `${previousVolatilityRegime}_TO_${volatilityData?.volatilityRegime}`;
+}
+    
+    /*
     ==================================================
     SIGNAL QUALITY
     ==================================================
@@ -465,6 +575,15 @@ async function generateFeatures(
       marketDay,
 
       isWeekend,
+
+      previousTrend,
+
+previousRegime,
+
+previousVolatilityRegime,
+
+transitionType,
+      
     });
 
     /*
@@ -527,7 +646,13 @@ async function generateFeatures(
         marketDay,
 
         isWeekend,
+previousTrend,
 
+previousRegime,
+
+previousVolatilityRegime,
+
+transitionType,
         /*
         ==================================================
         ML FEATURES

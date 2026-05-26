@@ -47,10 +47,17 @@ async function saveSignalMemory({
 
   marketHour,
 
-marketDay,
+  marketDay,
 
-isWeekend,
-  
+  isWeekend,
+
+  previousTrend,
+
+  previousRegime,
+
+  previousVolatilityRegime,
+
+  transitionType,
 }) {
 
   try {
@@ -96,11 +103,19 @@ isWeekend,
 
         exploration_trade,
 
-market_hour,
+        market_hour,
 
-market_day,
+        market_day,
 
-is_weekend
+        is_weekend,
+
+        previous_trend,
+
+        previous_regime,
+
+        previous_volatility_regime,
+
+        transition_type
 
       )
 
@@ -124,9 +139,13 @@ is_weekend
         $16,
         $17,
         $18,
-$19,
-$20,
-$21
+        $19,
+        $20,
+        $21,
+        $22,
+        $23,
+        $24,
+        $25
       )
       `,
 

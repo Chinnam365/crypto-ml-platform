@@ -1,10 +1,14 @@
+const {
+  getAdaptiveWeights,
+} = require("./adaptiveWeights");
+
 /*
 ==================================================
-PROBABILISTIC SIGNAL QUALITY ENGINE
+ADAPTIVE PROBABILISTIC SIGNAL ENGINE
 ==================================================
 */
 
-function calculateSignalQuality({
+async function calculateSignalQuality({
 
   rsi,
 
@@ -29,6 +33,15 @@ function calculateSignalQuality({
 
     /*
     ==================================================
+    ADAPTIVE WEIGHTS
+    ==================================================
+    */
+
+    const weights =
+      await getAdaptiveWeights();
+
+    /*
+    ==================================================
     SCORES
     ==================================================
     */
@@ -41,8 +54,7 @@ function calculateSignalQuality({
 
     /*
     ==================================================
-    TREND WEIGHT
-    25%
+    TREND
     ==================================================
     */
 
@@ -50,14 +62,16 @@ function calculateSignalQuality({
       trend === "BULLISH"
     ) {
 
-      bullishScore += 25;
+      bullishScore +=
+        weights.trend;
     }
 
     else if (
       trend === "BEARISH"
     ) {
 
-      bearishScore += 25;
+      bearishScore +=
+        weights.trend;
     }
 
     else {
@@ -68,7 +82,6 @@ function calculateSignalQuality({
     /*
     ==================================================
     MULTI TIMEFRAME ALIGNMENT
-    20%
     ==================================================
     */
 
@@ -76,14 +89,16 @@ function calculateSignalQuality({
       alignmentScore >= 90
     ) {
 
-      bullishScore += 20;
+      bullishScore +=
+        weights.alignment;
     }
 
     else if (
       alignmentScore >= 70
     ) {
 
-      bullishScore += 15;
+      bullishScore +=
+        weights.alignment * 0.75;
     }
 
     else {
@@ -94,7 +109,6 @@ function calculateSignalQuality({
     /*
     ==================================================
     OVERALL TREND
-    10%
     ==================================================
     */
 
@@ -120,7 +134,6 @@ function calculateSignalQuality({
     /*
     ==================================================
     RSI CONTEXT
-    15%
     ==================================================
     */
 
@@ -129,7 +142,8 @@ function calculateSignalQuality({
       rsi <= 70
     ) {
 
-      bullishScore += 15;
+      bullishScore +=
+        weights.rsi;
     }
 
     else if (
@@ -137,7 +151,8 @@ function calculateSignalQuality({
       rsi >= 30
     ) {
 
-      bearishScore += 15;
+      bearishScore +=
+        weights.rsi;
     }
 
     else {
@@ -148,7 +163,6 @@ function calculateSignalQuality({
     /*
     ==================================================
     MOMENTUM STATE
-    25%
     ==================================================
     */
 
@@ -157,7 +171,8 @@ function calculateSignalQuality({
       "BULLISH_ACCELERATION"
     ) {
 
-      bullishScore += 25;
+      bullishScore +=
+        weights.momentum;
     }
 
     else if (
@@ -165,7 +180,8 @@ function calculateSignalQuality({
       "BEARISH_ACCELERATION"
     ) {
 
-      bearishScore += 25;
+      bearishScore +=
+        weights.momentum;
     }
 
     else if (
@@ -175,7 +191,8 @@ function calculateSignalQuality({
 
     ) {
 
-      bullishScore += 10;
+      bullishScore +=
+        weights.momentum * 0.4;
 
       uncertaintyScore += 10;
     }
@@ -187,7 +204,8 @@ function calculateSignalQuality({
 
     ) {
 
-      bearishScore += 10;
+      bearishScore +=
+        weights.momentum * 0.4;
 
       uncertaintyScore += 10;
     }
@@ -200,7 +218,6 @@ function calculateSignalQuality({
     /*
     ==================================================
     MOMENTUM STRENGTH
-    10%
     ==================================================
     */
 
@@ -221,7 +238,6 @@ function calculateSignalQuality({
     /*
     ==================================================
     VOLATILITY
-    15%
     ==================================================
     */
 
@@ -230,7 +246,8 @@ function calculateSignalQuality({
       "NORMAL"
     ) {
 
-      bullishScore += 15;
+      bullishScore +=
+        weights.volatility;
     }
 
     else if (
@@ -264,6 +281,26 @@ function calculateSignalQuality({
 
     /*
     ==================================================
+    REGIME ANALYSIS
+    ==================================================
+    */
+
+    if (
+      regime === "TRENDING"
+    ) {
+
+      bullishScore += 5;
+    }
+
+    else if (
+      regime === "CHAOTIC"
+    ) {
+
+      uncertaintyScore += 15;
+    }
+
+    /*
+    ==================================================
     FINAL CONFIDENCE
     ==================================================
     */
@@ -283,13 +320,15 @@ function calculateSignalQuality({
     ) {
 
       confidence =
-        Math.max(
+        (
+          Math.max(
 
-          bullishScore,
+            bullishScore,
 
-          bearishScore
+            bearishScore
 
-        ) / totalScore * 100;
+          ) / totalScore
+        ) * 100;
     }
 
     confidence =
@@ -375,6 +414,9 @@ function calculateSignalQuality({
         ),
 
       marketBias,
+
+      adaptiveWeights:
+        weights,
     };
 
   } catch (err) {
@@ -399,6 +441,19 @@ function calculateSignalQuality({
       uncertaintyScore: 100,
 
       marketBias: "NEUTRAL",
+
+      adaptiveWeights: {
+
+        trend: 25,
+
+        momentum: 25,
+
+        alignment: 20,
+
+        volatility: 15,
+
+        rsi: 15,
+      },
     };
   }
 }

@@ -8,7 +8,7 @@ const {
 const {
   calculateRSI,
 } = require("../indicators/rsi");
- 
+
 const {
   calculateEMA,
 } = require("../indicators/ema");
@@ -57,7 +57,6 @@ const {
   saveSignalMemory,
 } = require("../ml/saveSignalMemory");
 
-
 /*
 ==================================================
 MAIN FEATURE ENGINE
@@ -69,6 +68,49 @@ async function generateFeatures(
 ) {
 
   try {
+
+    /*
+    ==================================================
+    TEMPORAL FEATURES
+    ==================================================
+    */
+
+    const now =
+      new Date();
+
+    const marketHour =
+      now.getUTCHours();
+
+    const dayIndex =
+      now.getUTCDay();
+
+    const days = [
+
+      "SUNDAY",
+
+      "MONDAY",
+
+      "TUESDAY",
+
+      "WEDNESDAY",
+
+      "THURSDAY",
+
+      "FRIDAY",
+
+      "SATURDAY",
+    ];
+
+    const marketDay =
+      days[dayIndex];
+
+    const isWeekend =
+
+      marketDay === "SATURDAY"
+
+      ||
+
+      marketDay === "SUNDAY";
 
     /*
     ==================================================
@@ -231,51 +273,53 @@ async function generateFeatures(
     */
 
     const signalQuality =
-  await calculateSignalQuality({
+      await calculateSignalQuality({
 
-    rsi,
+        rsi,
 
-    trend,
+        trend,
 
-    regime,
+        regime,
 
-    volatilityRegime:
-      volatilityData?.volatilityRegime,
+        volatilityRegime:
+          volatilityData?.volatilityRegime,
 
-    emaDistance,
+        emaDistance,
 
-    alignmentScore:
-      multiTf?.alignmentScore,
+        alignmentScore:
+          multiTf?.alignmentScore,
 
-    overallTrend:
-      multiTf?.overallTrend,
+        overallTrend:
+          multiTf?.overallTrend,
 
-    momentumState:
-      macdData?.momentumState,
+        momentumState:
+          macdData?.momentumState,
 
-    momentumStrength:
-      macdData?.momentumStrength,
-  });
-/*
-==================================================
-REINFORCEMENT MEMORY
-==================================================
-*/
+        momentumStrength:
+          macdData?.momentumStrength,
+      });
 
-const reinforcementData =
-  await getReinforcementScore({
+    /*
+    ==================================================
+    REINFORCEMENT MEMORY
+    ==================================================
+    */
 
-    trend,
+    const reinforcementData =
+      await getReinforcementScore({
 
-    momentumState:
-      macdData?.momentumState,
+        trend,
 
-    volatilityRegime:
-      volatilityData?.volatilityRegime,
+        momentumState:
+          macdData?.momentumState,
 
-    overallTrend:
-      multiTf?.overallTrend,
-  });
+        volatilityRegime:
+          volatilityData?.volatilityRegime,
+
+        overallTrend:
+          multiTf?.overallTrend,
+      });
+
     /*
     ==================================================
     TRADE DECISION
@@ -305,6 +349,9 @@ const reinforcementData =
 
         overallTrend:
           multiTf?.overallTrend,
+
+        momentumState:
+          macdData?.momentumState,
       });
 
     /*
@@ -312,13 +359,13 @@ const reinforcementData =
     POSITION SIZING
     ==================================================
     */
- 
+
     const positionSizing =
       calculatePositionSize({
 
         explorationTrade:
-  tradeDecision.explorationTrade,
-        
+          tradeDecision.explorationTrade,
+
         confidence:
           signalQuality.confidence,
 
@@ -357,63 +404,69 @@ const reinforcementData =
       await evaluatePortfolioRisk();
 
     /*
-==================================================
-SAVE SIGNAL MEMORY
-==================================================
-*/
+    ==================================================
+    SAVE SIGNAL MEMORY
+    ==================================================
+    */
 
-await saveSignalMemory({
+    await saveSignalMemory({
 
-  symbol,
+      symbol,
 
-  decision:
-    tradeDecision.action,
+      decision:
+        tradeDecision.action,
 
-  confidence:
-    signalQuality.confidence,
+      confidence:
+        signalQuality.confidence,
 
-  signalQuality:
-    signalQuality.quality,
+      signalQuality:
+        signalQuality.quality,
 
-  marketBias:
-    signalQuality.marketBias,
+      marketBias:
+        signalQuality.marketBias,
 
-  trend,
+      trend,
 
-  overallTrend:
-    multiTf?.overallTrend,
+      overallTrend:
+        multiTf?.overallTrend,
 
-  trend15m:
-    multiTf?.trend15m,
+      trend15m:
+        multiTf?.trend15m,
 
-  trend1h:
-    multiTf?.trend1h,
+      trend1h:
+        multiTf?.trend1h,
 
-  trend4h:
-    multiTf?.trend4h,
+      trend4h:
+        multiTf?.trend4h,
 
-  alignmentScore:
-    multiTf?.alignmentScore,
+      alignmentScore:
+        multiTf?.alignmentScore,
 
-  momentumState:
-    macdData?.momentumState,
+      momentumState:
+        macdData?.momentumState,
 
-  momentumStrength:
-    macdData?.momentumStrength,
+      momentumStrength:
+        macdData?.momentumStrength,
 
-  volatilityRegime:
-    volatilityData?.volatilityRegime,
+      volatilityRegime:
+        volatilityData?.volatilityRegime,
 
-  regime,
+      regime,
 
-  rsi,
+      rsi,
 
-  emaDistance,
+      emaDistance,
 
-  explorationTrade:
-    tradeDecision.explorationTrade,
-});
-    
+      explorationTrade:
+        tradeDecision.explorationTrade,
+
+      marketHour,
+
+      marketDay,
+
+      isWeekend,
+    });
+
     /*
     ==================================================
     SAVE TRADE MEMORY
@@ -468,6 +521,12 @@ await saveSignalMemory({
 
         entryPrice:
           currentPrice,
+
+        marketHour,
+
+        marketDay,
+
+        isWeekend,
 
         /*
         ==================================================
@@ -528,25 +587,28 @@ await saveSignalMemory({
         volatilityData?.volatilityRegime,
 
       confidence:
-  Number(
-    (
-      (
-        signalQuality.confidence
-        * 0.7
-      )
-      +
-      (
-        reinforcementData.reinforcementScore
-        * 0.3
-      )
-    ).toFixed(2)
-  ),
+        Number(
+          (
+            (
+              signalQuality.confidence
+              * 0.7
+            )
+            +
+            (
+              reinforcementData.reinforcementScore
+              * 0.3
+            )
+          ).toFixed(2)
+        ),
 
       signalQuality:
         signalQuality.quality,
 
       decision:
         tradeDecision.action,
+
+      explorationTrade:
+        tradeDecision.explorationTrade,
 
       recommendedPositionSize:
         positionSizing.recommendedPositionSize,
@@ -571,14 +633,28 @@ await saveSignalMemory({
 
       candleCount:
         candles.length,
-reinforcementScore:
-  reinforcementData.reinforcementScore,
 
-historicalWinRate:
-  reinforcementData.winRate,
+      reinforcementScore:
+        reinforcementData.reinforcementScore,
 
-historicalSampleSize:
-  reinforcementData.sampleSize,
+      historicalWinRate:
+        reinforcementData.winRate,
+
+      historicalSampleSize:
+        reinforcementData.sampleSize,
+
+      /*
+      ==================================================
+      TEMPORAL FEATURES
+      ==================================================
+      */
+
+      marketHour,
+
+      marketDay,
+
+      isWeekend,
+
       /*
       ==================================================
       MACD FEATURES

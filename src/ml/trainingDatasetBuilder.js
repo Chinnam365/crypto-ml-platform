@@ -41,7 +41,57 @@ async function buildTrainingDataset() {
 
     const signals =
       result.rows;
+/*
+==================================================
+NORMALIZATION HELPERS
+==================================================
+*/
 
+function normalizePercentage(
+  value
+) {
+
+  return Number(
+    (
+      (value || 0) / 100
+    ).toFixed(4)
+  );
+}
+
+function normalizeHour(
+  hour
+) {
+
+  return Number(
+    (
+      (hour || 0) / 23
+    ).toFixed(4)
+  );
+}
+
+function normalizeEmaDistance(
+  value
+) {
+
+  /*
+  Clamp between -10 and +10
+  */
+
+  const clamped =
+    Math.max(
+      -10,
+      Math.min(
+        10,
+        value || 0
+      )
+    );
+
+  return Number(
+    (
+      clamped / 10
+    ).toFixed(4)
+  );
+}
     /*
     ==================================================
     DATASET
@@ -90,29 +140,28 @@ async function buildTrainingDataset() {
           */
 
           confidence:
-            Number(
-              signal.confidence || 0
-            ),
+  normalizePercentage(
+    signal.confidence
+  ),
 
           alignmentScore:
-            Number(
-              signal.alignment_score || 0
-            ),
-
+  normalizePercentage(
+    signal.alignment_score
+  ),
           momentumStrength:
-            Number(
-              signal.momentum_strength || 0
-            ),
+  normalizePercentage(
+    signal.momentum_strength
+  ),
 
-          rsi:
-            Number(
-              signal.rsi || 0
-            ),
+         rsi:
+  normalizePercentage(
+    signal.rsi
+  ),
 
           emaDistance:
-            Number(
-              signal.ema_distance || 0
-            ),
+  normalizeEmaDistance(
+    signal.ema_distance
+  ),
 
           /*
           ==============================================
@@ -120,10 +169,10 @@ async function buildTrainingDataset() {
           ==============================================
           */
 
-          marketHour:
-            Number(
-              signal.market_hour || 0
-            ),
+         marketHour:
+  normalizeHour(
+    signal.market_hour
+  ),
 
           isWeekend:
             signal.is_weekend

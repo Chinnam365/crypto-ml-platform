@@ -1227,14 +1227,8 @@ ${decisionReasons.join("\n")}
     // ==========================================
 
     if (
-
-  side === "HOLD" ||
-
-  confidence <
-    optimizedThreshold ||
-
-  tradeQuality < 30
-) {
+  side === "HOLD"
+){
 
       console.log(
 

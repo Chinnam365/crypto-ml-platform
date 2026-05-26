@@ -332,7 +332,52 @@ TRANSITION DETECTION
 
 let transitionType =
   "STABLE";
+/*
+==================================================
+MARKET STATE TRANSITION
+==================================================
+*/
 
+let previousMarketState =
+  "UNKNOWN";
+
+let marketStateTransition =
+  "STABLE";
+
+/*
+==================================================
+LOAD PREVIOUS MARKET STATE
+==================================================
+*/
+
+if (
+  previousSignalResult.rows.length > 0
+) {
+
+  previousMarketState =
+
+    previousSignalResult
+      .rows[0]
+      .market_state ||
+
+    "UNKNOWN";
+}
+
+/*
+==================================================
+DETECT MARKET STATE TRANSITION
+==================================================
+*/
+
+if (
+  previousMarketState !==
+  marketState
+) {
+
+  marketStateTransition =
+
+    `${previousMarketState}_TO_${marketState}`;
+}
 /*
 ==================================================
 TREND TRANSITION
@@ -616,6 +661,7 @@ previousVolatilityRegime,
 
 transitionType,
       marketState,
+      marketStateTransition,
     });
 
     /*
@@ -686,6 +732,8 @@ previousVolatilityRegime,
 
 transitionType,
         marketState,
+        marketStateTransition,
+        
         /*
         ==================================================
         ML FEATURES
@@ -738,7 +786,7 @@ transitionType,
 
       regime,
       marketState,
-
+marketStateTransition,
       volatility:
         volatilityData?.volatility,
 

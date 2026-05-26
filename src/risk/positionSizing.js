@@ -60,7 +60,13 @@ function calculatePositionSize(
 
       positionSize -= 1;
     }
+if (
+  explorationTrade
+) {
 
+  recommendedPositionSize =
+    recommendedPositionSize * 0.25;
+}
     // =========================
     // MIN/MAX LIMITS
     // =========================

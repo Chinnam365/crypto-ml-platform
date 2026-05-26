@@ -561,6 +561,9 @@ if (
       volatilityRegime:
         volatilityData?.volatilityRegime,
 
+      signalPrice:
+  currentPrice,
+      
       regime,
 
       rsi,

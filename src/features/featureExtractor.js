@@ -53,6 +53,11 @@ const {
   getReinforcementScore,
 } = require("../ml/reinforcementMemory");
 
+const {
+  saveSignalMemory,
+} = require("../ml/saveSignalMemory");
+
+
 /*
 ==================================================
 MAIN FEATURE ENGINE
@@ -351,6 +356,64 @@ const reinforcementData =
     const portfolioRisk =
       await evaluatePortfolioRisk();
 
+    /*
+==================================================
+SAVE SIGNAL MEMORY
+==================================================
+*/
+
+await saveSignalMemory({
+
+  symbol,
+
+  decision:
+    tradeDecision.action,
+
+  confidence:
+    signalQuality.confidence,
+
+  signalQuality:
+    signalQuality.quality,
+
+  marketBias:
+    signalQuality.marketBias,
+
+  trend,
+
+  overallTrend:
+    multiTf?.overallTrend,
+
+  trend15m:
+    multiTf?.trend15m,
+
+  trend1h:
+    multiTf?.trend1h,
+
+  trend4h:
+    multiTf?.trend4h,
+
+  alignmentScore:
+    multiTf?.alignmentScore,
+
+  momentumState:
+    macdData?.momentumState,
+
+  momentumStrength:
+    macdData?.momentumStrength,
+
+  volatilityRegime:
+    volatilityData?.volatilityRegime,
+
+  regime,
+
+  rsi,
+
+  emaDistance,
+
+  explorationTrade:
+    tradeDecision.explorationTrade,
+});
+    
     /*
     ==================================================
     SAVE TRADE MEMORY

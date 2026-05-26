@@ -156,7 +156,7 @@ function generateTradeDecision({
       */
 
       if (
-        explorationChance <= 0.35
+        explorationChance <= 0.65
       ) {
 
         explorationTrade =

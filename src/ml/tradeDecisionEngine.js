@@ -118,7 +118,7 @@ function generateTradeDecision({
 
     else if (
 
-      confidence >= 45
+      confidence >= 35
 
       &&
 

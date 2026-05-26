@@ -12,34 +12,43 @@ function calculatePositionSize(
 
       signalQuality,
 
+      explorationTrade = false,
+
     } = features;
 
-    // =========================
-    // BASE POSITION %
-    // =========================
+    /*
+    ==================================================
+    BASE POSITION SIZE
+    ==================================================
+    */
 
     let positionSize = 1;
 
-    // =========================
-    // CONFIDENCE SCALING
-    // =========================
+    /*
+    ==================================================
+    CONFIDENCE SCALING
+    ==================================================
+    */
 
     if (
       confidence >= 80
     ) {
 
       positionSize += 2;
+    }
 
-    } else if (
+    else if (
       confidence >= 60
     ) {
 
       positionSize += 1;
     }
 
-    // =========================
-    // SIGNAL QUALITY BONUS
-    // =========================
+    /*
+    ==================================================
+    SIGNAL QUALITY BONUS
+    ==================================================
+    */
 
     if (
       signalQuality ===
@@ -49,9 +58,11 @@ function calculatePositionSize(
       positionSize += 1;
     }
 
-    // =========================
-    // HIGH VOLATILITY REDUCTION
-    // =========================
+    /*
+    ==================================================
+    HIGH VOLATILITY REDUCTION
+    ==================================================
+    */
 
     if (
       volatilityRegime ===
@@ -60,20 +71,32 @@ function calculatePositionSize(
 
       positionSize -= 1;
     }
-if (
-  explorationTrade
-) {
 
-  recommendedPositionSize =
-    recommendedPositionSize * 0.25;
-}
-    // =========================
-    // MIN/MAX LIMITS
-    // =========================
+    /*
+    ==================================================
+    EXPLORATION TRADE REDUCTION
+    ==================================================
+    */
+
+    if (
+      explorationTrade
+    ) {
+
+      positionSize =
+        positionSize * 0.25;
+    }
+
+    /*
+    ==================================================
+    MIN/MAX LIMITS
+    ==================================================
+    */
 
     positionSize =
       Math.max(
-        1,
+
+        0.5,
+
         Math.min(
           positionSize,
           5
@@ -83,7 +106,9 @@ if (
     return {
 
       recommendedPositionSize:
-        positionSize,
+        Number(
+          positionSize.toFixed(2)
+        ),
     };
 
   } catch (err) {

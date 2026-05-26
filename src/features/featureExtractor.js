@@ -57,6 +57,11 @@ const {
   saveSignalMemory,
 } = require("../ml/saveSignalMemory");
 
+const {
+  classifyMarketState,
+} = require("../ml/marketStateClassifier");
+
+
 /*
 ==================================================
 MAIN FEATURE ENGINE
@@ -375,7 +380,31 @@ if (
 
     `${previousVolatilityRegime}_TO_${volatilityData?.volatilityRegime}`;
 }
-    
+    /*
+==================================================
+MARKET STATE CLASSIFICATION
+==================================================
+*/
+
+const marketState =
+  classifyMarketState({
+
+    trend,
+
+    regime,
+
+    volatility:
+      volatilityData?.volatility || 0,
+
+    momentumState:
+      macdData?.momentumState,
+
+    momentumStrength:
+      macdData?.momentumStrength || 0,
+
+    alignmentScore:
+      multiTf?.alignmentScore || 0,
+  });
     /*
     ==================================================
     SIGNAL QUALITY
@@ -586,7 +615,7 @@ previousRegime,
 previousVolatilityRegime,
 
 transitionType,
-      
+      marketState,
     });
 
     /*
@@ -656,6 +685,7 @@ previousRegime,
 previousVolatilityRegime,
 
 transitionType,
+        marketState,
         /*
         ==================================================
         ML FEATURES
@@ -707,6 +737,7 @@ transitionType,
       trend,
 
       regime,
+      marketState,
 
       volatility:
         volatilityData?.volatility,

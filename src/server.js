@@ -793,8 +793,11 @@ await monitorPositions(pool);
     const rsi =
       calculateRSI(closes);
 
-    const macd =
-      calculateMACD(closes);
+    const macdData =
+  calculateMACD(closes);
+
+const macd =
+  macdData.macd;
 
     const trend =
       detectTrend(closes);

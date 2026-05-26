@@ -117,7 +117,9 @@ async function saveSignalMemory({
 
         previous_volatility_regime,
 
-        transition_type
+        transition_type,
+
+signal_price
 
       )
 
@@ -143,6 +145,12 @@ async function saveSignalMemory({
         $18,
         $19,
         $20,
+         $21,
+        $22,
+        $23,
+        $24,
+        $25,
+        $26,
      
       )
       `,
@@ -198,6 +206,7 @@ previousRegime,
 previousVolatilityRegime,
 
 transitionType,
+        signalPrice,
         
       ]
     );

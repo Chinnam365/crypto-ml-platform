@@ -173,6 +173,9 @@ const {
   buildTrainingDataset,
 } = require("./ml/trainingDatasetBuilder");
 
+const {
+  calculateFeatureImportance,
+} = require("./ml/featureImportanceEngine");
 const app = express();
 
 app.use(
@@ -2399,7 +2402,35 @@ app.get(
     }
   }
 );
-  
+  /*
+==================================================
+FEATURE IMPORTANCE ANALYTICS
+==================================================
+*/
+
+app.get(
+  "/feature-importance",
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await calculateFeatureImportance();
+
+      res.json(result);
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        success: false,
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
 app.listen(PORT, () => {
 
   console.log(

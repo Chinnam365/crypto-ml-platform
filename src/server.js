@@ -1596,9 +1596,32 @@ ${adjustedPositionSize}
   continue;
 }
    
+/*
+==================================================
+PHASE 2 LEARNING MODE
+ALLOW DUPLICATE EXPLORATION POSITIONS
+==================================================
+*/
+
 if (
   existingPosition.rows.length > 0
 ) {
+
+  console.log(`
+==================================
+DUPLICATE POSITION DETECTED
+LEARNING MODE ALLOWS CONTINUATION
+==================================
+
+Symbol:
+${randomSymbol}
+
+Side:
+${side}
+
+==================================
+`);
+} {
 
   console.log(`
 ==================================

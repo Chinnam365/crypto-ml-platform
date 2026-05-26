@@ -133,7 +133,7 @@ async function updateTradeOutcomes() {
       */
 
       if (
-        pnl >= 2
+        pnl >= 0.5
       ) {
 
         shouldClose = true;
@@ -144,7 +144,7 @@ async function updateTradeOutcomes() {
       */
 
       if (
-        pnl <= -1
+        pnl <= -0.5
       ) {
 
         shouldClose = true;

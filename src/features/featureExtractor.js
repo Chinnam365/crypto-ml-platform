@@ -226,7 +226,7 @@ async function generateFeatures(
     */
 
     const signalQuality =
-  calculateSignalQuality({
+  await calculateSignalQuality({
 
     rsi,
 

@@ -22,9 +22,13 @@ async function updateTradeOutcomes() {
 
         `
         SELECT *
+
         FROM trade_history
+
         WHERE pnl IS NULL
+
         ORDER BY id ASC
+
         LIMIT 100
         `
       );
@@ -36,170 +40,350 @@ async function updateTradeOutcomes() {
       trades.length === 0
     ) {
 
+      console.log(`
+==================================
+NO OPEN TRADES
+==================================
+`);
+
       return;
     }
+
+    /*
+    ==================================================
+    PROCESS TRADES
+    ==================================================
+    */
 
     for (
       const trade of trades
     ) {
 
-      /*
-      ================================================
-      CURRENT MARKET PRICE
-      ================================================
-      */
+      try {
 
-      const marketResult =
-        await pool.query(
+        /*
+        ================================================
+        CURRENT MARKET PRICE
+        ================================================
+        */
 
-          `
-          SELECT close
-          FROM market_candles
-          WHERE symbol = $1
-          ORDER BY candle_time DESC
-          LIMIT 1
-          `,
+        const marketResult =
+          await pool.query(
 
-          [trade.symbol]
-        );
+            `
+            SELECT close
 
-      if (
-        marketResult.rows.length === 0
-      ) {
-        continue;
-      }
+            FROM market_candles
 
-      const currentPrice =
-        Number(
-          marketResult.rows[0].close
-        );
+            WHERE symbol = $1
 
-      const entryPrice =
-        Number(
-          trade.entry_price
-        );
+            ORDER BY candle_time DESC
 
-      let pnl = 0;
+            LIMIT 1
+            `,
 
-      /*
-      ================================================
-      BUY
-      ================================================
-      */
+            [trade.symbol]
+          );
 
-      if (
-        trade.decision === "BUY"
-      ) {
+        if (
+          marketResult.rows.length === 0
+        ) {
+
+          console.log(`
+==================================
+NO MARKET DATA
+==================================
+Symbol:
+${trade.symbol}
+==================================
+`);
+
+          continue;
+        }
+
+        /*
+        ================================================
+        PRICES
+        ================================================
+        */
+
+        const currentPrice =
+          Number(
+            marketResult.rows[0].close
+          );
+
+        const entryPrice =
+          Number(
+            trade.entry_price
+          );
+
+        /*
+        ================================================
+        VALIDATION
+        ================================================
+        */
+
+        if (
+          !entryPrice
+          ||
+          entryPrice <= 0
+        ) {
+
+          console.log(`
+==================================
+INVALID ENTRY PRICE
+==================================
+Trade ID:
+${trade.id}
+
+Symbol:
+${trade.symbol}
+
+Entry Price:
+${trade.entry_price}
+==================================
+`);
+
+          continue;
+        }
+
+        let pnl = 0;
+
+        /*
+        ================================================
+        BUY POSITION
+        ================================================
+        */
+
+        if (
+          trade.decision === "BUY"
+        ) {
+
+          pnl =
+
+            (
+              (
+                currentPrice -
+                entryPrice
+              ) / entryPrice
+            ) * 100;
+        }
+
+        /*
+        ================================================
+        SELL POSITION
+        ================================================
+        */
+
+        else if (
+          trade.decision === "SELL"
+        ) {
+
+          pnl =
+
+            (
+              (
+                entryPrice -
+                currentPrice
+              ) / entryPrice
+            ) * 100;
+        }
+
+        /*
+        ================================================
+        ROUND PNL
+        ================================================
+        */
 
         pnl =
-          (
-            (
-              currentPrice -
-              entryPrice
-            ) / entryPrice
-          ) * 100;
-      }
+          Number(
+            pnl.toFixed(2)
+          );
 
-      /*
-      ================================================
-      SELL
-      ================================================
-      */
+        /*
+        ================================================
+        DEBUG LOG
+        ================================================
+        */
 
-      else if (
-        trade.decision === "SELL"
-      ) {
+        console.log(`
+==================================
+TRADE MONITOR
+==================================
+Trade ID:
+${trade.id}
 
-        pnl =
-          (
-            (
-              entryPrice -
-              currentPrice
-            ) / entryPrice
-          ) * 100;
-      }
+Symbol:
+${trade.symbol}
 
-      /*
-      ================================================
-      CLOSE CONDITIONS
-      ================================================
-      */
+Side:
+${trade.decision}
 
-      let shouldClose =
-        false;
+Entry:
+${entryPrice}
 
-      /*
-      +2% take profit
-      */
+Current:
+${currentPrice}
 
-      if (
-        pnl >= 0.5
-      ) {
+PnL:
+${pnl}%
+==================================
+`);
 
-        shouldClose = true;
-      }
+        /*
+        ================================================
+        CLOSE CONDITIONS
+        ================================================
+        */
 
-      /*
-      -1% stop loss
-      */
+        let shouldClose =
+          false;
 
-      if (
-        pnl <= -0.5
-      ) {
+        let outcome =
+          "LOSS";
 
-        shouldClose = true;
-      }
+        /*
+        ================================================
+        TAKE PROFIT
+        ================================================
+        */
 
-      /*
-      ================================================
-      UPDATE TRADE
-      ================================================
-      */
+        if (
+          pnl >= 0.5
+        ) {
 
-      if (
-        shouldClose
-      ) {
+          shouldClose =
+            true;
 
-        await pool.query(
+          outcome =
+            "WIN";
 
-          `
-          UPDATE trade_history
-          SET
+          console.log(`
+==================================
+TAKE PROFIT HIT
+==================================
+Symbol:
+${trade.symbol}
 
-            pnl = $1,
+PnL:
+${pnl}%
+==================================
+`);
+        }
 
-            outcome =
-              CASE
-                WHEN $1 > 0
-                THEN 'WIN'
-                ELSE 'LOSS'
-              END,
+        /*
+        ================================================
+        STOP LOSS
+        ================================================
+        */
 
-            closed_at = NOW()
+        if (
+          pnl <= -0.5
+        ) {
 
-          WHERE id = $2
-          `,
+          shouldClose =
+            true;
 
-          [
+          outcome =
+            "LOSS";
 
-            Number(
-              pnl.toFixed(2)
-            ),
+          console.log(`
+==================================
+STOP LOSS HIT
+==================================
+Symbol:
+${trade.symbol}
 
-            trade.id,
-          ]
-        );
+PnL:
+${pnl}%
+==================================
+`);
+        }
+
+        /*
+        ================================================
+        UPDATE CLOSED TRADE
+        ================================================
+        */
+
+        if (
+          shouldClose
+        ) {
+
+          await pool.query(
+
+            `
+            UPDATE trade_history
+
+            SET
+
+              pnl = $1,
+
+              outcome = $2,
+
+              closed_at = NOW()
+
+            WHERE id = $3
+            `,
+
+            [
+
+              pnl,
+
+              outcome,
+
+              trade.id,
+            ]
+          );
+
+          console.log(`
+==================================
+TRADE CLOSED
+==================================
+Trade ID:
+${trade.id}
+
+Symbol:
+${trade.symbol}
+
+Outcome:
+${outcome}
+
+Final PnL:
+${pnl}%
+==================================
+`);
+        }
+
+      } catch (tradeErr) {
+
+        console.log(`
+==================================
+TRADE PROCESSING ERROR
+==================================
+`);
+
+        console.log(tradeErr);
+
+        console.log(`
+==================================
+`);
       }
     }
 
   } catch (err) {
 
-    console.log(
+    console.log(`
+==================================
+OUTCOME UPDATER ERROR
+==================================
+`);
 
-      "Outcome updater error:",
+    console.log(err);
 
-      err.message
-    );
+    console.log(`
+==================================
+`);
   }
 }
 

@@ -150,7 +150,7 @@ signal_price
         $23,
         $24,
         $25,
-        $26,
+        $26
      
       )
       `,
@@ -213,17 +213,18 @@ transitionType,
 
   } catch (err) {
 
-  console.log(`
+    console.log(`
 ==================================
 SIGNAL MEMORY SAVE ERROR
 ==================================
 `);
 
-  console.log(err);
+    console.log(err);
 
-  console.log(`
+    console.log(`
 ==================================
 `);
+  }
 }
 
 module.exports = {

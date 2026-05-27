@@ -2234,9 +2234,10 @@ app.get(
         req.params.symbol;
 
       const features =
-        await generateFeatures(
-          symbol
-        );
+  await generateFeatures({
+    symbol,
+    candles,
+  });
 
       res.json({
 

@@ -61,7 +61,6 @@ const {
   classifyMarketState,
 } = require("../ml/marketStateClassifier");
 
-
 /*
 ==================================================
 MAIN FEATURE ENGINE
@@ -272,184 +271,167 @@ async function generateFeatures(
       });
 
     /*
-==================================================
-PREVIOUS MARKET STATE
-==================================================
-*/
+    ==================================================
+    MARKET STATE CLASSIFICATION
+    ==================================================
+    */
 
-const previousSignalResult =
-  await pool.query(
+    const marketState =
+      classifyMarketState({
 
-    `
-    SELECT *
+        trend,
 
-    FROM signal_memory
+        regime,
 
-    WHERE symbol = $1
+        volatility:
+          volatilityData?.volatility || 0,
 
-    ORDER BY id DESC
+        momentumState:
+          macdData?.momentumState,
 
-    LIMIT 1
-    `,
+        momentumStrength:
+          macdData?.momentumStrength || 0,
 
-    [symbol]
-  );
+        alignmentScore:
+          multiTf?.alignmentScore || 0,
+      });
 
-let previousTrend =
-  "UNKNOWN";
-
-let previousRegime =
-  "UNKNOWN";
-
-let previousVolatilityRegime =
-  "UNKNOWN";
-
-if (
-  previousSignalResult.rows.length > 0
-) {
-
-  const previousSignal =
-    previousSignalResult.rows[0];
-
-  previousTrend =
-    previousSignal.trend ||
-    "UNKNOWN";
-
-  previousRegime =
-    previousSignal.regime ||
-    "UNKNOWN";
-
-  previousVolatilityRegime =
-    previousSignal.volatility_regime ||
-    "UNKNOWN";
-}
-
-/*
-==================================================
-TRANSITION DETECTION
-==================================================
-*/
-
-let transitionType =
-  "STABLE";
-/*
-==================================================
-MARKET STATE TRANSITION
-==================================================
-*/
-
-let previousMarketState =
-  "UNKNOWN";
-
-let marketStateTransition =
-  "STABLE";
-
-/*
-==================================================
-LOAD PREVIOUS MARKET STATE
-==================================================
-*/
-
-if (
-  previousSignalResult.rows.length > 0
-) {
-
-  previousMarketState =
-
-    previousSignalResult
-      .rows[0]
-      .market_state ||
-
-    "UNKNOWN";
-}
-
-/*
-==================================================
-DETECT MARKET STATE TRANSITION
-==================================================
-*/
-
-if (
-  previousMarketState !==
-  marketState
-) {
-
-  marketStateTransition =
-
-    `${previousMarketState}_TO_${marketState}`;
-}
-/*
-==================================================
-TREND TRANSITION
-==================================================
-*/
-
-if (
-  previousTrend !== trend
-) {
-
-  transitionType =
-
-    `${previousTrend}_TO_${trend}`;
-}
-
-/*
-==================================================
-REGIME TRANSITION
-==================================================
-*/
-
-if (
-  previousRegime !== regime
-) {
-
-  transitionType =
-
-    `${previousRegime}_TO_${regime}`;
-}
-
-/*
-==================================================
-VOLATILITY TRANSITION
-==================================================
-*/
-
-if (
-
-  previousVolatilityRegime !==
-  volatilityData?.volatilityRegime
-
-) {
-
-  transitionType =
-
-    `${previousVolatilityRegime}_TO_${volatilityData?.volatilityRegime}`;
-}
     /*
-==================================================
-MARKET STATE CLASSIFICATION
-==================================================
-*/
+    ==================================================
+    LOAD PREVIOUS SIGNAL
+    ==================================================
+    */
 
-const marketState =
-  classifyMarketState({
+    const previousSignalResult =
+      await pool.query(
 
-    trend,
+        `
+        SELECT *
 
-    regime,
+        FROM signal_memory
 
-    volatility:
-      volatilityData?.volatility || 0,
+        WHERE symbol = $1
 
-    momentumState:
-      macdData?.momentumState,
+        ORDER BY id DESC
 
-    momentumStrength:
-      macdData?.momentumStrength || 0,
+        LIMIT 1
+        `,
 
-    alignmentScore:
-      multiTf?.alignmentScore || 0,
-  });
+        [symbol]
+      );
+
+    let previousTrend =
+      "UNKNOWN";
+
+    let previousRegime =
+      "UNKNOWN";
+
+    let previousVolatilityRegime =
+      "UNKNOWN";
+
+    let previousMarketState =
+      "UNKNOWN";
+
+    if (
+      previousSignalResult.rows.length > 0
+    ) {
+
+      const previousSignal =
+        previousSignalResult.rows[0];
+
+      previousTrend =
+        previousSignal.trend ||
+        "UNKNOWN";
+
+      previousRegime =
+        previousSignal.regime ||
+        "UNKNOWN";
+
+      previousVolatilityRegime =
+        previousSignal.volatility_regime ||
+        "UNKNOWN";
+
+      previousMarketState =
+        previousSignal.market_state ||
+        "UNKNOWN";
+    }
+
+    /*
+    ==================================================
+    TRANSITIONS
+    ==================================================
+    */
+
+    let transitionType =
+      "STABLE";
+
+    let marketStateTransition =
+      "STABLE";
+
+    /*
+    ==================================================
+    TREND TRANSITION
+    ==================================================
+    */
+
+    if (
+      previousTrend !== trend
+    ) {
+
+      transitionType =
+
+        `${previousTrend}_TO_${trend}`;
+    }
+
+    /*
+    ==================================================
+    REGIME TRANSITION
+    ==================================================
+    */
+
+    if (
+      previousRegime !== regime
+    ) {
+
+      transitionType =
+
+        `${previousRegime}_TO_${regime}`;
+    }
+
+    /*
+    ==================================================
+    VOLATILITY TRANSITION
+    ==================================================
+    */
+
+    if (
+
+      previousVolatilityRegime !==
+      volatilityData?.volatilityRegime
+
+    ) {
+
+      transitionType =
+
+        `${previousVolatilityRegime}_TO_${volatilityData?.volatilityRegime}`;
+    }
+
+    /*
+    ==================================================
+    MARKET STATE TRANSITION
+    ==================================================
+    */
+
+    if (
+      previousMarketState !==
+      marketState
+    ) {
+
+      marketStateTransition =
+
+        `${previousMarketState}_TO_${marketState}`;
+    }
+
     /*
     ==================================================
     SIGNAL QUALITY
@@ -636,8 +618,8 @@ const marketState =
         volatilityData?.volatilityRegime,
 
       signalPrice:
-  currentPrice,
-      
+        currentPrice,
+
       regime,
 
       rsi,
@@ -655,12 +637,14 @@ const marketState =
 
       previousTrend,
 
-previousRegime,
+      previousRegime,
 
-previousVolatilityRegime,
+      previousVolatilityRegime,
 
-transitionType,
+      transitionType,
+
       marketState,
+
       marketStateTransition,
     });
 
@@ -724,16 +708,19 @@ transitionType,
         marketDay,
 
         isWeekend,
-previousTrend,
 
-previousRegime,
+        previousTrend,
 
-previousVolatilityRegime,
+        previousRegime,
 
-transitionType,
+        previousVolatilityRegime,
+
+        transitionType,
+
         marketState,
+
         marketStateTransition,
-        
+
         /*
         ==================================================
         ML FEATURES
@@ -785,8 +772,11 @@ transitionType,
       trend,
 
       regime,
+
       marketState,
-marketStateTransition,
+
+      marketStateTransition,
+
       volatility:
         volatilityData?.volatility,
 
@@ -911,7 +901,7 @@ marketStateTransition,
 
       "Feature Engine Error:",
 
-      err.message
+      err
     );
 
     return null;

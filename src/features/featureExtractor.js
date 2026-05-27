@@ -568,7 +568,11 @@ async function generateFeatures(
 
     const portfolioRisk =
       await evaluatePortfolioRisk();
-
+console.log(`
+==================================
+REACHED SIGNAL MEMORY SECTION
+==================================
+`);
     /*
     ==================================================
     SAVE SIGNAL MEMORY

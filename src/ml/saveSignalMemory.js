@@ -213,13 +213,17 @@ transitionType,
 
   } catch (err) {
 
-    console.log(
+  console.log(`
+==================================
+SIGNAL MEMORY SAVE ERROR
+==================================
+`);
 
-      "Signal memory error:",
+  console.log(err);
 
-      err.message
-    );
-  }
+  console.log(`
+==================================
+`);
 }
 
 module.exports = {

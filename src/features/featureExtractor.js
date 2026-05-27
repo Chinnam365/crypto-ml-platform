@@ -897,15 +897,20 @@ async function generateFeatures(
 
   } catch (err) {
 
-    console.error(
+  console.log(`
+==================================
+FEATURE ENGINE CRASH
+==================================
+`);
 
-      "Feature Engine Error:",
+  console.log(err);
 
-      err
-    );
+  console.log(`
+==================================
+`);
 
-    return null;
-  }
+  return null;
+}
 }
 
 module.exports = {

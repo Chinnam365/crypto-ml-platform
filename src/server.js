@@ -2567,6 +2567,62 @@ app.get(
     }
   }
 );
+
+  /*
+==================================================
+TRADE HISTORY DEBUG
+==================================================
+*/
+
+app.get(
+  "/trade-history-debug",
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await pool.query(
+
+          `
+          SELECT
+
+            id,
+            symbol,
+            decision,
+            entry_price,
+            pnl,
+            outcome,
+            created_at,
+            closed_at
+
+          FROM trade_history
+
+          ORDER BY id DESC
+
+          LIMIT 50
+          `
+        );
+
+      res.json({
+
+        success: true,
+
+        trades:
+          result.rows,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        success: false,
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
   
 app.listen(PORT, () => {
 

@@ -758,47 +758,42 @@ await monitorPositions(pool);
 
     for (
   const randomSymbol of symbols
-) const candles =
-  await getCandles(
-    randomSymbol,
-    "5m",
-    100
-  );
-    {
+) {
 
-    // ==========================================
-    // GET REAL CANDLES
-    // ==========================================
+  // ==========================================
+  // GET REAL CANDLES
+  // ==========================================
 
-    const candles =
-      await getCandles(
-        randomSymbol,
-        "5m",
-        100
-      );
+  const candles =
+    await getCandles(
+      randomSymbol,
+      "5m",
+      100
+    );
 
-    if (!candles.length) {
+  if (!candles.length) {
 
-      console.log(
-        `No candles for ${randomSymbol}`
-      );
+    console.log(
+      `No candles for ${randomSymbol}`
+    );
 
-      continue;
-    }
-/*
-==================================================
-PHASE 2 FEATURE ENGINE
-==================================================
-*/
+    continue;
+  }
 
-const phase2Features =
-  await generateFeatures(
-    randomSymbol
-  );
+  /*
+  ==================================================
+  PHASE 2 FEATURE ENGINE
+  ==================================================
+  */
 
-if (!phase2Features) {
+  const phase2Features =
+    await generateFeatures(
+      randomSymbol
+    );
 
-  console.log(`
+  if (!phase2Features) {
+
+    console.log(`
 ==================================
 FEATURE ENGINE FAILED
 ==================================
@@ -809,10 +804,10 @@ ${randomSymbol}
 ==================================
 `);
 
-  continue;
-}
+    continue;
+  }
 
-console.log(`
+  console.log(`
 ==================================
 PHASE 2 FEATURES GENERATED
 ==================================
@@ -2284,11 +2279,10 @@ app.get(
       const symbol =
         req.params.symbol;
 
-      const features =
-  await generateFeatures({
-    symbol,
-    candles,
-  });
+     const features =
+  await generateFeatures(
+    symbol
+  );
 
       res.json({
 

@@ -1,159 +1,160 @@
 const pool =
   require("../db/db");
 
-async function saveTradeMemory(
-  trade
-) {
+/*
+==================================================
+SAVE TRADE MEMORY
+==================================================
+*/
+
+async function saveTradeMemory(data = {}) {
 
   try {
 
-    // =========================
-    // DUPLICATE CHECK
-    // =========================
+    console.log(`
+==================================
+ATTEMPTING TRADE MEMORY SAVE
+==================================
+`);
 
-    const existingTrade =
+    const result =
       await pool.query(
 
         `
-        SELECT *
-        FROM trade_history
+        INSERT INTO trade_history (
 
-        WHERE
+          symbol,
+          decision,
+          confidence,
+          signal_quality,
+          trend,
+          trend_15m,
+          trend_1h,
+          trend_4h,
+          alignment_score,
+          regime,
+          volatility_regime,
+          rsi,
+          ema_distance,
+          entry_price,
+          market_hour,
+          market_day,
+          is_weekend,
+          previous_trend,
+          previous_regime,
+          previous_volatility_regime,
+          transition_type,
+          market_state,
+          market_state_transition,
+          macd,
+          volatility,
+          trade_quality,
+          overall_trend,
+          buy_score,
+          sell_score
 
-          symbol = $1
+        )
 
-          AND
+        VALUES (
 
-          decision = $2
+          $1,
+          $2,
+          $3,
+          $4,
+          $5,
+          $6,
+          $7,
+          $8,
+          $9,
+          $10,
+          $11,
+          $12,
+          $13,
+          $14,
+          $15,
+          $16,
+          $17,
+          $18,
+          $19,
+          $20,
+          $21,
+          $22,
+          $23,
+          $24,
+          $25,
+          $26,
+          $27,
+          $28,
+          $29
+        )
 
-          AND
-
-          outcome = 'PENDING'
-
-        LIMIT 1
+        RETURNING id
         `,
 
         [
 
-          trade.symbol,
-
-          trade.decision,
+          data.symbol,
+          data.decision,
+          data.confidence,
+          data.signalQuality,
+          data.trend,
+          data.trend15m,
+          data.trend1h,
+          data.trend4h,
+          data.alignmentScore,
+          data.regime,
+          data.volatilityRegime,
+          data.rsi,
+          data.emaDistance,
+          data.entryPrice,
+          data.marketHour,
+          data.marketDay,
+          data.isWeekend,
+          data.previousTrend,
+          data.previousRegime,
+          data.previousVolatilityRegime,
+          data.transitionType,
+          data.marketState,
+          data.marketStateTransition,
+          data.macd,
+          data.volatility,
+          data.tradeQuality,
+          data.overallTrend,
+          data.buyScore,
+          data.sellScore,
         ]
       );
 
-    // =========================
-    // SKIP DUPLICATES
-    // =========================
+    console.log(`
+==================================
+TRADE MEMORY SAVED
+==================================
 
-    if (
-      existingTrade.rows.length > 0
-    ) {
+Trade ID:
+${result.rows[0].id}
 
-      console.log(
+Symbol:
+${data.symbol}
 
-        `Duplicate trade skipped: ${trade.symbol}`
-      );
+Decision:
+${data.decision}
 
-      return;
-    }
-
-    // =========================
-    // SAVE TRADE
-    // =========================
-
-    await pool.query(
-
-      `
-      INSERT INTO trade_history (
-
-        symbol,
-        decision,
-        confidence,
-        signal_quality,
-        trend,
-        regime,
-        volatility_regime,
-        rsi,
-        ema_distance,
-        entry_price,
-
-        macd,
-        volatility,
-        trade_quality,
-        overall_trend,
-        buy_score,
-        sell_score
-trend_15m,
-trend_1h,
-trend_4h,
-alignment_score
-      )
-
-      VALUES (
-
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,
-
-        $11,$12,$13,$14,$15,$16,
-        $17,$18,$19,$20
-      )
-      `,
-
-      [
-
-        trade.symbol,
-
-        trade.decision,
-
-        trade.confidence,
-
-        trade.signalQuality,
-
-        trade.trend,
-
-        trade.regime,
-
-        trade.volatilityRegime,
-
-        trade.rsi,
-
-        trade.emaDistance,
-
-        trade.entryPrice,
-
-        trade.macd,
-
-        trade.volatility,
-
-        trade.tradeQuality,
-
-        trade.overallTrend,
-
-        trade.buyScore,
-
-        trade.sellScore,
-        trade.trend15m,
-
-trade.trend1h,
-
-trade.trend4h,
-
-trade.alignmentScore,
-      ]
-    );
-
-    console.log(
-
-      `Trade memory saved: ${trade.symbol}`
-    );
+==================================
+`);
 
   } catch (err) {
 
-    console.error(
+    console.log(`
+==================================
+TRADE MEMORY SAVE ERROR
+==================================
+`);
 
-      "Trade Memory Error:",
+    console.log(err);
 
-      err.message
-    );
+    console.log(`
+==================================
+`);
   }
 }
 

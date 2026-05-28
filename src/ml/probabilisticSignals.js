@@ -1,4 +1,14 @@
-function calculateSignalScores({
+const {
+  getAdaptiveWeights,
+} = require("./adaptiveWeights");
+
+/*
+==================================================
+PROBABILISTIC SIGNAL ENGINE
+==================================================
+*/
+
+async function calculateSignalScores({
 
   rsi = 50,
 
@@ -9,220 +19,286 @@ function calculateSignalScores({
   regime = "SIDEWAYS",
 
   multiTf = {},
+
+  volatilityRegime = "NORMAL",
+
+  momentumState = "NEUTRAL",
 }) {
 
-  let buyScore = 0;
+  try {
 
-  let sellScore = 0;
+    /*
+    ==================================================
+    LOAD ADAPTIVE WEIGHTS
+    ==================================================
+    */
 
-  /*
-  =========================================
-  RSI
-  =========================================
-  */
+    const weights =
+      await getAdaptiveWeights();
 
-  if (rsi < 25) {
+    let buyScore = 0;
 
-    buyScore += 35;
-  }
+    let sellScore = 0;
 
-  else if (rsi < 35) {
+    /*
+    ==================================================
+    RSI
+    ==================================================
+    */
 
-    buyScore += 25;
-  }
+    if (rsi < 25) {
 
-  else if (rsi < 45) {
+      buyScore +=
+        35 * weights.rsi;
+    }
 
-    buyScore += 15;
-  }
+    else if (rsi < 35) {
 
-  else if (rsi < 55) {
+      buyScore +=
+        25 * weights.rsi;
+    }
 
-    buyScore += 5;
-  }
+    else if (rsi < 45) {
 
-  if (rsi > 75) {
+      buyScore +=
+        15 * weights.rsi;
+    }
 
-    sellScore += 35;
-  }
+    if (rsi > 75) {
 
-  else if (rsi > 65) {
+      sellScore +=
+        35 * weights.rsi;
+    }
 
-    sellScore += 25;
-  }
+    else if (rsi > 65) {
 
-  else if (rsi > 55) {
+      sellScore +=
+        25 * weights.rsi;
+    }
 
-    sellScore += 15;
-  }
+    else if (rsi > 55) {
 
-  else if (rsi > 45) {
+      sellScore +=
+        15 * weights.rsi;
+    }
 
-    sellScore += 5;
-  }
+    /*
+    ==================================================
+    MACD
+    ==================================================
+    */
 
-  /*
-  =========================================
-  MACD
-  =========================================
-  */
+    if (macd > 0.5) {
 
-  if (macd > 0.5) {
+      buyScore +=
+        25 * weights.macd;
+    }
 
-    buyScore += 25;
-  }
+    else if (macd > 0) {
 
-  else if (macd > 0) {
+      buyScore +=
+        15 * weights.macd;
+    }
 
-    buyScore += 15;
-  }
+    if (macd < -0.5) {
 
-  if (macd < -0.5) {
+      sellScore +=
+        25 * weights.macd;
+    }
 
-    sellScore += 25;
-  }
+    else if (macd < 0) {
 
-  else if (macd < 0) {
+      sellScore +=
+        15 * weights.macd;
+    }
 
-    sellScore += 15;
-  }
+    /*
+    ==================================================
+    TREND
+    ==================================================
+    */
 
-  /*
-  =========================================
-  TREND
-  =========================================
-  */
+    if (trend === "BULLISH") {
 
-  if (trend === "BULLISH") {
+      buyScore +=
+        25 * weights.trend;
+    }
 
-    buyScore += 25;
-  }
+    else if (
+      trend === "BEARISH"
+    ) {
 
-  else if (trend === "BEARISH") {
+      sellScore +=
+        25 * weights.trend;
+    }
 
-    sellScore += 25;
-  }
+    /*
+    ==================================================
+    VOLATILITY
+    ==================================================
+    */
 
-  /*
-  =========================================
-  REGIME
-  =========================================
-  */
+    if (
+      volatilityRegime === "HIGH"
+    ) {
 
-  if (regime === "TRENDING") {
+      buyScore +=
+        10 * weights.volatility;
 
-    buyScore += 15;
+      sellScore +=
+        10 * weights.volatility;
+    }
 
-    sellScore += 15;
-  }
+    /*
+    ==================================================
+    MULTI TIMEFRAME
+    ==================================================
+    */
 
-  else if (regime === "VOLATILE") {
+    if (
 
-    buyScore += 10;
+      multiTf?.overallTrend ===
+      "BULLISH"
 
-    sellScore += 10;
-  }
+    ) {
 
-  /*
-  =========================================
-  MULTI TIMEFRAME
-  =========================================
-  */
+      buyScore +=
+        25 * weights.alignment;
+    }
 
-  if (
+    else if (
 
-    multiTf?.overallTrend ===
-    "BULLISH"
+      multiTf?.overallTrend ===
+      "BEARISH"
 
-  ) {
+    ) {
 
-    buyScore += 25;
-  }
+      sellScore +=
+        25 * weights.alignment;
+    }
 
-  else if (
+    /*
+    ==================================================
+    MOMENTUM
+    ==================================================
+    */
 
-    multiTf?.overallTrend ===
-    "BEARISH"
+    if (
 
-  ) {
+      momentumState ===
+      "BULLISH_ACCELERATION"
+    ) {
 
-    sellScore += 25;
-  }
+      buyScore +=
+        20 * weights.momentum;
+    }
 
-  /*
-  =========================================
-  ALIGNMENT BONUS
-  =========================================
-  */
+    else if (
 
-  if (
+      momentumState ===
+      "BEARISH_ACCELERATION"
+    ) {
 
-    trend === "BULLISH"
+      sellScore +=
+        20 * weights.momentum;
+    }
 
-    &&
+    /*
+    ==================================================
+    TREND ALIGNMENT BONUS
+    ==================================================
+    */
 
-    multiTf?.overallTrend ===
-    "BULLISH"
+    if (
 
-  ) {
+      trend === "BULLISH"
 
-    buyScore += 15;
-  }
+      &&
 
-  if (
+      multiTf?.overallTrend ===
+      "BULLISH"
 
-    trend === "BEARISH"
+    ) {
 
-    &&
+      buyScore += 15;
+    }
 
-    multiTf?.overallTrend ===
-    "BEARISH"
+    if (
 
-  ) {
+      trend === "BEARISH"
 
-    sellScore += 15;
-  }
+      &&
 
-  /*
-  =========================================
-  SIDEWAYS PENALTY
-  =========================================
-  */
+      multiTf?.overallTrend ===
+      "BEARISH"
 
-  if (
-    trend === "SIDEWAYS"
-  ) {
+    ) {
 
-    buyScore -= 5;
+      sellScore += 15;
+    }
 
-    sellScore -= 5;
-  }
+    /*
+    ==================================================
+    SIDEWAYS PENALTY
+    ==================================================
+    */
 
-  /*
-  =========================================
-  SAFETY FLOOR
-  =========================================
-  */
+    if (
+      trend === "SIDEWAYS"
+    ) {
 
-  buyScore =
-    Math.max(
-      0,
-      Math.round(buyScore)
-    );
+      buyScore -= 5;
 
-  sellScore =
-    Math.max(
-      0,
-      Math.round(sellScore)
-    );
+      sellScore -= 5;
+    }
 
-  /*
-  =========================================
-  DEBUG LOG
-  =========================================
-  */
+    /*
+    ==================================================
+    ROUNDING
+    ==================================================
+    */
 
-  console.log(`
+    buyScore =
+      Math.max(
+        0,
+        Math.round(buyScore)
+      );
+
+    sellScore =
+      Math.max(
+        0,
+        Math.round(sellScore)
+      );
+
+    /*
+    ==================================================
+    FINAL DECISION
+    ==================================================
+    */
+
+    let decision = "HOLD";
+
+    if (
+      buyScore >= 45
+    ) {
+
+      decision = "BUY";
+    }
+
+    else if (
+      sellScore >= 45
+    ) {
+
+      decision = "SELL";
+    }
+
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
+
+    console.log(`
 ==================================
 PROBABILISTIC SIGNAL ENGINE
 ==================================
@@ -239,21 +315,60 @@ ${trend}
 Regime:
 ${regime}
 
+Momentum:
+${momentumState}
+
+Weights:
+${JSON.stringify(weights)}
+
 Buy Score:
 ${buyScore}
 
 Sell Score:
 ${sellScore}
 
+Decision:
+${decision}
+
 ==================================
 `);
 
-  return {
+    return {
 
-    buyScore,
+      buyScore,
 
-    sellScore,
-  };
+      sellScore,
+
+      decision,
+
+      weights,
+    };
+
+  } catch (err) {
+
+    console.log(`
+==================================
+PROBABILISTIC SIGNAL ERROR
+==================================
+`);
+
+    console.log(err);
+
+    console.log(`
+==================================
+`);
+
+    return {
+
+      buyScore: 0,
+
+      sellScore: 0,
+
+      decision: "HOLD",
+
+      weights: {},
+    };
+  }
 }
 
 module.exports = {

@@ -1,168 +1,386 @@
-const pool =
-  require("../db/db");
+const {
+  optimizeSystemBehavior,
+} = require("./selfOptimizer");
 
-// =====================================
-// ANALYTICS ENGINE
-// =====================================
+const {
+  analyzeStrategyPerformance,
+} = require("./strategyAnalytics");
 
-async function generateAnalytics() {
+const {
+  getAdaptiveSymbolWeights,
+} = require("./adaptiveSymbolWeights");
+
+/*
+==================================================
+META-COORDINATION INTELLIGENCE
+==================================================
+*/
+
+async function generateSystemAnalytics() {
 
   try {
 
-    // =========================
-    // TOTAL TRADES
-    // =========================
+    /*
+    ==================================================
+    SELF-HEALING STATUS
+    ==================================================
+    */
 
-    const tradesResult =
-      await pool.query(
+    const optimizer =
+      await optimizeSystemBehavior();
 
-        `
-        SELECT
+    /*
+    ==================================================
+    STRATEGY EVOLUTION
+    ==================================================
+    */
 
-          COUNT(*) as total,
+    const strategyAnalytics =
+      await analyzeStrategyPerformance();
 
-          AVG(pnl) as avg_pnl
+    /*
+    ==================================================
+    SYMBOL INTELLIGENCE
+    ==================================================
+    */
 
-        FROM trades
-        `
+    const symbolData =
+      await getAdaptiveSymbolWeights();
+
+    /*
+    ==================================================
+    PROMOTED STRATEGIES
+    ==================================================
+    */
+
+    const promotedCount =
+
+      strategyAnalytics
+        .promotedStrategies
+        .length;
+
+    /*
+    ==================================================
+    SUPPRESSED STRATEGIES
+    ==================================================
+    */
+
+    const suppressedCount =
+
+      strategyAnalytics
+        .suppressedStrategies
+        .length;
+
+    /*
+    ==================================================
+    TOP SYMBOLS
+    ==================================================
+    */
+
+    const topSymbols =
+
+      symbolData.rankings
+        .slice(0, 5);
+
+    /*
+    ==================================================
+    SYSTEM STABILITY
+    ==================================================
+    */
+
+    let systemStability = 100;
+
+    systemStability -=
+
+      optimizer.degradationScore;
+
+    /*
+    Clamp
+    */
+
+    systemStability =
+
+      Math.max(
+        0,
+        Math.min(
+          systemStability,
+          100
+        )
       );
 
-    // =========================
-    // TOTAL WINS
-    // =========================
-
-    const winsResult =
-      await pool.query(
-
-        `
-        SELECT
-
-          COUNT(*) as wins
-
-        FROM trades
-
-        WHERE outcome = 'WIN'
-        `
-      );
-
-    // =========================
-    // BEST SYMBOLS
-    // =========================
-
-    const symbolsResult =
-      await pool.query(
-
-        `
-        SELECT
-
-          symbol,
-
-          AVG(pnl) as avg_pnl,
-
-          COUNT(*) as trades
-
-        FROM trades
-
-        GROUP BY symbol
-
-        ORDER BY avg_pnl DESC
-        `
-      );
-
-    // =========================
-    // BEST TRENDS
-    // =========================
-
-    const trendsResult =
-      await pool.query(
-
-        `
-        SELECT
-
-          trend,
-
-          AVG(pnl) as avg_pnl,
-
-          COUNT(*) as trades
-
-        FROM features
-
-        WHERE outcome != 'OPEN'
-
-        GROUP BY trend
-
-        ORDER BY avg_pnl DESC
-        `
-      );
-
-    // =========================
-    // CALCULATIONS
-    // =========================
-
-    const totalTrades =
+    systemStability =
       Number(
-        tradesResult.rows[0].total
+        systemStability.toFixed(2)
       );
 
-    const totalWins =
+    /*
+    ==================================================
+    SYSTEM MODE
+    ==================================================
+    */
+
+    let systemMode =
+      "BALANCED";
+
+    /*
+    Healing mode
+    */
+
+    if (
+      optimizer.healingMode
+    ) {
+
+      systemMode =
+        "SELF_HEALING";
+    }
+
+    /*
+    Aggressive exploitation
+    */
+
+    else if (
+      optimizer.exploitationRate >=
+      0.85
+    ) {
+
+      systemMode =
+        "HIGH_CONFIDENCE";
+    }
+
+    /*
+    Exploratory adaptation
+    */
+
+    else if (
+      optimizer.explorationRate >=
+      0.5
+    ) {
+
+      systemMode =
+        "ADAPTIVE_EXPLORATION";
+    }
+
+    /*
+    ==================================================
+    AI HEALTH SCORE
+    ==================================================
+    */
+
+    let aiHealthScore =
+
+      (
+        systemStability * 0.5
+      )
+
+      +
+
+      (
+        optimizer.confidenceMultiplier
+        * 25
+      )
+
+      +
+
+      (
+        promotedCount * 2
+      )
+
+      -
+
+      (
+        suppressedCount * 1.5
+      );
+
+    /*
+    Clamp
+    */
+
+    aiHealthScore =
+
+      Math.max(
+        1,
+        Math.min(
+          aiHealthScore,
+          100
+        )
+      );
+
+    aiHealthScore =
       Number(
-        winsResult.rows[0].wins
+        aiHealthScore.toFixed(2)
       );
 
-    const avgPnL =
-      Number(
-        tradesResult.rows[0].avg_pnl || 0
-      );
+    /*
+    ==================================================
+    ADAPTATION LEVEL
+    ==================================================
+    */
 
-    const winRate =
+    let adaptationLevel =
+      "NORMAL";
 
-      totalTrades > 0
+    if (
+      aiHealthScore >= 85
+    ) {
 
-        ? (
-            totalWins /
-            totalTrades
-          ) * 100
+      adaptationLevel =
+        "HIGHLY_ADAPTIVE";
+    }
 
-        : 0;
+    else if (
+      aiHealthScore <= 45
+    ) {
 
-    // =========================
-    // RETURN ANALYTICS
-    // =========================
+      adaptationLevel =
+        "DEFENSIVE_ADAPTATION";
+    }
 
-    return {
+    /*
+    ==================================================
+    META INTELLIGENCE SUMMARY
+    ==================================================
+    */
 
-      totalTrades,
+    const summary = {
 
-      totalWins,
+      aiHealthScore,
 
-      winRate:
-        winRate.toFixed(2),
+      systemStability,
 
-      avgPnL:
-        avgPnL.toFixed(2),
+      systemMode,
 
-      bestSymbols:
-        symbolsResult.rows,
+      adaptationLevel,
 
-      bestTrends:
-        trendsResult.rows,
+      healingMode:
+        optimizer.healingMode,
+
+      degradationScore:
+        optimizer.degradationScore,
+
+      explorationRate:
+        optimizer.explorationRate,
+
+      exploitationRate:
+        optimizer.exploitationRate,
+
+      confidenceMultiplier:
+        optimizer.confidenceMultiplier,
+
+      promotedStrategies:
+        promotedCount,
+
+      suppressedStrategies:
+        suppressedCount,
+
+      topSymbols,
     };
 
-  } catch (error) {
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
 
-    console.error(
-      "Analytics failed:",
-      error.message
+    console.log(`
+==================================
+META-COORDINATION INTELLIGENCE
+==================================
+
+AI Health Score:
+${summary.aiHealthScore}
+
+System Stability:
+${summary.systemStability}
+
+System Mode:
+${summary.systemMode}
+
+Adaptation Level:
+${summary.adaptationLevel}
+
+Healing Mode:
+${summary.healingMode}
+
+Degradation Score:
+${summary.degradationScore}
+
+Exploration Rate:
+${summary.explorationRate}
+
+Exploitation Rate:
+${summary.exploitationRate}
+
+Promoted Strategies:
+${summary.promotedStrategies}
+
+Suppressed Strategies:
+${summary.suppressedStrategies}
+
+==================================
+TOP SYMBOL INTELLIGENCE
+==================================
+`);
+
+    console.table(
+      topSymbols
     );
+
+    console.log(`
+==================================
+`);
+
+    /*
+    ==================================================
+    RETURN
+    ==================================================
+    */
+
+    return summary;
+
+  } catch (err) {
+
+    console.log(`
+==================================
+META-COORDINATION ERROR
+==================================
+`);
+
+    console.log(err);
+
+    console.log(`
+==================================
+`);
 
     return {
 
-      error:
-        error.message,
+      aiHealthScore: 50,
+
+      systemStability: 50,
+
+      systemMode: "BALANCED",
+
+      adaptationLevel:
+        "NORMAL",
+
+      healingMode: false,
+
+      degradationScore: 0,
+
+      explorationRate: 0.3,
+
+      exploitationRate: 0.7,
+
+      confidenceMultiplier: 1,
+
+      promotedStrategies: 0,
+
+      suppressedStrategies: 0,
+
+      topSymbols: [],
     };
   }
 }
 
 module.exports = {
-  generateAnalytics,
+  generateSystemAnalytics,
 };

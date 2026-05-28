@@ -1,91 +1,314 @@
-async function getAdaptiveSymbolWeights(pool) {
+const pool =
+  require("../db/db");
 
-  const result =
-    await pool.query(`
-      SELECT
-        symbol,
+/*
+==================================================
+ADAPTIVE SYMBOL INTELLIGENCE
+==================================================
+*/
 
-        COUNT(*) as trades,
+async function getAdaptiveSymbolWeights() {
 
-        AVG(pnl) as avg_pnl,
+  try {
 
-        SUM(
-          CASE
-            WHEN pnl > 0
-            THEN 1
-            ELSE 0
-          END
-        ) as wins
+    /*
+    ==================================================
+    LOAD COMPLETED TRADES
+    ==================================================
+    */
 
-      FROM ml_dataset
+    const result =
+      await pool.query(
 
-      GROUP BY symbol
-    `);
+        `
+        SELECT *
 
-  const rows =
-    result.rows;
+        FROM trade_history
 
-  const weights = {};
+        WHERE
 
-  rows.forEach(row => {
+          outcome IS NOT NULL
 
-    const trades =
-      Number(row.trades || 0);
+          AND
 
-    const wins =
-      Number(row.wins || 0);
+          outcome != 'PENDING'
 
-    const avgPnL =
-      Number(row.avg_pnl || 0);
+        ORDER BY id DESC
 
-    const winRate =
-      trades > 0
-        ? (wins / trades) * 100
-        : 50;
-
-    // ==========================================
-    // SYMBOL SCORE
-    // ==========================================
-
-    let score =
-      (
-        winRate * 0.6
-      ) +
-      (
-        avgPnL * 0.4
+        LIMIT 2000
+        `
       );
 
-    // ==========================================
-    // NORMALIZE
-    // ==========================================
+    const trades =
+      result.rows;
 
-    let weight = 1;
+    /*
+    ==================================================
+    DEFAULT SYMBOLS
+    ==================================================
+    */
 
-    if (score > 70) {
+    const symbolStats = {
 
-      weight = 1.3;
+      BTCUSDT: {
+        wins: 0,
+        total: 0,
+        pnl: 0,
+      },
+
+      ETHUSDT: {
+        wins: 0,
+        total: 0,
+        pnl: 0,
+      },
+
+      SOLUSDT: {
+        wins: 0,
+        total: 0,
+        pnl: 0,
+      },
+
+      LINKUSDT: {
+        wins: 0,
+        total: 0,
+        pnl: 0,
+      },
+
+      DOGEUSDT: {
+        wins: 0,
+        total: 0,
+        pnl: 0,
+      },
+    };
+
+    /*
+    ==================================================
+    PROCESS TRADES
+    ==================================================
+    */
+
+    for (
+      const trade of trades
+    ) {
+
+      if (
+        !symbolStats[
+          trade.symbol
+        ]
+      ) {
+
+        symbolStats[
+          trade.symbol
+        ] = {
+
+          wins: 0,
+          total: 0,
+          pnl: 0,
+        };
+      }
+
+      symbolStats[
+        trade.symbol
+      ].total++;
+
+      symbolStats[
+        trade.symbol
+      ].pnl +=
+        Number(
+          trade.pnl || 0
+        );
+
+      if (
+        trade.outcome === "WIN"
+      ) {
+
+        symbolStats[
+          trade.symbol
+        ].wins++;
+      }
     }
 
-    else if (score > 55) {
+    /*
+    ==================================================
+    CALCULATE WEIGHTS
+    ==================================================
+    */
 
-      weight = 1.15;
+    const weights = {};
+
+    for (
+      const symbol of
+      Object.keys(symbolStats)
+    ) {
+
+      const stats =
+        symbolStats[symbol];
+
+      /*
+      ================================================
+      MINIMUM SAMPLE SIZE
+      ================================================
+      */
+
+      if (
+        stats.total < 5
+      ) {
+
+        weights[symbol] = 1;
+
+        continue;
+      }
+
+      /*
+      ================================================
+      WIN RATE
+      ================================================
+      */
+
+      const winRate =
+
+        stats.wins /
+        stats.total;
+
+      /*
+      ================================================
+      AVG PNL
+      ================================================
+      */
+
+      const avgPnL =
+
+        stats.pnl /
+        stats.total;
+
+      /*
+      ================================================
+      WEIGHT FORMULA
+      ================================================
+      */
+
+      let weight =
+
+        0.5 +
+
+        (winRate * 1.2) +
+
+        (avgPnL * 0.15);
+
+      /*
+      ================================================
+      CLAMPING
+      ================================================
+      */
+
+      weight =
+
+        Math.max(
+          0.4,
+          Math.min(
+            weight,
+            2.5
+          )
+        );
+
+      weights[symbol] =
+        Number(
+          weight.toFixed(2)
+        );
     }
 
-    else if (score < 40) {
+    /*
+    ==================================================
+    SYMBOL RANKING
+    ==================================================
+    */
 
-      weight = 0.7;
-    }
+    const rankings =
 
-    else if (score < 50) {
+      Object.keys(weights)
 
-      weight = 0.85;
-    }
+        .map(symbol => ({
 
-    weights[row.symbol] =
-      Number(weight.toFixed(2));
-  });
+          symbol,
 
-  return weights;
+          weight:
+            weights[symbol],
+
+          trades:
+            symbolStats[symbol]
+              .total,
+
+          avgPnL:
+            Number(
+
+              (
+                symbolStats[symbol]
+                  .pnl
+
+                /
+
+                Math.max(
+                  1,
+                  symbolStats[symbol]
+                    .total
+                )
+
+              ).toFixed(2)
+            ),
+        }))
+
+        .sort(
+          (a, b) =>
+            b.weight -
+            a.weight
+        );
+
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
+
+    console.log(`
+==================================
+ADAPTIVE SYMBOL WEIGHTS
+==================================
+`);
+
+    console.table(rankings);
+
+    console.log(`
+==================================
+`);
+
+    return {
+
+      weights,
+
+      rankings,
+    };
+
+  } catch (err) {
+
+    console.log(`
+==================================
+SYMBOL WEIGHT ERROR
+==================================
+`);
+
+    console.log(err);
+
+    console.log(`
+==================================
+`);
+
+    return {
+
+      weights: {},
+
+      rankings: [],
+    };
+  }
 }
 
 module.exports = {

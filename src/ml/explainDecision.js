@@ -14,67 +14,145 @@ function explainDecision({
 
   tradeQuality,
 
-  multiTf,
+  multiTf = {},
+
+  consensusStrength = 0,
+
+  sentiment = "NEUTRAL",
+
+  riskMode = "NORMAL",
+
+  anomalyThreat = "NORMAL",
+
+  predictedState = "NEUTRAL",
 }) {
 
   const reasons = [];
 
-  // ==========================================
-  // SIDE
-  // ==========================================
+  /*
+  ==================================================
+  DECISION
+  ==================================================
+  */
 
-  if (side === "HOLD") {
+  if (side === "BUY") {
 
     reasons.push(
-      "No strong directional signal"
+      "Bullish conditions detected"
     );
   }
 
-  // ==========================================
-  // CONFIDENCE
-  // ==========================================
-
-  if (
-    confidence < threshold
-  ) {
+  else if (side === "SELL") {
 
     reasons.push(
-      "Confidence below adaptive threshold"
+      "Bearish conditions detected"
     );
   }
 
   else {
 
     reasons.push(
+      "No strong directional signal"
+    );
+  }
+
+  /*
+  ==================================================
+  CONFIDENCE
+  ==================================================
+  */
+
+  if (
+    confidence >= threshold
+  ) {
+
+    reasons.push(
       "Confidence exceeded threshold"
     );
   }
 
-  // ==========================================
-  // VOLATILITY
-  // ==========================================
+  else {
 
-  if (volatility < 0.4) {
+    reasons.push(
+      "Confidence below adaptive threshold"
+    );
+  }
+
+  /*
+  ==================================================
+  CONSENSUS
+  ==================================================
+  */
+
+  if (
+    consensusStrength >= 80
+  ) {
+
+    reasons.push(
+      "Strong intelligence consensus"
+    );
+  }
+
+  else if (
+    consensusStrength >= 60
+  ) {
+
+    reasons.push(
+      "Moderate intelligence consensus"
+    );
+  }
+
+  else if (
+    consensusStrength > 0
+  ) {
+
+    reasons.push(
+      "Weak intelligence consensus"
+    );
+  }
+
+  /*
+  ==================================================
+  VOLATILITY
+  ==================================================
+  */
+
+  if (
+    volatility < 0.4
+  ) {
 
     reasons.push(
       "Volatility too low"
     );
   }
 
-  if (volatility > 7) {
+  else if (
+    volatility > 7
+  ) {
 
     reasons.push(
       "Volatility extremely high"
     );
   }
 
-  // ==========================================
-  // MULTI TF
-  // ==========================================
+  else if (
+    volatility > 3
+  ) {
+
+    reasons.push(
+      "Elevated volatility detected"
+    );
+  }
+
+  /*
+  ==================================================
+  MULTI TIMEFRAME
+  ==================================================
+  */
 
   if (
 
-    multiTf.overallTrend ===
+    multiTf?.overallTrend ===
     trend
 
   ) {
@@ -91,26 +169,73 @@ function explainDecision({
     );
   }
 
-  // ==========================================
-  // REGIME
-  // ==========================================
+  /*
+  ==================================================
+  REGIME
+  ==================================================
+  */
 
   reasons.push(
     `Market regime: ${regime}`
   );
 
-  // ==========================================
-  // TRADE QUALITY
-  // ==========================================
+  /*
+  ==================================================
+  SENTIMENT
+  ==================================================
+  */
 
-  if (tradeQuality >= 70) {
+  if (
+    sentiment !== "NEUTRAL"
+  ) {
+
+    reasons.push(
+      `Market sentiment: ${sentiment}`
+    );
+  }
+
+  /*
+  ==================================================
+  PREDICTED STATE
+  ==================================================
+  */
+
+  if (
+    predictedState !== "NEUTRAL"
+  ) {
+
+    reasons.push(
+      `Predicted market state: ${predictedState}`
+    );
+  }
+
+  /*
+  ==================================================
+  TRADE QUALITY
+  ==================================================
+  */
+
+  if (
+    tradeQuality >= 85
+  ) {
+
+    reasons.push(
+      "Institutional-grade setup"
+    );
+  }
+
+  else if (
+    tradeQuality >= 70
+  ) {
 
     reasons.push(
       "High quality setup"
     );
   }
 
-  else if (tradeQuality >= 50) {
+  else if (
+    tradeQuality >= 50
+  ) {
 
     reasons.push(
       "Moderate quality setup"
@@ -123,6 +248,42 @@ function explainDecision({
       "Low quality setup"
     );
   }
+
+  /*
+  ==================================================
+  RISK MODE
+  ==================================================
+  */
+
+  if (
+    riskMode !== "NORMAL"
+  ) {
+
+    reasons.push(
+      `Risk mode: ${riskMode}`
+    );
+  }
+
+  /*
+  ==================================================
+  ANOMALY DETECTION
+  ==================================================
+  */
+
+  if (
+    anomalyThreat !== "NORMAL"
+  ) {
+
+    reasons.push(
+      `Anomaly threat: ${anomalyThreat}`
+    );
+  }
+
+  /*
+  ==================================================
+  RETURN
+  ==================================================
+  */
 
   return reasons;
 }

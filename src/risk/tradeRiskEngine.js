@@ -23,6 +23,24 @@ function calculateTradeRisk(
     let takeProfit = null;
 
     // =========================
+    // HOLD SAFETY
+    // =========================
+
+    if (
+      decision === "HOLD"
+    ) {
+
+      return {
+
+        stopLoss: null,
+
+        takeProfit: null,
+
+        riskRewardRatio: null,
+      };
+    }
+
+    // =========================
     // VOLATILITY FACTOR
     // =========================
 
@@ -62,7 +80,7 @@ function calculateTradeRisk(
     // SELL SETUP
     // =========================
 
-    if (
+    else if (
       decision === "SELL"
     ) {
 
@@ -87,11 +105,7 @@ function calculateTradeRisk(
     // RISK REWARD
     // =========================
 
-    const riskRewardRatio =
-
-  decision === "HOLD"
-    ? null
-    : 2;
+    const riskRewardRatio = 2;
 
     return {
 
@@ -114,7 +128,7 @@ function calculateTradeRisk(
 
       "Trade Risk Error:",
 
-      err.message
+      err
     );
 
     return {

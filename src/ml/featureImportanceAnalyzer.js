@@ -13,7 +13,7 @@ async function analyzeFeatureImportance() {
 
     /*
     ==================================================
-    LOAD LABELED SIGNALS
+    LOAD COMPLETED TRADES
     ==================================================
     */
 
@@ -23,22 +23,33 @@ async function analyzeFeatureImportance() {
         `
         SELECT *
 
-        FROM signal_memory
+        FROM trade_history
 
         WHERE
-          signal_outcome IS NOT NULL
+
+          outcome IS NOT NULL
+
+          AND
+
+          outcome != 'PENDING'
 
         ORDER BY id DESC
 
-        LIMIT 5000
+        LIMIT 1000
         `
       );
 
-    const signals =
+    const trades =
       result.rows;
 
+    /*
+    ==================================================
+    MINIMUM SAMPLE SIZE
+    ==================================================
+    */
+
     if (
-      signals.length < 50
+      trades.length < 20
     ) {
 
       return {
@@ -46,7 +57,7 @@ async function analyzeFeatureImportance() {
         success: false,
 
         message:
-          "Not enough labeled signals",
+          "Not enough completed trades",
       };
     }
 
@@ -56,289 +67,262 @@ async function analyzeFeatureImportance() {
     ==================================================
     */
 
-    const featureScores = {
+    let bullishWins = 0;
+    let bullishTotal = 0;
 
-      highConfidence:
-        { success: 0, total: 0 },
+    let bearishWins = 0;
+    let bearishTotal = 0;
 
-      bullishTrend:
-        { success: 0, total: 0 },
+    let highVolWins = 0;
+    let highVolTotal = 0;
 
-      bearishTrend:
-        { success: 0, total: 0 },
+    let lowVolWins = 0;
+    let lowVolTotal = 0;
 
-      highAlignment:
-        { success: 0, total: 0 },
+    let alignedWins = 0;
+    let alignedTotal = 0;
 
-      bullishMomentum:
-        { success: 0, total: 0 },
-
-      lowVolatility:
-        { success: 0, total: 0 },
-
-      breakoutSetup:
-        { success: 0, total: 0 },
-
-      accumulation:
-        { success: 0, total: 0 },
-
-      explorationTrade:
-        { success: 0, total: 0 },
-    };
+    let momentumWins = 0;
+    let momentumTotal = 0;
 
     /*
     ==================================================
-    ITERATE SIGNALS
+    PROCESS TRADES
     ==================================================
     */
 
     for (
-      const signal of signals
+      const trade of trades
     ) {
 
-      const isSuccess =
-
-        signal.signal_outcome ===
-        "SUCCESS";
+      const isWin =
+        trade.outcome === "WIN";
 
       /*
       ================================================
-      HIGH CONFIDENCE
+      TREND
       ================================================
       */
 
       if (
-        signal.confidence >= 60
+        trade.trend === "BULLISH"
       ) {
 
-        featureScores.highConfidence.total++;
+        bullishTotal++;
 
-        if (isSuccess) {
+        if (isWin) {
+          bullishWins++;
+        }
+      }
 
-          featureScores.highConfidence.success++;
+      if (
+        trade.trend === "BEARISH"
+      ) {
+
+        bearishTotal++;
+
+        if (isWin) {
+          bearishWins++;
         }
       }
 
       /*
       ================================================
-      BULLISH TREND
+      VOLATILITY
       ================================================
       */
 
       if (
-        signal.trend ===
-        "BULLISH"
+        trade.volatility_regime ===
+        "HIGH"
       ) {
 
-        featureScores.bullishTrend.total++;
+        highVolTotal++;
 
-        if (isSuccess) {
-
-          featureScores.bullishTrend.success++;
+        if (isWin) {
+          highVolWins++;
         }
       }
 
-      /*
-      ================================================
-      BEARISH TREND
-      ================================================
-      */
-
       if (
-        signal.trend ===
-        "BEARISH"
-      ) {
-
-        featureScores.bearishTrend.total++;
-
-        if (isSuccess) {
-
-          featureScores.bearishTrend.success++;
-        }
-      }
-
-      /*
-      ================================================
-      HIGH ALIGNMENT
-      ================================================
-      */
-
-      if (
-        signal.alignment_score >= 70
-      ) {
-
-        featureScores.highAlignment.total++;
-
-        if (isSuccess) {
-
-          featureScores.highAlignment.success++;
-        }
-      }
-
-      /*
-      ================================================
-      BULLISH MOMENTUM
-      ================================================
-      */
-
-      if (
-
-        signal.momentum_state ===
-        "BULLISH_ACCELERATION"
-
-      ) {
-
-        featureScores.bullishMomentum.total++;
-
-        if (isSuccess) {
-
-          featureScores.bullishMomentum.success++;
-        }
-      }
-
-      /*
-      ================================================
-      LOW VOLATILITY
-      ================================================
-      */
-
-      if (
-        signal.volatility_regime ===
+        trade.volatility_regime ===
         "LOW"
       ) {
 
-        featureScores.lowVolatility.total++;
+        lowVolTotal++;
 
-        if (isSuccess) {
-
-          featureScores.lowVolatility.success++;
+        if (isWin) {
+          lowVolWins++;
         }
       }
 
       /*
       ================================================
-      BREAKOUT SETUP
+      ALIGNMENT
       ================================================
       */
 
       if (
-        signal.market_state ===
-        "BREAKOUT_SETUP"
+        Number(
+          trade.alignment_score
+        ) >= 70
       ) {
 
-        featureScores.breakoutSetup.total++;
+        alignedTotal++;
 
-        if (isSuccess) {
-
-          featureScores.breakoutSetup.success++;
+        if (isWin) {
+          alignedWins++;
         }
       }
 
       /*
       ================================================
-      ACCUMULATION
+      MOMENTUM
       ================================================
       */
 
       if (
-        signal.market_state ===
-        "ACCUMULATION"
+
+        trade.momentum_state ===
+        "BULLISH_ACCELERATION"
+
+        ||
+
+        trade.momentum_state ===
+        "BEARISH_ACCELERATION"
       ) {
 
-        featureScores.accumulation.total++;
+        momentumTotal++;
 
-        if (isSuccess) {
-
-          featureScores.accumulation.success++;
-        }
-      }
-
-      /*
-      ================================================
-      EXPLORATION TRADES
-      ================================================
-      */
-
-      if (
-        signal.exploration_trade
-      ) {
-
-        featureScores.explorationTrade.total++;
-
-        if (isSuccess) {
-
-          featureScores.explorationTrade.success++;
+        if (isWin) {
+          momentumWins++;
         }
       }
     }
 
     /*
     ==================================================
-    CALCULATE SUCCESS RATES
+    SAFE WINRATE
     ==================================================
     */
 
-    const report = {};
-
-    for (
-      const feature in featureScores
+    function safeRate(
+      wins,
+      total
     ) {
 
-      const data =
-        featureScores[feature];
+      if (
+        total === 0
+      ) {
+        return 0;
+      }
 
-      const successRate =
+      return Number(
 
-        data.total > 0
-
-          ?
-
-          (
-            data.success /
-            data.total
-          ) * 100
-
-          :
-
-          0;
-
-      report[feature] = {
-
-        totalSamples:
-          data.total,
-
-        successRate:
-          Number(
-            successRate.toFixed(2)
-          ),
-      };
+        (
+          (wins / total) * 100
+        ).toFixed(2)
+      );
     }
+
+    /*
+    ==================================================
+    FINAL REPORT
+    ==================================================
+    */
+
+    const report = {
+
+      sampleSize:
+        trades.length,
+
+      trend: {
+
+        bullishTrendWinRate:
+          safeRate(
+            bullishWins,
+            bullishTotal
+          ),
+
+        bearishTrendWinRate:
+          safeRate(
+            bearishWins,
+            bearishTotal
+          ),
+      },
+
+      volatility: {
+
+        highVolatilityWinRate:
+          safeRate(
+            highVolWins,
+            highVolTotal
+          ),
+
+        lowVolatilityWinRate:
+          safeRate(
+            lowVolWins,
+            lowVolTotal
+          ),
+      },
+
+      alignment: {
+
+        alignedSetupWinRate:
+          safeRate(
+            alignedWins,
+            alignedTotal
+          ),
+      },
+
+      momentum: {
+
+        accelerationWinRate:
+          safeRate(
+            momentumWins,
+            momentumTotal
+          ),
+      },
+    };
+
+    console.log(`
+==================================
+FEATURE IMPORTANCE REPORT
+==================================
+`);
+
+    console.log(report);
+
+    console.log(`
+==================================
+`);
 
     return {
 
       success: true,
-
-      totalSignals:
-        signals.length,
 
       report,
     };
 
   } catch (err) {
 
-    console.log(
+    console.log(`
+==================================
+FEATURE IMPORTANCE ERROR
+==================================
+`);
 
-      "Feature importance error:",
+    console.log(err);
 
-      err.message
-    );
+    console.log(`
+==================================
+`);
 
     return {
 
       success: false,
 
-      error:
-        err.message,
+      error: err.message,
     };
   }
 }

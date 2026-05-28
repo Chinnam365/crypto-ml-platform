@@ -1,86 +1,301 @@
-async function getOptimizationAdjustments(pool) {
+const pool =
+  require("../db/db");
 
-const result =
-  await pool.query(`
-    SELECT
-      AVG(pnl) AS avg_pnl,
-      AVG(confidence) AS avg_confidence,
-      AVG(reward) AS avg_reward,
-      COUNT(*) AS trades
-    FROM reinforcement_memory
-  `);
+/*
+==================================================
+SELF OPTIMIZER
+==================================================
+*/
 
-  const row =
-    result.rows[0];
+async function optimizeSystemBehavior() {
 
-  const avgPnL =
-    Number(row.avg_pnl || 0);
+  try {
 
-  const avgConfidence =
-    Number(
-      row.avg_confidence || 0
-    );
+    /*
+    ==================================================
+    LOAD RECENT TRADES
+    ==================================================
+    */
 
-  const avgReward =
-    Number(row.avg_reward || 0);
-const totalTrades =
-  Number(
-    row.trades || 0
-  );
-  let thresholdAdjustment = 0;
+    const result =
+      await pool.query(
 
-  let confidenceMultiplier = 1;
+        `
+        SELECT *
 
-  // ==========================================
-  // PERFORMANCE LOGIC
-  // ==========================================
-// ==========================================
-// MINIMUM SAMPLE PROTECTION
-// ==========================================
+        FROM trade_history
 
-if (totalTrades < 30) {
+        WHERE
 
-  return {
+          outcome IS NOT NULL
 
-    avgPnL,
+          AND
 
-    avgConfidence,
+          outcome != 'PENDING'
 
-    avgReward,
+        ORDER BY id DESC
 
-    thresholdAdjustment: 0,
+        LIMIT 300
+        `
+      );
 
-    confidenceMultiplier: 1,
-  };
-}
-  if (avgReward > 0.3) {
+    const trades =
+      result.rows;
 
-    thresholdAdjustment -= 3;
+    /*
+    ==================================================
+    MINIMUM DATA
+    ==================================================
+    */
 
-    confidenceMultiplier += 0.05;
+    if (
+      trades.length < 30
+    ) {
+
+      return {
+
+        explorationRate: 0.4,
+
+        exploitationRate: 0.6,
+
+        confidenceMultiplier: 1,
+
+        thresholdAdjustment: 0,
+      };
+    }
+
+    /*
+    ==================================================
+    METRICS
+    ==================================================
+    */
+
+    let wins = 0;
+
+    let losses = 0;
+
+    let totalPnL = 0;
+
+    for (
+      const trade of trades
+    ) {
+
+      if (
+        trade.outcome === "WIN"
+      ) {
+
+        wins++;
+      }
+
+      else if (
+        trade.outcome === "LOSS"
+      ) {
+
+        losses++;
+      }
+
+      totalPnL +=
+        Number(
+          trade.pnl || 0
+        );
+    }
+
+    const totalTrades =
+      wins + losses;
+
+    const winRate =
+
+      totalTrades > 0
+
+        ? (wins / totalTrades) * 100
+
+        : 0;
+
+    const avgPnL =
+
+      totalTrades > 0
+
+        ? totalPnL / totalTrades
+
+        : 0;
+
+    /*
+    ==================================================
+    EXPLORATION / EXPLOITATION
+    ==================================================
+    */
+
+    let explorationRate = 0.3;
+
+    let exploitationRate = 0.7;
+
+    /*
+    ==================================================
+    LOSING SYSTEM
+    EXPLORE MORE
+    ==================================================
+    */
+
+    if (
+      winRate < 45
+    ) {
+
+      explorationRate = 0.6;
+
+      exploitationRate = 0.4;
+    }
+
+    /*
+    ==================================================
+    STRONG SYSTEM
+    EXPLOIT MORE
+    ==================================================
+    */
+
+    else if (
+      winRate > 60
+    ) {
+
+      explorationRate = 0.15;
+
+      exploitationRate = 0.85;
+    }
+
+    /*
+    ==================================================
+    CONFIDENCE MULTIPLIER
+    ==================================================
+    */
+
+    let confidenceMultiplier = 1;
+
+    if (
+      avgPnL > 0.5
+    ) {
+
+      confidenceMultiplier = 1.15;
+    }
+
+    else if (
+      avgPnL < -0.5
+    ) {
+
+      confidenceMultiplier = 0.85;
+    }
+
+    /*
+    ==================================================
+    THRESHOLD ADJUSTMENT
+    ==================================================
+    */
+
+    let thresholdAdjustment = 0;
+
+    if (
+      winRate > 65
+    ) {
+
+      thresholdAdjustment = -5;
+    }
+
+    else if (
+      winRate < 40
+    ) {
+
+      thresholdAdjustment = 5;
+    }
+
+    /*
+    ==================================================
+    FINAL OUTPUT
+    ==================================================
+    */
+
+    const output = {
+
+      winRate:
+        Number(
+          winRate.toFixed(2)
+        ),
+
+      avgPnL:
+        Number(
+          avgPnL.toFixed(2)
+        ),
+
+      explorationRate:
+        Number(
+          explorationRate.toFixed(2)
+        ),
+
+      exploitationRate:
+        Number(
+          exploitationRate.toFixed(2)
+        ),
+
+      confidenceMultiplier:
+        Number(
+          confidenceMultiplier.toFixed(2)
+        ),
+
+      thresholdAdjustment,
+    };
+
+    console.log(`
+==================================
+SELF OPTIMIZER
+==================================
+
+Win Rate:
+${output.winRate}%
+
+Avg PnL:
+${output.avgPnL}
+
+Exploration Rate:
+${output.explorationRate}
+
+Exploitation Rate:
+${output.exploitationRate}
+
+Confidence Multiplier:
+${output.confidenceMultiplier}
+
+Threshold Adjustment:
+${output.thresholdAdjustment}
+
+==================================
+`);
+
+    return output;
+
+  } catch (err) {
+
+    console.log(`
+==================================
+SELF OPTIMIZER ERROR
+==================================
+`);
+
+    console.log(err);
+
+    console.log(`
+==================================
+`);
+
+    return {
+
+      explorationRate: 0.3,
+
+      exploitationRate: 0.7,
+
+      confidenceMultiplier: 1,
+
+      thresholdAdjustment: 0,
+    };
   }
-
-  if (avgReward < -0.3) {
-
-    thresholdAdjustment += 3;
-
-    confidenceMultiplier -= 0.05;
-  }
-
-  return {
-
-    avgPnL,
-
-    avgConfidence,
-
-    avgReward,
-
-    thresholdAdjustment,
-
-    confidenceMultiplier,
-  };
 }
 
 module.exports = {
-  getOptimizationAdjustments,
+  optimizeSystemBehavior,
 };

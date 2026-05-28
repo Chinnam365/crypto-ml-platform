@@ -11,10 +11,11 @@ SYMBOL SELECTION ENGINE
 ==================================================
 */
 
-async function selectTradingSymbols({
-
-  maxSymbols = 5,
-}) {
+async function selectTradingSymbols(
+  {
+    maxSymbols = 5,
+  } = {}
+) {
 
   try {
 

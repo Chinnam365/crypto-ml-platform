@@ -758,7 +758,13 @@ await monitorPositions(pool);
 
     for (
   const randomSymbol of symbols
-) {
+) const candles =
+  await getCandles(
+    randomSymbol,
+    "5m",
+    100
+  );
+    {
 
     // ==========================================
     // GET REAL CANDLES
@@ -779,7 +785,52 @@ await monitorPositions(pool);
 
       continue;
     }
+/*
+==================================================
+PHASE 2 FEATURE ENGINE
+==================================================
+*/
 
+const phase2Features =
+  await generateFeatures(
+    randomSymbol
+  );
+
+if (!phase2Features) {
+
+  console.log(`
+==================================
+FEATURE ENGINE FAILED
+==================================
+
+Symbol:
+${randomSymbol}
+
+==================================
+`);
+
+  continue;
+}
+
+console.log(`
+==================================
+PHASE 2 FEATURES GENERATED
+==================================
+
+Symbol:
+${randomSymbol}
+
+Decision:
+${phase2Features.decision}
+
+Confidence:
+${phase2Features.confidence}
+
+Market State:
+${phase2Features.marketState}
+
+==================================
+`);
     // ==========================================
     // EXTRACT CLOSES
     // ==========================================

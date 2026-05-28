@@ -1,10 +1,14 @@
+const {
+  optimizeSystemBehavior,
+} = require("./selfOptimizer");
+
 /*
 ==================================================
-ADAPTIVE TRADE DECISION ENGINE
+TRADE DECISION ENGINE
 ==================================================
 */
 
-function generateTradeDecision({
+async function generateTradeDecision({
 
   trend,
 
@@ -18,230 +22,344 @@ function generateTradeDecision({
 
   volatilityRegime,
 
-  alignmentScore = 0,
+  alignmentScore,
 
-  overallTrend = "SIDEWAYS",
+  overallTrend,
 
-  momentumState = "NEUTRAL",
+  momentumState,
 }) {
 
   try {
 
     /*
     ==================================================
-    DEFAULT
+    SYSTEM OPTIMIZATION
     ==================================================
     */
 
-    let action =
-      "HOLD";
-
-    let reason =
-      "No valid setup";
-
-    let explorationTrade =
-      false;
+    const optimizer =
+      await optimizeSystemBehavior();
 
     /*
     ==================================================
-    HIGH CONFIDENCE BUY
+    APPLY CONFIDENCE MULTIPLIER
+    ==================================================
+    */
+
+    let adjustedConfidence =
+
+      confidence *
+      optimizer.confidenceMultiplier;
+
+    adjustedConfidence =
+      Number(
+        adjustedConfidence.toFixed(2)
+      );
+
+    /*
+    ==================================================
+    EXPLORATION LOGIC
+    ==================================================
+    */
+
+    const explorationTrade =
+
+      Math.random() <
+      optimizer.explorationRate;
+
+    /*
+    ==================================================
+    BASE DECISION
+    ==================================================
+    */
+
+    let action = "HOLD";
+
+    /*
+    ==================================================
+    BUY CONDITIONS
+    ==================================================
+    */
+
+    const bullishConditions = [
+
+      trend === "BULLISH",
+
+      rsi < 65,
+
+      adjustedConfidence >=
+        (
+          55 +
+          optimizer.thresholdAdjustment
+        ),
+
+      signalQuality !== "LOW",
+
+      overallTrend !== "BEARISH",
+    ];
+
+    const bullishScore =
+
+      bullishConditions.filter(
+        Boolean
+      ).length;
+
+    /*
+    ==================================================
+    SELL CONDITIONS
+    ==================================================
+    */
+
+    const bearishConditions = [
+
+      trend === "BEARISH",
+
+      rsi > 35,
+
+      adjustedConfidence >=
+        (
+          55 +
+          optimizer.thresholdAdjustment
+        ),
+
+      signalQuality !== "LOW",
+
+      overallTrend !== "BULLISH",
+    ];
+
+    const bearishScore =
+
+      bearishConditions.filter(
+        Boolean
+      ).length;
+
+    /*
+    ==================================================
+    MOMENTUM BONUS
+    ==================================================
+    */
+
+    let momentumBonus = 0;
+
+    if (
+
+      momentumState ===
+      "BULLISH_ACCELERATION"
+
+      ||
+
+      momentumState ===
+      "BEARISH_ACCELERATION"
+    ) {
+
+      momentumBonus = 1;
+    }
+
+    /*
+    ==================================================
+    ALIGNMENT BONUS
+    ==================================================
+    */
+
+    let alignmentBonus = 0;
+
+    if (
+      alignmentScore >= 70
+    ) {
+
+      alignmentBonus = 1;
+    }
+
+    /*
+    ==================================================
+    FINAL SCORES
+    ==================================================
+    */
+
+    const finalBullishScore =
+
+      bullishScore +
+      momentumBonus +
+      alignmentBonus;
+
+    const finalBearishScore =
+
+      bearishScore +
+      momentumBonus +
+      alignmentBonus;
+
+    /*
+    ==================================================
+    DECISION LOGIC
+    ==================================================
+    */
+
+    if (
+      finalBullishScore >= 5
+    ) {
+
+      action = "BUY";
+    }
+
+    else if (
+      finalBearishScore >= 5
+    ) {
+
+      action = "SELL";
+    }
+
+    /*
+    ==================================================
+    EXPLORATION OVERRIDE
     ==================================================
     */
 
     if (
 
-      confidence >= 65
+      explorationTrade
 
       &&
 
-      trend === "BULLISH"
+      adjustedConfidence >= 45
 
       &&
 
-      (
-        momentumState ===
-        "BULLISH_ACCELERATION"
-
-        ||
-
-        overallTrend ===
-        "BULLISH"
-      )
-
+      action === "HOLD"
     ) {
-
-      action = "BUY";
-
-      reason =
-        "High confidence bullish setup";
-    }
-
-    /*
-    ==================================================
-    HIGH CONFIDENCE SELL
-    ==================================================
-    */
-
-    else if (
-
-      confidence >= 65
-
-      &&
-
-      trend === "BEARISH"
-
-      &&
-
-      (
-        momentumState ===
-        "BEARISH_ACCELERATION"
-
-        ||
-
-        overallTrend ===
-        "BEARISH"
-      )
-
-    ) {
-
-      action = "SELL";
-
-      reason =
-        "High confidence bearish setup";
-    }
-
-    /*
-    ==================================================
-    EXPLORATION MODE
-    ==================================================
-    */
-
-    else if (
-
-      confidence >= 20
-
-      &&
-
-      confidence < 65
-
-      &&
-
-      volatilityRegime ===
-      "NORMAL"
-
-      &&
-
-      (
-        momentumState ===
-        "BULLISH_ACCELERATION"
-
-        ||
-
-        momentumState ===
-        "BEARISH_ACCELERATION"
-      )
-    ) {
-
-      /*
-      ================================================
-      RANDOMIZED EXPLORATION
-      ================================================
-      */
-
-      const explorationChance =
-        Math.random();
-
-      /*
-      35% chance
-      */
 
       if (
-        explorationChance <= 1
+        trend === "BULLISH"
       ) {
 
-        explorationTrade =
-          true;
+        action = "BUY";
+      }
 
-        if (
-          momentumState ===
-          "BULLISH_ACCELERATION"
-        ) {
+      else if (
+        trend === "BEARISH"
+      ) {
 
-          action = "BUY";
-        }
-
-        else {
-
-          action = "SELL";
-        }
-
-        reason =
-          "Exploration learning trade";
+        action = "SELL";
       }
     }
 
     /*
     ==================================================
-    CHAOTIC MARKET FILTER
+    DEFENSIVE VOLATILITY FILTER
     ==================================================
     */
 
     if (
-      regime === "CHAOTIC"
+
+      volatilityRegime === "HIGH"
+
+      &&
+
+      adjustedConfidence < 65
     ) {
 
       action = "HOLD";
-
-      reason =
-        "Chaotic market blocked";
     }
 
     /*
     ==================================================
-    EXTREME VOLATILITY FILTER
+    SIDEWAYS FILTER
     ==================================================
     */
 
     if (
-      volatilityRegime ===
-      "EXTREME"
+
+      regime === "SIDEWAYS"
+
+      &&
+
+      adjustedConfidence < 60
     ) {
 
       action = "HOLD";
-
-      reason =
-        "Extreme volatility blocked";
     }
+
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
+
+    console.log(`
+==================================
+TRADE DECISION ENGINE
+==================================
+
+Action:
+${action}
+
+Base Confidence:
+${confidence}
+
+Adjusted Confidence:
+${adjustedConfidence}
+
+Bullish Score:
+${finalBullishScore}
+
+Bearish Score:
+${finalBearishScore}
+
+Exploration Trade:
+${explorationTrade}
+
+Exploration Rate:
+${optimizer.explorationRate}
+
+Exploitation Rate:
+${optimizer.exploitationRate}
+
+Threshold Adjustment:
+${optimizer.thresholdAdjustment}
+
+==================================
+`);
 
     return {
 
       action,
 
-      confidence,
-
       explorationTrade,
 
-      reason,
+      adjustedConfidence,
+
+      explorationRate:
+        optimizer.explorationRate,
+
+      exploitationRate:
+        optimizer.exploitationRate,
     };
 
   } catch (err) {
 
-    console.log(
+    console.log(`
+==================================
+TRADE DECISION ENGINE ERROR
+==================================
+`);
 
-      "Trade decision error:",
+    console.log(err);
 
-      err.message
-    );
+    console.log(`
+==================================
+`);
 
     return {
 
       action: "HOLD",
 
-      confidence: 0,
-
       explorationTrade: false,
 
-      reason: "Engine error",
+      adjustedConfidence:
+        confidence || 50,
+
+      explorationRate: 0.3,
+
+      exploitationRate: 0.7,
     };
   }
 }

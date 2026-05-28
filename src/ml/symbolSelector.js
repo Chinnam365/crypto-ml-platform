@@ -1,69 +1,269 @@
+const {
+  getAdaptiveSymbolWeights,
+} = require("./adaptiveSymbolWeights");
+
 const pool =
   require("../db/db");
 
-// =====================================
-// GET BEST SYMBOLS
-// =====================================
+/*
+==================================================
+SYMBOL SELECTION ENGINE
+==================================================
+*/
 
-async function getBestSymbols() {
+async function selectTradingSymbols({
+
+  maxSymbols = 5,
+}) {
 
   try {
 
-    const result =
-      await pool.query(
+    /*
+    ==================================================
+    LOAD SYMBOL INTELLIGENCE
+    ==================================================
+    */
 
-        `
-        SELECT
+    const symbolData =
+      await getAdaptiveSymbolWeights();
 
-          symbol,
+    const rankings =
+      symbolData.rankings;
 
-          AVG(pnl) as avg_pnl,
+    /*
+    ==================================================
+    NO DATA YET
+    ==================================================
+    */
 
-          COUNT(*) as trades
+    if (
+      rankings.length === 0
+    ) {
 
-        FROM trades
+      return [
+        "BTCUSDT",
+        "ETHUSDT",
+        "SOLUSDT",
+        "LINKUSDT",
+        "DOGEUSDT",
+      ];
+    }
 
-        GROUP BY symbol
+    /*
+    ==================================================
+    ACTIVE MARKET FILTER
+    ==================================================
+    */
 
-        HAVING COUNT(*) > 5
+    const activeSymbols = [];
 
-        ORDER BY avg_pnl DESC
-        `
-      );
+    for (
+      const item of rankings
+    ) {
 
-    const ranked =
-      result.rows.map(row => ({
+      try {
 
-        symbol:
-          row.symbol,
+        /*
+        ================================================
+        RECENT ACTIVITY
+        ================================================
+        */
 
-        avgPnL:
-          Number(row.avg_pnl),
+        const marketResult =
+          await pool.query(
 
-        trades:
-          Number(row.trades),
-      }));
+            `
+            SELECT *
 
-    console.log(
-      "Symbol rankings:",
-      ranked
+            FROM market_candles
+
+            WHERE symbol = $1
+
+            ORDER BY candle_time DESC
+
+            LIMIT 20
+            `,
+
+            [item.symbol]
+          );
+
+        const candles =
+          marketResult.rows;
+
+        if (
+          candles.length < 10
+        ) {
+
+          continue;
+        }
+
+        /*
+        ================================================
+        VOLUME CHECK
+        ================================================
+        */
+
+        let avgVolume = 0;
+
+        for (
+          const candle of candles
+        ) {
+
+          avgVolume +=
+            Number(
+              candle.volume || 0
+            );
+        }
+
+        avgVolume /= candles.length;
+
+        /*
+        ================================================
+        LOW LIQUIDITY FILTER
+        ================================================
+        */
+
+        if (
+          avgVolume <= 0
+        ) {
+
+          continue;
+        }
+
+        /*
+        ================================================
+        FINAL SCORE
+        ================================================
+        */
+
+        const score =
+
+          item.weight *
+
+          Math.log(
+            avgVolume + 1
+          );
+
+        activeSymbols.push({
+
+          symbol:
+            item.symbol,
+
+          score:
+            Number(
+              score.toFixed(2)
+            ),
+
+          weight:
+            item.weight,
+
+          avgPnL:
+            item.avgPnL,
+
+          trades:
+            item.trades,
+
+          avgVolume:
+            Number(
+              avgVolume.toFixed(2)
+            ),
+        });
+
+      } catch (symbolErr) {
+
+        console.log(`
+==================================
+SYMBOL FILTER ERROR
+==================================
+`);
+
+        console.log(symbolErr);
+
+        console.log(`
+==================================
+`);
+      }
+    }
+
+    /*
+    ==================================================
+    SORT BEST SYMBOLS
+    ==================================================
+    */
+
+    activeSymbols.sort(
+      (a, b) =>
+        b.score - a.score
     );
 
-    return ranked;
+    /*
+    ==================================================
+    FINAL SELECTION
+    ==================================================
+    */
 
-  } catch (error) {
+    const selected =
 
-    console.error(
+      activeSymbols
 
-      "Symbol selector failed:",
+        .slice(0, maxSymbols)
 
-      error.message
-    );
+        .map(
+          item => item.symbol
+        );
 
-    return [];
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
+
+    console.log(`
+==================================
+SYMBOL SELECTION ENGINE
+==================================
+`);
+
+    console.table(activeSymbols);
+
+    console.log(`
+Selected Symbols:
+${selected.join(", ")}
+
+==================================
+`);
+
+    return selected;
+
+  } catch (err) {
+
+    console.log(`
+==================================
+SYMBOL SELECTION ERROR
+==================================
+`);
+
+    console.log(err);
+
+    console.log(`
+==================================
+`);
+
+    return [
+
+      "BTCUSDT",
+
+      "ETHUSDT",
+
+      "SOLUSDT",
+
+      "LINKUSDT",
+
+      "DOGEUSDT",
+    ];
   }
 }
 
 module.exports = {
-  getBestSymbols,
+  selectTradingSymbols,
 };

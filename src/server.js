@@ -751,14 +751,22 @@ await monitorPositions(pool);
       }
     }
 
-    console.log(
-      "Allowed symbols:",
-      symbols
-    );
+console.log(
+  "Allowed symbols:",
+  symbols
+);
 
-    for (
+for (
   const randomSymbol of symbols
 ) {
+
+  await new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        1500
+      )
+  );
 
   // ==========================================
   // GET REAL CANDLES
@@ -1832,7 +1840,7 @@ async function startServer() {
 
   setInterval(
     runEngine,
-    15000
+    60000
   );
 
   const PORT =

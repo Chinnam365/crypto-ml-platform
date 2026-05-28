@@ -1,116 +1,252 @@
 function calculateSignalScores({
 
-  rsi,
+  rsi = 50,
 
-  macd,
+  macd = 0,
 
-  trend,
+  trend = "SIDEWAYS",
 
-  regime,
+  regime = "SIDEWAYS",
 
-  multiTf,
+  multiTf = {},
 }) {
 
   let buyScore = 0;
 
   let sellScore = 0;
 
-  // ==========================================
-  // RSI
-  // ==========================================
+  /*
+  =========================================
+  RSI
+  =========================================
+  */
 
-  if (rsi < 30) {
+  if (rsi < 25) {
 
-    buyScore += 30;
+    buyScore += 35;
   }
 
-  else if (rsi < 40) {
+  else if (rsi < 35) {
 
-    buyScore += 20;
+    buyScore += 25;
   }
 
-  else if (rsi < 50) {
+  else if (rsi < 45) {
 
-    buyScore += 10;
+    buyScore += 15;
   }
 
-  if (rsi > 70) {
+  else if (rsi < 55) {
 
-    sellScore += 30;
+    buyScore += 5;
   }
 
-  else if (rsi > 60) {
+  if (rsi > 75) {
 
-    sellScore += 20;
+    sellScore += 35;
   }
 
-  else if (rsi > 50) {
+  else if (rsi > 65) {
 
-    sellScore += 10;
+    sellScore += 25;
   }
 
-  // ==========================================
-  // MACD
-  // ==========================================
+  else if (rsi > 55) {
 
-  if (macd > 0) {
-
-    buyScore += 20;
+    sellScore += 15;
   }
 
-  if (macd < 0) {
+  else if (rsi > 45) {
 
-    sellScore += 20;
+    sellScore += 5;
   }
 
-  // ==========================================
-  // TREND
-  // ==========================================
+  /*
+  =========================================
+  MACD
+  =========================================
+  */
+
+  if (macd > 0.5) {
+
+    buyScore += 25;
+  }
+
+  else if (macd > 0) {
+
+    buyScore += 15;
+  }
+
+  if (macd < -0.5) {
+
+    sellScore += 25;
+  }
+
+  else if (macd < 0) {
+
+    sellScore += 15;
+  }
+
+  /*
+  =========================================
+  TREND
+  =========================================
+  */
 
   if (trend === "BULLISH") {
 
-    buyScore += 20;
+    buyScore += 25;
   }
 
-  if (trend === "BEARISH") {
+  else if (trend === "BEARISH") {
 
-    sellScore += 20;
+    sellScore += 25;
   }
 
-  // ==========================================
-  // REGIME
-  // ==========================================
+  /*
+  =========================================
+  REGIME
+  =========================================
+  */
 
   if (regime === "TRENDING") {
+
+    buyScore += 15;
+
+    sellScore += 15;
+  }
+
+  else if (regime === "VOLATILE") {
 
     buyScore += 10;
 
     sellScore += 10;
   }
 
-  // ==========================================
-  // MULTI TIMEFRAME
-  // ==========================================
+  /*
+  =========================================
+  MULTI TIMEFRAME
+  =========================================
+  */
 
   if (
 
-    multiTf.overallTrend ===
+    multiTf?.overallTrend ===
     "BULLISH"
 
   ) {
 
-    buyScore += 20;
+    buyScore += 25;
   }
 
-  if (
+  else if (
 
-    multiTf.overallTrend ===
+    multiTf?.overallTrend ===
     "BEARISH"
 
   ) {
 
-    sellScore += 20;
+    sellScore += 25;
   }
+
+  /*
+  =========================================
+  ALIGNMENT BONUS
+  =========================================
+  */
+
+  if (
+
+    trend === "BULLISH"
+
+    &&
+
+    multiTf?.overallTrend ===
+    "BULLISH"
+
+  ) {
+
+    buyScore += 15;
+  }
+
+  if (
+
+    trend === "BEARISH"
+
+    &&
+
+    multiTf?.overallTrend ===
+    "BEARISH"
+
+  ) {
+
+    sellScore += 15;
+  }
+
+  /*
+  =========================================
+  SIDEWAYS PENALTY
+  =========================================
+  */
+
+  if (
+    trend === "SIDEWAYS"
+  ) {
+
+    buyScore -= 5;
+
+    sellScore -= 5;
+  }
+
+  /*
+  =========================================
+  SAFETY FLOOR
+  =========================================
+  */
+
+  buyScore =
+    Math.max(
+      0,
+      Math.round(buyScore)
+    );
+
+  sellScore =
+    Math.max(
+      0,
+      Math.round(sellScore)
+    );
+
+  /*
+  =========================================
+  DEBUG LOG
+  =========================================
+  */
+
+  console.log(`
+==================================
+PROBABILISTIC SIGNAL ENGINE
+==================================
+
+RSI:
+${rsi}
+
+MACD:
+${macd}
+
+Trend:
+${trend}
+
+Regime:
+${regime}
+
+Buy Score:
+${buyScore}
+
+Sell Score:
+${sellScore}
+
+==================================
+`);
 
   return {
 

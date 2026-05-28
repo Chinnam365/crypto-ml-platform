@@ -1,120 +1,288 @@
-async function getAdaptiveSizeMultiplier({
+const {
+  optimizeSystemBehavior,
+} = require("./selfOptimizer");
 
-  pool,
+const {
+  getRegimeStrategy,
+} = require("./regimeStrategy");
+
+/*
+==================================================
+ADAPTIVE POSITION SIZING
+==================================================
+*/
+
+async function calculateAdaptivePositionSize({
+
+  basePositionSize,
 
   confidence,
+
+  regime,
+
+  volatilityRegime,
+
+  trend,
+
+  momentumState,
+
+  explorationTrade = false,
 }) {
 
-  const result =
-    await pool.query(`
-      SELECT pnl
-      FROM ml_dataset
-      ORDER BY id DESC
-      LIMIT 20
-    `);
+  try {
 
-  const rows =
-    result.rows;
+    /*
+    ==================================================
+    SELF OPTIMIZER
+    ==================================================
+    */
 
-  // ==========================================
-  // DEFAULT MULTIPLIER
-  // ==========================================
+    const optimizer =
+      await optimizeSystemBehavior();
 
-  let multiplier = 1;
+    /*
+    ==================================================
+    REGIME STRATEGY
+    ==================================================
+    */
 
-  if (!rows.length) {
+    const strategy =
+      await getRegimeStrategy({
 
-    return multiplier;
-  }
+        regime,
 
-  let wins = 0;
+        volatilityRegime,
 
-  rows.forEach(row => {
+        trend,
+
+        momentumState,
+      });
+
+    /*
+    ==================================================
+    START SIZE
+    ==================================================
+    */
+
+    let size =
+      Number(basePositionSize);
+
+    /*
+    ==================================================
+    CONFIDENCE SCALING
+    ==================================================
+    */
+
+    const confidenceMultiplier =
+
+      confidence / 50;
+
+    size *= confidenceMultiplier;
+
+    /*
+    ==================================================
+    STRATEGY MULTIPLIER
+    ==================================================
+    */
+
+    size *=
+      strategy.positionSizingMultiplier;
+
+    /*
+    ==================================================
+    SYSTEM PERFORMANCE
+    ==================================================
+    */
+
+    size *=
+      optimizer.confidenceMultiplier;
+
+    /*
+    ==================================================
+    EXPLORATION DEFENSE
+    ==================================================
+    */
 
     if (
-      Number(row.pnl) > 0
+      explorationTrade
     ) {
 
-      wins++;
+      size *= 0.5;
     }
-  });
 
-  const recentWinRate =
-    (
-      wins / rows.length
-    ) * 100;
+    /*
+    ==================================================
+    HIGH VOLATILITY DEFENSE
+    ==================================================
+    */
 
-  // ==========================================
-  // CONFIDENCE FACTOR
-  // ==========================================
+    if (
+      volatilityRegime === "HIGH"
+    ) {
 
-  if (confidence >= 85) {
+      size *= 0.7;
+    }
 
-    multiplier += 0.25;
-  }
+    /*
+    ==================================================
+    MOMENTUM BONUS
+    ==================================================
+    */
 
-  else if (confidence >= 75) {
+    if (
 
-    multiplier += 0.15;
-  }
+      momentumState ===
+      "BULLISH_ACCELERATION"
 
-  // ==========================================
-  // PERFORMANCE FACTOR
-  // ==========================================
+      ||
 
-  if (recentWinRate < 40) {
+      momentumState ===
+      "BEARISH_ACCELERATION"
+    ) {
 
-    multiplier -= 0.4;
-  }
+      size *= 1.15;
+    }
 
-  else if (
-    recentWinRate < 50
-  ) {
+    /*
+    ==================================================
+    TREND BONUS
+    ==================================================
+    */
 
-    multiplier -= 0.2;
-  }
+    if (
+      regime === "TRENDING"
+    ) {
 
-  else if (
-    recentWinRate > 70
-  ) {
+      size *= 1.1;
+    }
 
-    multiplier += 0.2;
-  }
+    /*
+    ==================================================
+    SIDEWAYS DEFENSE
+    ==================================================
+    */
 
-  // ==========================================
-  // SAFETY LIMITS
-  // ==========================================
+    if (
+      regime === "SIDEWAYS"
+    ) {
 
-  if (multiplier < 0.5) {
+      size *= 0.8;
+    }
 
-    multiplier = 0.5;
-  }
+    /*
+    ==================================================
+    CLAMPING
+    ==================================================
+    */
 
-  if (multiplier > 1.5) {
+    const minSize =
 
-    multiplier = 1.5;
-  }
+      basePositionSize * 0.2;
 
-  console.log(`
+    const maxSize =
+
+      basePositionSize * 3;
+
+    size =
+
+      Math.max(
+        minSize,
+        Math.min(
+          size,
+          maxSize
+        )
+      );
+
+    size =
+      Number(
+        size.toFixed(4)
+      );
+
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
+
+    console.log(`
 ==================================
 ADAPTIVE POSITION SIZING
 ==================================
 
-Recent Win Rate:
-${recentWinRate.toFixed(2)}%
+Base Size:
+${basePositionSize}
+
+Final Size:
+${size}
 
 Confidence:
 ${confidence}
 
-Size Multiplier:
-${multiplier.toFixed(2)}
+Confidence Multiplier:
+${confidenceMultiplier.toFixed(2)}
+
+Regime:
+${regime}
+
+Volatility:
+${volatilityRegime}
+
+Strategy Mode:
+${strategy.mode}
+
+Exploration Trade:
+${explorationTrade}
+
+System Confidence:
+${optimizer.confidenceMultiplier}
 
 ==================================
 `);
 
-  return multiplier;
+    return {
+
+      finalSize: size,
+
+      confidenceMultiplier:
+        Number(
+          confidenceMultiplier.toFixed(2)
+        ),
+
+      strategyMode:
+        strategy.mode,
+
+      explorationTrade,
+    };
+
+  } catch (err) {
+
+    console.log(`
+==================================
+ADAPTIVE SIZING ERROR
+==================================
+`);
+
+    console.log(err);
+
+    console.log(`
+==================================
+`);
+
+    return {
+
+      finalSize:
+        basePositionSize,
+
+      confidenceMultiplier: 1,
+
+      strategyMode:
+        "BALANCED",
+
+      explorationTrade: false,
+    };
+  }
 }
 
 module.exports = {
-  getAdaptiveSizeMultiplier,
+  calculateAdaptivePositionSize,
 };

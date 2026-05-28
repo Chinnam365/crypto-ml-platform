@@ -2,12 +2,16 @@ const pool =
   require("../db/db");
 
 const {
-  getRegimeStrategy,
-} = require("./regimeStrategy");
+  getAdaptiveSymbolWeights,
+} = require("./adaptiveSymbolWeights");
+
+const {
+  analyzeStrategyPerformance,
+} = require("./strategyAnalytics");
 
 /*
 ==================================================
-PORTFOLIO INTELLIGENCE ENGINE
+ADAPTIVE CAPITAL ROTATION ENGINE
 ==================================================
 */
 
@@ -22,11 +26,11 @@ async function evaluatePortfolioRisk({
 
     /*
     ==================================================
-    LOAD OPEN POSITIONS
+    OPEN POSITIONS
     ==================================================
     */
 
-    const result =
+    const openResult =
       await pool.query(
 
         `
@@ -34,14 +38,30 @@ async function evaluatePortfolioRisk({
 
         FROM trade_history
 
-        WHERE
-
-          outcome = 'PENDING'
+        WHERE outcome = 'PENDING'
         `
       );
 
     const openTrades =
-      result.rows;
+      openResult.rows;
+
+    /*
+    ==================================================
+    SYMBOL INTELLIGENCE
+    ==================================================
+    */
+
+    const symbolData =
+      await getAdaptiveSymbolWeights();
+
+    /*
+    ==================================================
+    STRATEGY EVOLUTION
+    ==================================================
+    */
+
+    const strategyAnalytics =
+      await analyzeStrategyPerformance();
 
     /*
     ==================================================
@@ -63,128 +83,146 @@ async function evaluatePortfolioRisk({
 
     /*
     ==================================================
-    REGIME STRATEGY
-    ==================================================
-    */
-
-    const strategy =
-      await getRegimeStrategy({
-
-        regime,
-
-        volatilityRegime,
-
-        trend: "SIDEWAYS",
-
-        momentumState:
-          "NEUTRAL",
-      });
-
-    /*
-    ==================================================
     BASE LIMITS
     ==================================================
     */
 
-    let maxPositions = 15;
+    let maxExposure = 3000;
 
-    let maxExposure = 2500;
+    let maxPositions = 15;
 
     /*
     ==================================================
-    TRENDING MARKET
+    REGIME ADAPTATION
     ==================================================
     */
 
     if (
-      strategy.mode ===
-      "TREND_FOLLOWING"
+      regime === "TRENDING"
     ) {
+
+      maxExposure = 5000;
 
       maxPositions = 20;
-
-      maxExposure = 4000;
     }
 
-    /*
-    ==================================================
-    DEFENSIVE MARKET
-    ==================================================
-    */
-
     else if (
-      strategy.mode ===
-      "DEFENSIVE"
+      volatilityRegime === "HIGH"
     ) {
+
+      maxExposure = 1500;
 
       maxPositions = 8;
-
-      maxExposure = 1200;
     }
 
     /*
     ==================================================
-    MEAN REVERSION
+    SYMBOL CAPITAL ALLOCATION
     ==================================================
     */
 
-    else if (
-      strategy.mode ===
-      "MEAN_REVERSION"
-    ) {
-
-      maxPositions = 10;
-
-      maxExposure = 1800;
-    }
-
-    /*
-    ==================================================
-    SYMBOL CONCENTRATION
-    ==================================================
-    */
-
-    const symbolCounts = {};
-
-    for (
-      const trade of openTrades
-    ) {
-
-      const symbol =
-        trade.symbol;
-
-      if (
-        !symbolCounts[symbol]
-      ) {
-
-        symbolCounts[symbol] = 0;
-      }
-
-      symbolCounts[symbol]++;
-    }
-
-    /*
-    ==================================================
-    CONCENTRATION RISK
-    ==================================================
-    */
-
-    let concentrationRisk =
-      false;
+    const symbolAllocations = [];
 
     for (
       const symbol of
-      Object.keys(symbolCounts)
+      Object.keys(
+        symbolData.weights
+      )
     ) {
 
-      if (
-        symbolCounts[symbol] >= 5
+      const symbolWeight =
+
+        symbolData.weights[
+          symbol
+        ] || 1;
+
+      /*
+      ================================================
+      STRATEGY SUPPORT
+      ================================================
+      */
+
+      let strategySupport = 1;
+
+      for (
+        const strategy of
+        strategyAnalytics.promotedStrategies
       ) {
 
-        concentrationRisk =
-          true;
+        if (
+          strategy.strategyKey.includes(
+            symbol.replace(
+              "USDT",
+              ""
+            )
+          )
+        ) {
+
+          strategySupport += 0.2;
+        }
       }
+
+      /*
+      ================================================
+      ALLOCATION SCORE
+      ================================================
+      */
+
+      const allocationScore =
+
+        symbolWeight *
+        strategySupport;
+
+      /*
+      ================================================
+      TARGET CAPITAL
+      ================================================
+      */
+
+      const targetCapital =
+
+        (
+          allocationScore / 10
+        ) * maxExposure;
+
+      symbolAllocations.push({
+
+        symbol,
+
+        symbolWeight:
+          Number(
+            symbolWeight.toFixed(2)
+          ),
+
+        strategySupport:
+          Number(
+            strategySupport.toFixed(2)
+          ),
+
+        allocationScore:
+          Number(
+            allocationScore.toFixed(2)
+          ),
+
+        targetCapital:
+          Number(
+            targetCapital.toFixed(2)
+          ),
+      });
     }
+
+    /*
+    ==================================================
+    SORT BEST CAPITAL TARGETS
+    ==================================================
+    */
+
+    symbolAllocations.sort(
+      (a, b) =>
+
+        b.allocationScore -
+        a.allocationScore
+    );
 
     /*
     ==================================================
@@ -195,7 +233,7 @@ async function evaluatePortfolioRisk({
     let riskScore = 0;
 
     /*
-    Exposure
+    Exposure utilization
     */
 
     riskScore +=
@@ -203,7 +241,7 @@ async function evaluatePortfolioRisk({
       (
         totalExposure /
         maxExposure
-      ) * 50;
+      ) * 60;
 
     /*
     Position count
@@ -214,23 +252,21 @@ async function evaluatePortfolioRisk({
       (
         openTrades.length /
         maxPositions
-      ) * 30;
+      ) * 25;
 
     /*
-    Concentration
+    High volatility penalty
     */
 
     if (
-      concentrationRisk
+      volatilityRegime === "HIGH"
     ) {
 
-      riskScore += 20;
+      riskScore += 15;
     }
 
     /*
-    ==================================================
-    CLAMPING
-    ==================================================
+    Clamp
     */
 
     riskScore =
@@ -250,23 +286,23 @@ async function evaluatePortfolioRisk({
 
     /*
     ==================================================
-    FINAL DECISION
+    CAN TRADE
     ==================================================
     */
 
     let canTrade = true;
 
     if (
-      openTrades.length >=
-      maxPositions
+      totalExposure >=
+      maxExposure
     ) {
 
       canTrade = false;
     }
 
     if (
-      totalExposure >=
-      maxExposure
+      openTrades.length >=
+      maxPositions
     ) {
 
       canTrade = false;
@@ -287,17 +323,17 @@ async function evaluatePortfolioRisk({
 
     console.log(`
 ==================================
-PORTFOLIO INTELLIGENCE
+ADAPTIVE CAPITAL ROTATION
 ==================================
 
-Strategy Mode:
-${strategy.mode}
+Regime:
+${regime}
+
+Volatility:
+${volatilityRegime}
 
 Open Positions:
 ${openTrades.length}
-
-Max Positions:
-${maxPositions}
 
 Total Exposure:
 ${totalExposure.toFixed(2)}
@@ -308,23 +344,33 @@ ${maxExposure}
 Risk Score:
 ${riskScore}
 
-Concentration Risk:
-${concentrationRisk}
-
 Can Trade:
 ${canTrade}
 
 ==================================
+TOP CAPITAL TARGETS
+==================================
 `);
+
+    console.table(
+      symbolAllocations.slice(0, 10)
+    );
+
+    console.log(`
+==================================
+`);
+
+    /*
+    ==================================================
+    RETURN
+    ==================================================
+    */
 
     return {
 
       canTrade,
 
-      openPositions:
-        openTrades.length,
-
-      maxPositions,
+      riskScore,
 
       totalExposure:
         Number(
@@ -333,19 +379,23 @@ ${canTrade}
 
       maxExposure,
 
-      concentrationRisk,
+      openPositions:
+        openTrades.length,
 
-      riskScore,
+      maxPositions,
 
-      strategyMode:
-        strategy.mode,
+      topAllocations:
+        symbolAllocations.slice(0, 5),
+
+      allAllocations:
+        symbolAllocations,
     };
 
   } catch (err) {
 
     console.log(`
 ==================================
-PORTFOLIO INTELLIGENCE ERROR
+CAPITAL ROTATION ERROR
 ==================================
 `);
 
@@ -359,20 +409,19 @@ PORTFOLIO INTELLIGENCE ERROR
 
       canTrade: true,
 
+      riskScore: 0,
+
+      totalExposure: 0,
+
+      maxExposure: 3000,
+
       openPositions: 0,
 
       maxPositions: 10,
 
-      totalExposure: 0,
+      topAllocations: [],
 
-      maxExposure: 1000,
-
-      concentrationRisk: false,
-
-      riskScore: 0,
-
-      strategyMode:
-        "BALANCED",
+      allAllocations: [],
     };
   }
 }

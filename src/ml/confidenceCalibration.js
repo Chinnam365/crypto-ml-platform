@@ -1,152 +1,373 @@
-async function getConfidenceCalibration(pool) {
+const pool =
+  require("../db/db");
 
-  const result =
-    await pool.query(`
-      SELECT
-        confidence,
+/*
+==================================================
+META CONFIDENCE CALIBRATION
+==================================================
+*/
 
-        pnl
+async function calibrateConfidence({
 
-      FROM ml_dataset
+  mlProbability = 50,
 
-      WHERE pnl IS NOT NULL
-    `);
+  probabilisticScore = 50,
 
-  const rows =
-    result.rows;
+  adaptiveConfidence = 50,
 
-  const buckets = {
+  memoryBoost = 0,
 
-    "50-60": [],
+  regime = "SIDEWAYS",
 
-    "60-70": [],
+  volatilityRegime = "NORMAL",
 
-    "70-80": [],
+  trend = "SIDEWAYS",
+}) {
 
-    "80-90": [],
+  try {
 
-    "90-100": [],
-  };
+    /*
+    ==================================================
+    LOAD RECENT PERFORMANCE
+    ==================================================
+    */
 
-  // ==========================================
-  // GROUP INTO BUCKETS
-  // ==========================================
+    const result =
+      await pool.query(
 
-  rows.forEach(row => {
+        `
+        SELECT *
 
-    const confidence =
-      Number(row.confidence || 0);
+        FROM trade_history
 
-    const pnl =
-      Number(row.pnl || 0);
+        WHERE
 
-    let bucket = null;
+          outcome IS NOT NULL
+
+          AND
+
+          outcome != 'PENDING'
+
+        ORDER BY id DESC
+
+        LIMIT 300
+        `
+      );
+
+    const trades =
+      result.rows;
+
+    /*
+    ==================================================
+    DEFAULT WEIGHTS
+    ==================================================
+    */
+
+    let mlWeight = 0.35;
+
+    let probabilisticWeight = 0.25;
+
+    let adaptiveWeight = 0.30;
+
+    let memoryWeight = 0.10;
+
+    /*
+    ==================================================
+    MARKET REGIME ADAPTATION
+    ==================================================
+    */
+
+    /*
+    Trending markets trust momentum and ML
+    */
 
     if (
-      confidence >= 50 &&
-      confidence < 60
+      regime === "TRENDING"
     ) {
 
-      bucket = "50-60";
+      mlWeight = 0.40;
+
+      probabilisticWeight = 0.20;
+
+      adaptiveWeight = 0.30;
+
+      memoryWeight = 0.10;
     }
+
+    /*
+    Sideways markets trust memory and probabilities
+    */
 
     else if (
-      confidence >= 60 &&
-      confidence < 70
+      regime === "SIDEWAYS"
     ) {
 
-      bucket = "60-70";
+      mlWeight = 0.25;
+
+      probabilisticWeight = 0.35;
+
+      adaptiveWeight = 0.25;
+
+      memoryWeight = 0.15;
     }
 
-    else if (
-      confidence >= 70 &&
-      confidence < 80
+    /*
+    Volatile markets become defensive
+    */
+
+    if (
+      volatilityRegime === "HIGH"
     ) {
 
-      bucket = "70-80";
+      adaptiveWeight += 0.10;
+
+      mlWeight -= 0.05;
     }
 
-    else if (
-      confidence >= 80 &&
-      confidence < 90
+    /*
+    ==================================================
+    TREND CONFIDENCE BOOST
+    ==================================================
+    */
+
+    if (
+
+      trend === "BULLISH"
+
+      ||
+
+      trend === "BEARISH"
     ) {
 
-      bucket = "80-90";
+      mlWeight += 0.05;
     }
 
-    else if (
-      confidence >= 90
+    /*
+    ==================================================
+    NORMALIZATION
+    ==================================================
+    */
+
+    const totalWeight =
+
+      mlWeight +
+
+      probabilisticWeight +
+
+      adaptiveWeight +
+
+      memoryWeight;
+
+    mlWeight /=
+      totalWeight;
+
+    probabilisticWeight /=
+      totalWeight;
+
+    adaptiveWeight /=
+      totalWeight;
+
+    memoryWeight /=
+      totalWeight;
+
+    /*
+    ==================================================
+    CALIBRATED CONFIDENCE
+    ==================================================
+    */
+
+    let calibratedConfidence =
+
+      (
+        mlProbability
+        * mlWeight
+      )
+
+      +
+
+      (
+        probabilisticScore
+        * probabilisticWeight
+      )
+
+      +
+
+      (
+        adaptiveConfidence
+        * adaptiveWeight
+      )
+
+      +
+
+      (
+        memoryBoost
+        * memoryWeight
+      );
+
+    /*
+    ==================================================
+    PERFORMANCE CALIBRATION
+    ==================================================
+    */
+
+    if (
+      trades.length >= 30
     ) {
-
-      bucket = "90-100";
-    }
-
-    if (bucket) {
-
-      buckets[bucket].push(pnl);
-    }
-  });
-
-  // ==========================================
-  // CALCULATE PERFORMANCE
-  // ==========================================
-
-  const calibration = [];
-
-  Object.keys(buckets)
-    .forEach(bucket => {
-
-      const trades =
-        buckets[bucket];
-
-      const total =
-        trades.length;
-
-      if (!total) {
-
-        calibration.push({
-
-          bucket,
-
-          trades: 0,
-
-          winRate: 0,
-        });
-
-        return;
-      }
 
       let wins = 0;
 
-      trades.forEach(pnl => {
+      for (
+        const trade of trades
+      ) {
 
-        if (pnl > 0) {
+        if (
+          trade.outcome === "WIN"
+        ) {
 
           wins++;
         }
-      });
+      }
 
       const winRate =
+
         (
-          wins / total
+          wins /
+          trades.length
         ) * 100;
 
-      calibration.push({
+      /*
+      Strong system
+      */
 
-        bucket,
+      if (
+        winRate >= 60
+      ) {
 
-        trades: total,
+        calibratedConfidence += 5;
+      }
 
-        winRate:
+      /*
+      Weak system
+      */
+
+      else if (
+        winRate <= 40
+      ) {
+
+        calibratedConfidence -= 5;
+      }
+    }
+
+    /*
+    ==================================================
+    CLAMPING
+    ==================================================
+    */
+
+    calibratedConfidence =
+
+      Math.max(
+        1,
+        Math.min(
+          calibratedConfidence,
+          99
+        )
+      );
+
+    calibratedConfidence =
+      Number(
+        calibratedConfidence.toFixed(2)
+      );
+
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
+
+    console.log(`
+==================================
+META CONFIDENCE CALIBRATION
+==================================
+
+ML Weight:
+${mlWeight.toFixed(2)}
+
+Probabilistic Weight:
+${probabilisticWeight.toFixed(2)}
+
+Adaptive Weight:
+${adaptiveWeight.toFixed(2)}
+
+Memory Weight:
+${memoryWeight.toFixed(2)}
+
+Calibrated Confidence:
+${calibratedConfidence}
+
+Regime:
+${regime}
+
+Volatility:
+${volatilityRegime}
+
+Trend:
+${trend}
+
+==================================
+`);
+
+    return {
+
+      calibratedConfidence,
+
+      weights: {
+
+        mlWeight:
           Number(
-            winRate.toFixed(2)
+            mlWeight.toFixed(2)
           ),
-      });
-    });
 
-  return calibration;
+        probabilisticWeight:
+          Number(
+            probabilisticWeight.toFixed(2)
+          ),
+
+        adaptiveWeight:
+          Number(
+            adaptiveWeight.toFixed(2)
+          ),
+
+        memoryWeight:
+          Number(
+            memoryWeight.toFixed(2)
+          ),
+      },
+    };
+
+  } catch (err) {
+
+    console.log(`
+==================================
+CONFIDENCE CALIBRATION ERROR
+==================================
+`);
+
+    console.log(err);
+
+    console.log(`
+==================================
+`);
+
+    return {
+
+      calibratedConfidence: 50,
+
+      weights: {},
+    };
+  }
 }
 
 module.exports = {
-  getConfidenceCalibration,
+  calibrateConfidence,
 };

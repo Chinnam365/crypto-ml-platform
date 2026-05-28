@@ -1,116 +1,301 @@
-async function updateReinforcementMemory({
+const pool =
+  require("../db/db");
 
-  pool,
+/*
+==================================================
+REINFORCEMENT LEARNING ENGINE
+==================================================
+*/
 
-  symbol,
+async function updateReinforcementMemory() {
 
-  side,
+  try {
 
-  regime,
+    /*
+    ==================================================
+    LOAD CLOSED TRADES
+    ==================================================
+    */
 
-  trend,
+    const result =
+      await pool.query(
 
-  quality,
+        `
+        SELECT *
 
-  confidence,
+        FROM trade_history
 
-  pnl,
-}) {
+        WHERE
 
-  // ==========================================
-  // BUILD PATTERN
-  // ==========================================
+          outcome IS NOT NULL
 
-  const pattern = [
+          AND
 
-    symbol,
+          outcome != 'PENDING'
 
-    side,
+        ORDER BY id DESC
 
-    regime,
+        LIMIT 500
+        `
+      );
 
-    trend,
+    const trades =
+      result.rows;
 
-    quality >= 70
-      ? "HIGH_QUALITY"
-      : "NORMAL_QUALITY",
+    if (
+      trades.length < 20
+    ) {
 
-  ].join("_");
+      console.log(`
+==================================
+NOT ENOUGH REINFORCEMENT DATA
+==================================
+`);
 
-  // ==========================================
-  // REWARD SCORE
-  // ==========================================
+      return;
+    }
 
-  let reward = 0;
+    /*
+    ==================================================
+    PROCESS TRADES
+    ==================================================
+    */
 
-  if (pnl > 0) {
+    for (
+      const trade of trades
+    ) {
 
-    reward = 1;
+      try {
+
+        /*
+        ================================================
+        CONTEXT KEY
+        ================================================
+        */
+
+        const contextKey =
+
+          `${trade.trend}_` +
+
+          `${trade.regime}_` +
+
+          `${trade.volatility_regime}_` +
+
+          `${trade.momentum_state}_` +
+
+          `${trade.overall_trend}`;
+
+        /*
+        ================================================
+        REWARD
+        ================================================
+        */
+
+        let reward = 0;
+
+        if (
+          trade.outcome === "WIN"
+        ) {
+
+          reward = 1;
+        }
+
+        else if (
+          trade.outcome === "LOSS"
+        ) {
+
+          reward = -1;
+        }
+
+        else {
+
+          reward = 0;
+        }
+
+        /*
+        ================================================
+        CHECK EXISTING MEMORY
+        ================================================
+        */
+
+        const existingResult =
+          await pool.query(
+
+            `
+            SELECT *
+
+            FROM reinforcement_memory
+
+            WHERE context_key = $1
+
+            LIMIT 1
+            `,
+
+            [contextKey]
+          );
+
+        /*
+        ================================================
+        INSERT NEW CONTEXT
+        ================================================
+        */
+
+        if (
+          existingResult.rows.length === 0
+        ) {
+
+          await pool.query(
+
+            `
+            INSERT INTO reinforcement_memory (
+
+              context_key,
+              trend,
+              regime,
+              volatility_regime,
+              momentum_state,
+              overall_trend,
+              total_reward,
+              sample_size,
+              avg_reward
+
+            )
+
+            VALUES (
+
+              $1,
+              $2,
+              $3,
+              $4,
+              $5,
+              $6,
+              $7,
+              1,
+              $7
+            )
+            `,
+
+            [
+
+              contextKey,
+
+              trade.trend,
+
+              trade.regime,
+
+              trade.volatility_regime,
+
+              trade.momentum_state,
+
+              trade.overall_trend,
+
+              reward,
+            ]
+          );
+        }
+
+        /*
+        ================================================
+        UPDATE EXISTING CONTEXT
+        ================================================
+        */
+
+        else {
+
+          const existing =
+            existingResult.rows[0];
+
+          const newTotalReward =
+
+            Number(
+              existing.total_reward
+            ) + reward;
+
+          const newSampleSize =
+
+            Number(
+              existing.sample_size
+            ) + 1;
+
+          const avgReward =
+
+            newTotalReward /
+            newSampleSize;
+
+          await pool.query(
+
+            `
+            UPDATE reinforcement_memory
+
+            SET
+
+              total_reward = $1,
+
+              sample_size = $2,
+
+              avg_reward = $3
+
+            WHERE context_key = $4
+            `,
+
+            [
+
+              newTotalReward,
+
+              newSampleSize,
+
+              Number(
+                avgReward.toFixed(4)
+              ),
+
+              contextKey,
+            ]
+          );
+        }
+
+      } catch (tradeErr) {
+
+        console.log(`
+==================================
+REINFORCEMENT TRADE ERROR
+==================================
+`);
+
+        console.log(tradeErr);
+
+        console.log(`
+==================================
+`);
+      }
+    }
+
+    console.log(`
+==================================
+REINFORCEMENT MEMORY UPDATED
+==================================
+
+Trades Processed:
+${trades.length}
+
+==================================
+`);
+
+  } catch (err) {
+
+    console.log(`
+==================================
+REINFORCEMENT ENGINE ERROR
+==================================
+`);
+
+    console.log(err);
+
+    console.log(`
+==================================
+`);
   }
-
-  if (pnl < 0) {
-
-    reward = -1;
-  }
-
-  // ==========================================
-  // SAVE MEMORY
-  // ==========================================
-
-  await pool.query(
-    `
-    INSERT INTO reinforcement_memory
-    (
-      pattern,
-      confidence,
-      pnl,
-      reward
-    )
-    VALUES
-    ($1,$2,$3,$4)
-    `,
-    [
-      pattern,
-
-      confidence,
-
-      pnl,
-
-      reward,
-    ]
-  );
-}
-
-// ==========================================
-// GET REINFORCEMENT SCORE
-// ==========================================
-
-async function getReinforcementScore({
-
-  pool,
-
-  pattern,
-}) {
-
-  const result =
-    await pool.query(
-      `
-      SELECT
-        AVG(reward) AS score
-      FROM reinforcement_memory
-      WHERE pattern = $1
-      `,
-      [pattern]
-    );
-
-  return Number(
-    result.rows[0]?.score || 0
-  );
 }
 
 module.exports = {
-
   updateReinforcementMemory,
-
-  getReinforcementScore,
 };

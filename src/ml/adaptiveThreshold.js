@@ -239,6 +239,25 @@ ADAPTIVE THRESHOLD ERROR
   }
 }
 
+/*
+==================================================
+BACKWARD COMPATIBILITY
+==================================================
+*/
+
+async function getAdaptiveThreshold(
+  options = {}
+) {
+
+  return await
+    calculateAdaptiveThreshold(
+      options
+    );
+}
+
 module.exports = {
+
   calculateAdaptiveThreshold,
+
+  getAdaptiveThreshold,
 };

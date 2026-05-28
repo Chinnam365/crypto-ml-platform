@@ -468,51 +468,27 @@ async function generateFeatures(
         momentumStrength:
           macdData?.momentumStrength,
       });
-
-    /*
-    ==================================================
-    REINFORCEMENT MEMORY
-    ==================================================
-    */
-
-    const reinforcementData =
-      await getReinforcementScore({
-
-        trend,
-
-        momentumState:
-          macdData?.momentumState,
-
-        volatilityRegime:
-          volatilityData?.volatilityRegime,
-
-        overallTrend:
-          multiTf?.overallTrend,
-      });
 /*
 ==================================================
-PROBABILISTIC SCORES
+REINFORCEMENT MEMORY
 ==================================================
 */
 
-const {
-  calculateSignalScores,
-} = require("../ml/probabilisticSignals");
-
-const signalScores =
-  calculateSignalScores({
-
-    rsi,
-
-    macd:
-      macdData?.macd || 0,
+const reinforcementData =
+  await getReinforcementScore({
 
     trend,
 
-    regime,
+    momentumState:
+      macdData?.momentumState,
 
-    multiTf,
+    volatilityRegime:
+      volatilityData?.volatilityRegime,
+
+    overallTrend:
+      multiTf?.overallTrend,
   });
+
 /*
 ==================================================
 PROBABILISTIC SCORES

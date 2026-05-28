@@ -6,27 +6,21 @@ function calculateTradeRisk(
 
     const {
 
-      currentPrice,
+      currentPrice = 0,
 
-      volatility,
+      volatility = 0,
 
-      decision,
+      decision = "HOLD",
 
-    } = features;
-
-    // =========================
-    // DEFAULTS
-    // =========================
-
-    let stopLoss = null;
-
-    let takeProfit = null;
+    } = features || {};
 
     // =========================
     // HOLD SAFETY
     // =========================
 
     if (
+      !decision ||
+
       decision === "HOLD"
     ) {
 
@@ -41,15 +35,62 @@ function calculateTradeRisk(
     }
 
     // =========================
+    // INPUT VALIDATION
+    // =========================
+
+    if (
+
+      !currentPrice ||
+
+      isNaN(currentPrice) ||
+
+      currentPrice <= 0
+    ) {
+
+      console.log(`
+==================================
+INVALID CURRENT PRICE
+==================================
+
+Current Price:
+${currentPrice}
+
+==================================
+`);
+
+      return {
+
+        stopLoss: null,
+
+        takeProfit: null,
+
+        riskRewardRatio: null,
+      };
+    }
+
+    // =========================
+    // SAFE VOLATILITY
+    // =========================
+
+    const safeVolatility =
+
+      isNaN(volatility)
+        ? 1
+        : Math.max(
+            Number(volatility),
+            0.3
+          );
+
+    // =========================
     // VOLATILITY FACTOR
     // =========================
 
     const riskFactor =
+      safeVolatility * 2;
 
-      Math.max(
-        volatility * 2,
-        0.3
-      );
+    let stopLoss = null;
+
+    let takeProfit = null;
 
     // =========================
     // BUY SETUP
@@ -60,6 +101,7 @@ function calculateTradeRisk(
     ) {
 
       stopLoss =
+
         currentPrice *
 
         (
@@ -68,11 +110,14 @@ function calculateTradeRisk(
         );
 
       takeProfit =
+
         currentPrice *
 
         (
           1 +
-          (riskFactor * 2) / 100
+          (
+            riskFactor * 2
+          ) / 100
         );
     }
 
@@ -85,6 +130,7 @@ function calculateTradeRisk(
     ) {
 
       stopLoss =
+
         currentPrice *
 
         (
@@ -93,12 +139,57 @@ function calculateTradeRisk(
         );
 
       takeProfit =
+
         currentPrice *
 
         (
           1 -
-          (riskFactor * 2) / 100
+          (
+            riskFactor * 2
+          ) / 100
         );
+    }
+
+    // =========================
+    // FINAL VALIDATION
+    // =========================
+
+    if (
+
+      stopLoss === null ||
+
+      takeProfit === null ||
+
+      isNaN(stopLoss) ||
+
+      isNaN(takeProfit)
+    ) {
+
+      console.log(`
+==================================
+INVALID RISK OUTPUT
+==================================
+
+Decision:
+${decision}
+
+Stop Loss:
+${stopLoss}
+
+Take Profit:
+${takeProfit}
+
+==================================
+`);
+
+      return {
+
+        stopLoss: null,
+
+        takeProfit: null,
+
+        riskRewardRatio: null,
+      };
     }
 
     // =========================
@@ -124,12 +215,17 @@ function calculateTradeRisk(
 
   } catch (err) {
 
-    console.error(
+    console.log(`
+==================================
+TRADE RISK ERROR
+==================================
+`);
 
-      "Trade Risk Error:",
+    console.log(err);
 
-      err
-    );
+    console.log(`
+==================================
+`);
 
     return {
 

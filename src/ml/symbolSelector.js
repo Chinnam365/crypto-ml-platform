@@ -265,5 +265,9 @@ SYMBOL SELECTION ERROR
 }
 
 module.exports = {
+
   selectTradingSymbols,
+
+  getBestSymbols:
+    selectTradingSymbols,
 };

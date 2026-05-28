@@ -1,98 +1,495 @@
-async function getDrawdownState(pool) {
+const pool =
+  require("../db/db");
 
-  const result =
-    await pool.query(`
-      SELECT pnl
-      FROM positions
-      WHERE status = 'CLOSED'
-      ORDER BY closed_at DESC
-      LIMIT 50
-    `);
+/*
+==================================================
+AUTONOMOUS MARKET BEHAVIOR PROFILING
+==================================================
+*/
 
-  const rows =
-    result.rows;
+async function analyzeMarketBehavior() {
 
-  let cumulativePnL = 0;
+  try {
 
-  let peakPnL = 0;
+    /*
+    ==================================================
+    LOAD RECENT MARKET MEMORY
+    ==================================================
+    */
 
-  let maxDrawdown = 0;
+    const result =
+      await pool.query(
 
-  rows.reverse().forEach(row => {
+        `
+        SELECT *
 
-    cumulativePnL +=
-      Number(row.pnl || 0);
+        FROM signal_memory
+
+        ORDER BY id DESC
+
+        LIMIT 3000
+        `
+      );
+
+    const signals =
+      result.rows;
+
+    /*
+    ==================================================
+    DEFAULT PROFILE
+    ==================================================
+    */
+
+    const profile = {
+
+      trendingBehavior: 0,
+
+      sidewaysBehavior: 0,
+
+      volatileBehavior: 0,
+
+      breakoutBehavior: 0,
+
+      fakeoutBehavior: 0,
+
+      momentumPersistence: 0,
+
+      reversalBehavior: 0,
+
+      emotionalVolatility: 0,
+    };
+
+    /*
+    ==================================================
+    EMPTY DATA
+    ==================================================
+    */
 
     if (
-      cumulativePnL >
-      peakPnL
+      signals.length < 30
     ) {
 
-      peakPnL =
-        cumulativePnL;
+      return {
+
+        profile,
+
+        dominantBehavior:
+          "UNKNOWN",
+
+        behaviorScore: 50,
+      };
     }
 
-    const drawdown =
-      peakPnL -
-      cumulativePnL;
+    /*
+    ==================================================
+    ANALYSIS COUNTERS
+    ==================================================
+    */
 
-    if (
-      drawdown >
-      maxDrawdown
+    let trendingCount = 0;
+
+    let sidewaysCount = 0;
+
+    let volatileCount = 0;
+
+    let breakoutCount = 0;
+
+    let fakeoutCount = 0;
+
+    let momentumCount = 0;
+
+    let reversalCount = 0;
+
+    let emotionalCount = 0;
+
+    /*
+    ==================================================
+    PROCESS SIGNALS
+    ==================================================
+    */
+
+    for (
+      const signal of signals
     ) {
 
-      maxDrawdown =
-        drawdown;
+      /*
+      ================================================
+      TRENDING
+      ================================================
+      */
+
+      if (
+        signal.regime ===
+        "TRENDING"
+      ) {
+
+        trendingCount++;
+      }
+
+      /*
+      ================================================
+      SIDEWAYS
+      ================================================
+      */
+
+      if (
+        signal.regime ===
+        "SIDEWAYS"
+      ) {
+
+        sidewaysCount++;
+      }
+
+      /*
+      ================================================
+      VOLATILE
+      ================================================
+      */
+
+      if (
+        signal.volatility_regime ===
+        "HIGH"
+      ) {
+
+        volatileCount++;
+      }
+
+      /*
+      ================================================
+      BREAKOUT BEHAVIOR
+      ================================================
+      */
+
+      if (
+
+        signal.momentum_state ===
+        "BULLISH_ACCELERATION"
+
+        ||
+
+        signal.momentum_state ===
+        "BEARISH_ACCELERATION"
+      ) {
+
+        breakoutCount++;
+      }
+
+      /*
+      ================================================
+      FAKEOUT BEHAVIOR
+      ================================================
+      */
+
+      if (
+
+        signal.regime ===
+        "SIDEWAYS"
+
+        &&
+
+        (
+          signal.momentum_state ===
+          "BULLISH_ACCELERATION"
+
+          ||
+
+          signal.momentum_state ===
+          "BEARISH_ACCELERATION"
+        )
+      ) {
+
+        fakeoutCount++;
+      }
+
+      /*
+      ================================================
+      MOMENTUM PERSISTENCE
+      ================================================
+      */
+
+      if (
+
+        signal.alignment_score >= 80
+
+        &&
+
+        signal.regime ===
+        "TRENDING"
+      ) {
+
+        momentumCount++;
+      }
+
+      /*
+      ================================================
+      REVERSAL BEHAVIOR
+      ================================================
+      */
+
+      if (
+
+        signal.rsi >= 75
+
+        ||
+
+        signal.rsi <= 25
+      ) {
+
+        reversalCount++;
+      }
+
+      /*
+      ================================================
+      EMOTIONAL VOLATILITY
+      ================================================
+      */
+
+      if (
+
+        signal.volatility_regime ===
+        "HIGH"
+
+        &&
+
+        signal.alignment_score < 50
+      ) {
+
+        emotionalCount++;
+      }
     }
-  });
 
-  // ==========================================
-  // DETERMINE RISK MODE
-  // ==========================================
+    /*
+    ==================================================
+    BUILD PROFILE
+    ==================================================
+    */
 
-  let riskMode =
-    "NORMAL";
+    const total =
+      signals.length;
 
-  if (maxDrawdown > 500) {
+    profile.trendingBehavior =
 
-    riskMode =
-      "DEFENSIVE";
-  }
+      Number(
+        (
+          (trendingCount / total)
+          * 100
+        ).toFixed(2)
+      );
 
-  if (maxDrawdown > 1000) {
+    profile.sidewaysBehavior =
 
-    riskMode =
-      "PROTECTIVE";
-  }
+      Number(
+        (
+          (sidewaysCount / total)
+          * 100
+        ).toFixed(2)
+      );
 
-  if (maxDrawdown > 2000) {
+    profile.volatileBehavior =
 
-    riskMode =
-      "LOCKDOWN";
-  }
+      Number(
+        (
+          (volatileCount / total)
+          * 100
+        ).toFixed(2)
+      );
 
-  console.log(`
+    profile.breakoutBehavior =
+
+      Number(
+        (
+          (breakoutCount / total)
+          * 100
+        ).toFixed(2)
+      );
+
+    profile.fakeoutBehavior =
+
+      Number(
+        (
+          (fakeoutCount / total)
+          * 100
+        ).toFixed(2)
+      );
+
+    profile.momentumPersistence =
+
+      Number(
+        (
+          (momentumCount / total)
+          * 100
+        ).toFixed(2)
+      );
+
+    profile.reversalBehavior =
+
+      Number(
+        (
+          (reversalCount / total)
+          * 100
+        ).toFixed(2)
+      );
+
+    profile.emotionalVolatility =
+
+      Number(
+        (
+          (emotionalCount / total)
+          * 100
+        ).toFixed(2)
+      );
+
+    /*
+    ==================================================
+    DOMINANT MARKET BEHAVIOR
+    ==================================================
+    */
+
+    let dominantBehavior =
+      "BALANCED";
+
+    let highestScore = 0;
+
+    for (
+      const key of
+      Object.keys(profile)
+    ) {
+
+      if (
+        profile[key] >
+        highestScore
+      ) {
+
+        highestScore =
+          profile[key];
+
+        dominantBehavior =
+          key;
+      }
+    }
+
+    /*
+    ==================================================
+    MARKET STABILITY SCORE
+    ==================================================
+    */
+
+    let behaviorScore =
+
+      100 -
+
+      (
+        profile.emotionalVolatility
+        * 0.7
+      )
+
+      -
+
+      (
+        profile.fakeoutBehavior
+        * 0.5
+      );
+
+    behaviorScore =
+
+      Math.max(
+        1,
+        Math.min(
+          behaviorScore,
+          100
+        )
+      );
+
+    behaviorScore =
+      Number(
+        behaviorScore.toFixed(2)
+      );
+
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
+
+    console.log(`
 ==================================
-DRAWDOWN INTELLIGENCE
+MARKET BEHAVIOR PROFILING
 ==================================
 
-Max Drawdown:
-${maxDrawdown.toFixed(2)}
+Dominant Behavior:
+${dominantBehavior}
 
-Risk Mode:
-${riskMode}
+Behavior Stability Score:
+${behaviorScore}
+
+Trending:
+${profile.trendingBehavior}%
+
+Sideways:
+${profile.sidewaysBehavior}%
+
+Volatile:
+${profile.volatileBehavior}%
+
+Breakout:
+${profile.breakoutBehavior}%
+
+Fakeout:
+${profile.fakeoutBehavior}%
+
+Momentum Persistence:
+${profile.momentumPersistence}%
+
+Reversal:
+${profile.reversalBehavior}%
+
+Emotional Volatility:
+${profile.emotionalVolatility}%
 
 ==================================
 `);
 
-  return {
+    /*
+    ==================================================
+    RETURN
+    ==================================================
+    */
 
-    maxDrawdown,
+    return {
 
-    riskMode,
-  };
+      profile,
+
+      dominantBehavior,
+
+      behaviorScore,
+    };
+
+  } catch (err) {
+
+    console.log(`
+==================================
+MARKET BEHAVIOR ERROR
+==================================
+`);
+
+    console.log(err);
+
+    console.log(`
+==================================
+`);
+
+    return {
+
+      profile: {},
+
+      dominantBehavior:
+        "UNKNOWN",
+
+      behaviorScore: 50,
+    };
+  }
 }
 
 module.exports = {
-  getDrawdownState,
+  analyzeMarketBehavior,
 };

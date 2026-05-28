@@ -264,10 +264,25 @@ SYMBOL SELECTION ERROR
   }
 }
 
+/*
+==================================================
+BACKWARD COMPATIBILITY
+==================================================
+*/
+
+async function getBestSymbols(
+  options = {}
+) {
+
+  return await
+    selectTradingSymbols(
+      options
+    );
+}
+
 module.exports = {
 
   selectTradingSymbols,
 
-  getBestSymbols:
-    selectTradingSymbols,
+  getBestSymbols,
 };

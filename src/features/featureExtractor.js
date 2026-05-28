@@ -663,10 +663,7 @@ REACHED SIGNAL MEMORY SECTION
       tradeDecision.action !==
       "HOLD"
 
-      &&
-
-      portfolioRisk.allowNewTrades
-    ) {
+          ) {
 
       await saveTradeMemory({
 

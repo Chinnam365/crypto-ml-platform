@@ -2,9 +2,17 @@ const {
   calculateAdaptiveConfidence,
 } = require("./adaptiveConfidence");
 
+const {
+  getRegimeMemory,
+} = require("./regimeMemory");
+
+const {
+  analyzeStrategyPerformance,
+} = require("./strategyAnalytics");
+
 /*
 ==================================================
-CONFIDENCE ENGINE
+CROSS-MODEL CONSENSUS ENGINE
 ==================================================
 */
 
@@ -25,9 +33,19 @@ async function calculateConfidence({
   momentumStrength,
 
   overallTrend,
+
+  marketState,
+
+  decision = "HOLD",
 }) {
 
   try {
+
+    /*
+    ==================================================
+    BASE CONFIDENCE
+    ==================================================
+    */
 
     let confidence = 50;
 
@@ -107,7 +125,7 @@ async function calculateConfidence({
 
     /*
     ==================================================
-    MULTI TIMEFRAME ALIGNMENT
+    MULTI-TIMEFRAME ALIGNMENT
     ==================================================
     */
 
@@ -167,7 +185,7 @@ async function calculateConfidence({
 
     /*
     ==================================================
-    CLAMP BASE
+    BASE CLAMP
     ==================================================
     */
 
@@ -183,11 +201,11 @@ async function calculateConfidence({
 
     /*
     ==================================================
-    ADAPTIVE CONTEXTUAL LEARNING
+    ADAPTIVE CONFIDENCE
     ==================================================
     */
 
-    const adaptiveData =
+    const adaptive =
       await calculateAdaptiveConfidence({
 
         baseConfidence:
@@ -206,30 +224,267 @@ async function calculateConfidence({
 
     /*
     ==================================================
-    FINAL CONFIDENCE
+    TEMPORAL MEMORY
     ==================================================
     */
 
-    const finalConfidence =
+    const memory =
+      await getRegimeMemory({
 
-      adaptiveData.adjustedConfidence;
+        currentState:
+          marketState,
+
+        trend,
+
+        volatilityRegime,
+
+        momentumState,
+      });
+
+    let memoryBoost = 0;
+
+    if (
+      memory.found
+    ) {
+
+      for (
+        const prediction of
+        memory.predictions
+      ) {
+
+        memoryBoost +=
+
+          (
+            prediction.avgProbability
+            || 0
+          ) * 0.03;
+      }
+    }
+
+    /*
+    ==================================================
+    STRATEGY EVOLUTION
+    ==================================================
+    */
+
+    const analytics =
+      await analyzeStrategyPerformance();
+
+    const strategyKey =
+
+      `${regime}_` +
+
+      `${trend}_` +
+
+      `${volatilityRegime}_` +
+
+      `${momentumState}_` +
+
+      `${decision}`;
+
+    const strategy =
+
+      analytics.strategies.find(
+
+        s =>
+          s.strategyKey ===
+          strategyKey
+      );
+
+    let strategyBoost = 0;
+
+    if (strategy) {
+
+      if (
+
+        strategy.classification ===
+        "PROMOTE"
+      ) {
+
+        strategyBoost =
+          strategy.evolutionScore * 0.08;
+      }
+
+      else if (
+
+        strategy.classification ===
+        "SUPPRESS"
+      ) {
+
+        strategyBoost =
+          -(
+            strategy.evolutionScore
+            * 0.05
+          );
+      }
+    }
+
+    /*
+    ==================================================
+    CONSENSUS CONFIDENCE
+    ==================================================
+    */
+
+    let consensusConfidence =
+
+      adaptive.adjustedConfidence
+
+      +
+
+      memoryBoost
+
+      +
+
+      strategyBoost;
+
+    /*
+    ==================================================
+    CONSENSUS STRENGTH
+    ==================================================
+    */
+
+    let consensusStrength = 0;
+
+    /*
+    Trend agreement
+    */
+
+    if (
+
+      trend === overallTrend
+
+      &&
+
+      trend !== "SIDEWAYS"
+    ) {
+
+      consensusStrength += 25;
+    }
+
+    /*
+    Momentum agreement
+    */
+
+    if (
+
+      momentumState ===
+      "BULLISH_ACCELERATION"
+
+      ||
+
+      momentumState ===
+      "BEARISH_ACCELERATION"
+    ) {
+
+      consensusStrength += 20;
+    }
+
+    /*
+    Strategy agreement
+    */
+
+    if (
+
+      strategy
+
+      &&
+
+      strategy.classification ===
+      "PROMOTE"
+    ) {
+
+      consensusStrength += 30;
+    }
+
+    /*
+    Memory agreement
+    */
+
+    if (
+      memory.found
+    ) {
+
+      consensusStrength += 15;
+    }
+
+    /*
+    Reinforcement agreement
+    */
+
+    if (
+      adaptive.reinforcementBoost > 0
+    ) {
+
+      consensusStrength += 10;
+    }
+
+    /*
+    ==================================================
+    CLAMPING
+    ==================================================
+    */
+
+    consensusConfidence =
+
+      Math.max(
+        1,
+        Math.min(
+          consensusConfidence,
+          99
+        )
+      );
+
+    consensusStrength =
+
+      Math.max(
+        0,
+        Math.min(
+          consensusStrength,
+          100
+        )
+      );
+
+    consensusConfidence =
+      Number(
+        consensusConfidence.toFixed(2)
+      );
+
+    consensusStrength =
+      Number(
+        consensusStrength.toFixed(2)
+      );
+
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
 
     console.log(`
 ==================================
-CONFIDENCE ENGINE
+CROSS-MODEL CONSENSUS ENGINE
 ==================================
 
 Base Confidence:
 ${confidence}
 
 Adaptive Confidence:
-${finalConfidence}
+${adaptive.adjustedConfidence}
 
-Reinforcement Boost:
-${adaptiveData.reinforcementBoost}
+Memory Boost:
+${memoryBoost.toFixed(2)}
 
-Sample Size:
-${adaptiveData.sampleSize}
+Strategy Boost:
+${strategyBoost.toFixed(2)}
+
+Consensus Confidence:
+${consensusConfidence}
+
+Consensus Strength:
+${consensusStrength}
+
+Strategy:
+${strategyKey}
 
 ==================================
 `);
@@ -237,20 +492,29 @@ ${adaptiveData.sampleSize}
     return {
 
       confidence:
-        finalConfidence,
+        consensusConfidence,
+
+      consensusStrength,
 
       reinforcementBoost:
-        adaptiveData.reinforcementBoost,
+        adaptive.reinforcementBoost,
 
-      reinforcementSamples:
-        adaptiveData.sampleSize,
+      memoryBoost:
+        Number(
+          memoryBoost.toFixed(2)
+        ),
+
+      strategyBoost:
+        Number(
+          strategyBoost.toFixed(2)
+        ),
     };
 
   } catch (err) {
 
     console.log(`
 ==================================
-CONFIDENCE ENGINE ERROR
+CONSENSUS ENGINE ERROR
 ==================================
 `);
 
@@ -264,9 +528,13 @@ CONFIDENCE ENGINE ERROR
 
       confidence: 50,
 
+      consensusStrength: 0,
+
       reinforcementBoost: 0,
 
-      reinforcementSamples: 0,
+      memoryBoost: 0,
+
+      strategyBoost: 0,
     };
   }
 }

@@ -3,7 +3,7 @@ const pool =
 
 /*
 ==================================================
-SELF OPTIMIZER
+SELF-HEALING AI INTELLIGENCE
 ==================================================
 */
 
@@ -35,7 +35,7 @@ async function optimizeSystemBehavior() {
 
         ORDER BY id DESC
 
-        LIMIT 300
+        LIMIT 500
         `
       );
 
@@ -44,7 +44,7 @@ async function optimizeSystemBehavior() {
 
     /*
     ==================================================
-    MINIMUM DATA
+    DEFAULT RESPONSE
     ==================================================
     */
 
@@ -54,13 +54,17 @@ async function optimizeSystemBehavior() {
 
       return {
 
-        explorationRate: 0.4,
+        explorationRate: 0.3,
 
-        exploitationRate: 0.6,
+        exploitationRate: 0.7,
 
         confidenceMultiplier: 1,
 
         thresholdAdjustment: 0,
+
+        healingMode: false,
+
+        degradationScore: 0,
       };
     }
 
@@ -76,15 +80,34 @@ async function optimizeSystemBehavior() {
 
     let totalPnL = 0;
 
+    let consecutiveLosses = 0;
+
+    let maxConsecutiveLosses = 0;
+
+    /*
+    ==================================================
+    PROCESS TRADES
+    ==================================================
+    */
+
     for (
       const trade of trades
     ) {
+
+      const pnl =
+        Number(
+          trade.pnl || 0
+        );
+
+      totalPnL += pnl;
 
       if (
         trade.outcome === "WIN"
       ) {
 
         wins++;
+
+        consecutiveLosses = 0;
       }
 
       else if (
@@ -92,13 +115,27 @@ async function optimizeSystemBehavior() {
       ) {
 
         losses++;
-      }
 
-      totalPnL +=
-        Number(
-          trade.pnl || 0
-        );
+        consecutiveLosses++;
+
+        if (
+
+          consecutiveLosses >
+
+          maxConsecutiveLosses
+        ) {
+
+          maxConsecutiveLosses =
+            consecutiveLosses;
+        }
+      }
     }
+
+    /*
+    ==================================================
+    PERFORMANCE
+    ==================================================
+    */
 
     const totalTrades =
       wins + losses;
@@ -107,7 +144,10 @@ async function optimizeSystemBehavior() {
 
       totalTrades > 0
 
-        ? (wins / totalTrades) * 100
+        ? (
+            wins /
+            totalTrades
+          ) * 100
 
         : 0;
 
@@ -115,9 +155,85 @@ async function optimizeSystemBehavior() {
 
       totalTrades > 0
 
-        ? totalPnL / totalTrades
+        ? (
+            totalPnL /
+            totalTrades
+          )
 
         : 0;
+
+    /*
+    ==================================================
+    DEGRADATION SCORE
+    ==================================================
+    */
+
+    let degradationScore = 0;
+
+    /*
+    Poor win rate
+    */
+
+    if (
+      winRate < 45
+    ) {
+
+      degradationScore += 25;
+    }
+
+    /*
+    Negative profitability
+    */
+
+    if (
+      avgPnL < 0
+    ) {
+
+      degradationScore += 25;
+    }
+
+    /*
+    Loss streaks
+    */
+
+    degradationScore +=
+
+      maxConsecutiveLosses * 4;
+
+    /*
+    Clamp
+    */
+
+    degradationScore =
+
+      Math.max(
+        0,
+        Math.min(
+          degradationScore,
+          100
+        )
+      );
+
+    degradationScore =
+      Number(
+        degradationScore.toFixed(2)
+      );
+
+    /*
+    ==================================================
+    SELF-HEALING MODE
+    ==================================================
+    */
+
+    let healingMode =
+      false;
+
+    if (
+      degradationScore >= 60
+    ) {
+
+      healingMode = true;
+    }
 
     /*
     ==================================================
@@ -130,35 +246,42 @@ async function optimizeSystemBehavior() {
     let exploitationRate = 0.7;
 
     /*
-    ==================================================
-    LOSING SYSTEM
-    EXPLORE MORE
-    ==================================================
+    Healing mode explores carefully
     */
 
     if (
-      winRate < 45
+      healingMode
     ) {
 
-      explorationRate = 0.6;
+      explorationRate = 0.15;
 
-      exploitationRate = 0.4;
+      exploitationRate = 0.85;
     }
 
     /*
-    ==================================================
-    STRONG SYSTEM
-    EXPLOIT MORE
-    ==================================================
+    Weak system explores more
+    */
+
+    else if (
+      winRate < 45
+    ) {
+
+      explorationRate = 0.5;
+
+      exploitationRate = 0.5;
+    }
+
+    /*
+    Strong system exploits more
     */
 
     else if (
       winRate > 60
     ) {
 
-      explorationRate = 0.15;
+      explorationRate = 0.1;
 
-      exploitationRate = 0.85;
+      exploitationRate = 0.9;
     }
 
     /*
@@ -180,8 +303,24 @@ async function optimizeSystemBehavior() {
       avgPnL < -0.5
     ) {
 
-      confidenceMultiplier = 0.85;
+      confidenceMultiplier = 0.8;
     }
+
+    /*
+    Healing mode defensive reduction
+    */
+
+    if (
+      healingMode
+    ) {
+
+      confidenceMultiplier *= 0.7;
+    }
+
+    confidenceMultiplier =
+      Number(
+        confidenceMultiplier.toFixed(2)
+      );
 
     /*
     ==================================================
@@ -202,26 +341,88 @@ async function optimizeSystemBehavior() {
       winRate < 40
     ) {
 
-      thresholdAdjustment = 5;
+      thresholdAdjustment = 8;
+    }
+
+    /*
+    Healing mode stricter
+    */
+
+    if (
+      healingMode
+    ) {
+
+      thresholdAdjustment += 10;
     }
 
     /*
     ==================================================
-    FINAL OUTPUT
+    AUTONOMOUS SAFETY RESPONSE
     ==================================================
     */
 
-    const output = {
+    let tradingAllowed =
+      true;
 
-      winRate:
-        Number(
-          winRate.toFixed(2)
-        ),
+    if (
+      degradationScore >= 85
+    ) {
 
-      avgPnL:
-        Number(
-          avgPnL.toFixed(2)
-        ),
+      tradingAllowed =
+        false;
+    }
+
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
+
+    console.log(`
+==================================
+SELF-HEALING AI INTELLIGENCE
+==================================
+
+Win Rate:
+${winRate.toFixed(2)}%
+
+Avg PnL:
+${avgPnL.toFixed(2)}
+
+Max Consecutive Losses:
+${maxConsecutiveLosses}
+
+Degradation Score:
+${degradationScore}
+
+Healing Mode:
+${healingMode}
+
+Trading Allowed:
+${tradingAllowed}
+
+Exploration Rate:
+${explorationRate}
+
+Exploitation Rate:
+${exploitationRate}
+
+Confidence Multiplier:
+${confidenceMultiplier}
+
+Threshold Adjustment:
+${thresholdAdjustment}
+
+==================================
+`);
+
+    /*
+    ==================================================
+    RETURN
+    ==================================================
+    */
+
+    return {
 
       explorationRate:
         Number(
@@ -233,47 +434,22 @@ async function optimizeSystemBehavior() {
           exploitationRate.toFixed(2)
         ),
 
-      confidenceMultiplier:
-        Number(
-          confidenceMultiplier.toFixed(2)
-        ),
+      confidenceMultiplier,
 
       thresholdAdjustment,
+
+      healingMode,
+
+      degradationScore,
+
+      tradingAllowed,
     };
-
-    console.log(`
-==================================
-SELF OPTIMIZER
-==================================
-
-Win Rate:
-${output.winRate}%
-
-Avg PnL:
-${output.avgPnL}
-
-Exploration Rate:
-${output.explorationRate}
-
-Exploitation Rate:
-${output.exploitationRate}
-
-Confidence Multiplier:
-${output.confidenceMultiplier}
-
-Threshold Adjustment:
-${output.thresholdAdjustment}
-
-==================================
-`);
-
-    return output;
 
   } catch (err) {
 
     console.log(`
 ==================================
-SELF OPTIMIZER ERROR
+SELF-HEALING ERROR
 ==================================
 `);
 
@@ -292,6 +468,12 @@ SELF OPTIMIZER ERROR
       confidenceMultiplier: 1,
 
       thresholdAdjustment: 0,
+
+      healingMode: false,
+
+      degradationScore: 0,
+
+      tradingAllowed: true,
     };
   }
 }

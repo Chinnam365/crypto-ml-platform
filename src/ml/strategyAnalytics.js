@@ -1,145 +1,384 @@
 const pool =
   require("../db/db");
 
-async function generateStrategyAnalytics() {
+/*
+==================================================
+AUTONOMOUS STRATEGY EVOLUTION
+==================================================
+*/
+
+async function analyzeStrategyPerformance() {
 
   try {
 
-    // =========================
-    // LOAD CLOSED TRADES
-    // =========================
+    /*
+    ==================================================
+    LOAD COMPLETED TRADES
+    ==================================================
+    */
 
     const result =
       await pool.query(
 
         `
         SELECT *
+
         FROM trade_history
-        WHERE outcome != 'PENDING'
+
+        WHERE
+
+          outcome IS NOT NULL
+
+          AND
+
+          outcome != 'PENDING'
+
+        ORDER BY id DESC
+
+        LIMIT 3000
         `
       );
 
     const trades =
       result.rows;
 
-    // =========================
-    // EMPTY DATASET
-    // =========================
+    /*
+    ==================================================
+    STRATEGY MEMORY
+    ==================================================
+    */
 
-    if (
-      trades.length === 0
-    ) {
+    const strategies = {};
 
-      return {
-
-        totalTrades: 0,
-
-        wins: 0,
-
-        losses: 0,
-
-        winRate: 0,
-
-        averagePnL: 0,
-      };
-    }
-
-    // =========================
-    // CALCULATIONS
-    // =========================
-
-    let wins = 0;
-
-    let losses = 0;
-
-    let totalPnL = 0;
+    /*
+    ==================================================
+    BUILD STRATEGY PROFILES
+    ==================================================
+    */
 
     for (
       const trade of trades
     ) {
 
-      totalPnL +=
+      /*
+      ================================================
+      STRATEGY SIGNATURE
+      ================================================
+      */
+
+      const strategyKey =
+
+        `${trade.regime || "UNKNOWN"}_` +
+
+        `${trade.trend || "SIDEWAYS"}_` +
+
+        `${trade.volatility_regime || "NORMAL"}_` +
+
+        `${trade.momentum_state || "NEUTRAL"}_` +
+
+        `${trade.decision || "HOLD"}`;
+
+      /*
+      ================================================
+      INITIALIZE
+      ================================================
+      */
+
+      if (
+        !strategies[strategyKey]
+      ) {
+
+        strategies[strategyKey] = {
+
+          wins: 0,
+
+          losses: 0,
+
+          totalPnL: 0,
+
+          trades: 0,
+
+          confidenceTotal: 0,
+        };
+      }
+
+      /*
+      ================================================
+      UPDATE STATS
+      ================================================
+      */
+
+      const strategy =
+        strategies[strategyKey];
+
+      strategy.trades++;
+
+      strategy.totalPnL +=
         Number(
-          trade.pnl
+          trade.pnl || 0
+        );
+
+      strategy.confidenceTotal +=
+        Number(
+          trade.confidence || 0
         );
 
       if (
-        trade.outcome ===
-        "WIN"
+        trade.outcome === "WIN"
       ) {
 
-        wins++;
+        strategy.wins++;
       }
 
-      if (
-        trade.outcome ===
-        "LOSS"
+      else if (
+        trade.outcome === "LOSS"
       ) {
 
-        losses++;
+        strategy.losses++;
       }
     }
 
-    // =========================
-    // METRICS
-    // =========================
+    /*
+    ==================================================
+    STRATEGY EVOLUTION
+    ==================================================
+    */
 
-    const totalTrades =
-      trades.length;
+    const evolvedStrategies = [];
 
-    const winRate =
-      (
-        wins /
-        totalTrades
-      ) * 100;
+    for (
+      const strategyKey of
+      Object.keys(strategies)
+    ) {
 
-    const averagePnL =
-      totalPnL /
-      totalTrades;
+      const stats =
+        strategies[strategyKey];
+
+      /*
+      ================================================
+      MINIMUM SAMPLE SIZE
+      ================================================
+      */
+
+      if (
+        stats.trades < 10
+      ) {
+
+        continue;
+      }
+
+      /*
+      ================================================
+      PERFORMANCE METRICS
+      ================================================
+      */
+
+      const winRate =
+
+        (
+          stats.wins /
+          stats.trades
+        ) * 100;
+
+      const avgPnL =
+
+        stats.totalPnL /
+        stats.trades;
+
+      const avgConfidence =
+
+        stats.confidenceTotal /
+        stats.trades;
+
+      /*
+      ================================================
+      EVOLUTION SCORE
+      ================================================
+      */
+
+      let evolutionScore =
+
+        (
+          winRate * 0.5
+        )
+
+        +
+
+        (
+          avgPnL * 15
+        )
+
+        +
+
+        (
+          avgConfidence * 0.2
+        );
+
+      evolutionScore =
+        Number(
+          evolutionScore.toFixed(2)
+        );
+
+      /*
+      ================================================
+      STRATEGY CLASSIFICATION
+      ================================================
+      */
+
+      let classification =
+        "NEUTRAL";
+
+      if (
+        evolutionScore >= 75
+      ) {
+
+        classification =
+          "PROMOTE";
+      }
+
+      else if (
+        evolutionScore <= 40
+      ) {
+
+        classification =
+          "SUPPRESS";
+      }
+
+      /*
+      ================================================
+      STRATEGY PROFILE
+      ================================================
+      */
+
+      evolvedStrategies.push({
+
+        strategyKey,
+
+        classification,
+
+        trades:
+          stats.trades,
+
+        winRate:
+          Number(
+            winRate.toFixed(2)
+          ),
+
+        avgPnL:
+          Number(
+            avgPnL.toFixed(2)
+          ),
+
+        avgConfidence:
+          Number(
+            avgConfidence.toFixed(2)
+          ),
+
+        evolutionScore,
+      });
+    }
+
+    /*
+    ==================================================
+    SORT BEST STRATEGIES
+    ==================================================
+    */
+
+    evolvedStrategies.sort(
+      (a, b) =>
+
+        b.evolutionScore -
+        a.evolutionScore
+    );
+
+    /*
+    ==================================================
+    TOP STRATEGIES
+    ==================================================
+    */
+
+    const promotedStrategies =
+
+      evolvedStrategies.filter(
+
+        strategy =>
+
+          strategy.classification ===
+          "PROMOTE"
+      );
+
+    const suppressedStrategies =
+
+      evolvedStrategies.filter(
+
+        strategy =>
+
+          strategy.classification ===
+          "SUPPRESS"
+      );
+
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
+
+    console.log(`
+==================================
+AUTONOMOUS STRATEGY EVOLUTION
+==================================
+`);
+
+    console.table(
+
+      evolvedStrategies.slice(0, 15)
+    );
+
+    console.log(`
+Promoted Strategies:
+${promotedStrategies.length}
+
+Suppressed Strategies:
+${suppressedStrategies.length}
+
+==================================
+`);
 
     return {
 
-      totalTrades,
+      strategies:
+        evolvedStrategies,
 
-      wins,
+      promotedStrategies,
 
-      losses,
-
-      winRate:
-        Number(
-          winRate.toFixed(2)
-        ),
-
-      averagePnL:
-        Number(
-          averagePnL.toFixed(2)
-        ),
+      suppressedStrategies,
     };
 
   } catch (err) {
 
-    console.error(
+    console.log(`
+==================================
+STRATEGY EVOLUTION ERROR
+==================================
+`);
 
-      "Strategy Analytics Error:",
+    console.log(err);
 
-      err.message
-    );
+    console.log(`
+==================================
+`);
 
     return {
 
-      totalTrades: 0,
+      strategies: [],
 
-      wins: 0,
+      promotedStrategies: [],
 
-      losses: 0,
-
-      winRate: 0,
-
-      averagePnL: 0,
+      suppressedStrategies: [],
     };
   }
 }
 
 module.exports = {
-  generateStrategyAnalytics,
+  analyzeStrategyPerformance,
 };

@@ -658,12 +658,14 @@ REACHED SIGNAL MEMORY SECTION
     ==================================================
     */
 
-    if (
+   if (
 
-      tradeDecision.action !==
-      "HOLD"
+  buyScore >= 35
 
-          ) {
+  ||
+
+  sellScore >= 35
+) {
 
       await saveTradeMemory({
 

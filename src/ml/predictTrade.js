@@ -1,129 +1,397 @@
-const {
-  getModel,
-} = require("./modelStore");
+const brain =
+  require("brain.js");
 
 const {
-  normalizeFeatures,
-} = require("./normalizeFeatures");
+  calculateSignalScores,
+} = require("./probabilisticSignals");
 
-// =====================================
-// PREDICT TRADE
-// =====================================
+const {
+  getRegimeMemory,
+} = require("./regimeMemory");
 
-function predictTrade(features) {
+const {
+  calculateAdaptiveConfidence,
+} = require("./adaptiveConfidence");
 
-  const model =
-    getModel();
+const {
+  calculateAdaptiveThreshold,
+} = require("./adaptiveThreshold");
 
-  if (!model) {
+/*
+==================================================
+LOAD MODEL
+==================================================
+*/
 
-    throw new Error(
-      "Model not trained yet"
-    );
-  }
+let net = new brain.NeuralNetwork();
 
-  const normalized =
-    normalizeFeatures(features);
+try {
 
-  const input = [[
+  net =
+    require("./modelStore");
 
-    normalized.rsi,
+} catch (err) {
 
-    normalized.volatility,
+  console.log(`
+==================================
+MODEL LOAD WARNING
+==================================
 
-    normalized.score,
+Using fallback model
 
-    normalized.bullish5m,
+==================================
+`);
+}
 
-    normalized.bullish15m,
+/*
+==================================================
+ENSEMBLE PREDICTIVE ENGINE
+==================================================
+*/
 
-    normalized.bullish1h,
+async function predictTrade(features) {
 
-    normalized.btcBullish,
+  try {
 
-    normalized.ema5mSpread,
+    /*
+    ==================================================
+    ML PREDICTION
+    ==================================================
+    */
 
-    normalized.ema15mSpread,
+    const mlOutput =
+      net.run({
 
-    normalized.ema1hSpread,
+        rsi:
+          features.rsi / 100,
 
-    normalized.atr,
+        macd:
+          features.macd / 10,
 
-    normalized.candleBody,
+        volatility:
+          features.volatility / 10,
 
-    normalized.upperWick,
+        confidence:
+          features.confidence / 100,
+      });
 
-    normalized.lowerWick,
+    const mlProbability =
 
-    normalized.emaSlope,
-
-    normalized.rsiSlope,
-
-    normalized.distanceFromEma,
-
-    normalized.relativeVolume,
-
-    normalized.bullishRatio,
-
-    normalized.momentum,
-
-    normalized.volatilityExpansion,
-  ]];
-
-  const estimators =
-    model.estimators;
-
-  if (
-    !estimators ||
-    estimators.length === 0
-  ) {
-
-    throw new Error(
-      "Random Forest estimators missing"
-    );
-  }
-
-  let buyVotes = 0;
-
-  for (const tree of estimators) {
-
-    const prediction =
-      tree.predict(input)[0];
-
-    if (prediction === 1) {
-
-      buyVotes++;
-    }
-  }
-
-  const probability =
-    buyVotes /
-    estimators.length;
-
-  let decision =
-    "SKIP";
-
-  if (
-    probability >= 0.65
-  ) {
-
-    decision = "BUY";
-  }
-
-  return {
-
-    probability:
       Number(
-        probability.toFixed(4)
-      ),
+        (
+          (mlOutput.buy || 0)
+          * 100
+        ).toFixed(2)
+      );
 
-    buyVotes,
+    /*
+    ==================================================
+    PROBABILISTIC ENGINE
+    ==================================================
+    */
 
-    totalTrees:
-      estimators.length,
+    const probabilistic =
+      await calculateSignalScores({
 
-    decision,
-  };
+        rsi:
+          features.rsi,
+
+        macd:
+          features.macd,
+
+        trend:
+          features.trend,
+
+        regime:
+          features.regime,
+
+        multiTf: {
+
+          overallTrend:
+            features.overallTrend,
+        },
+
+        volatilityRegime:
+          features.volatilityRegime,
+
+        momentumState:
+          features.momentumState,
+      });
+
+    /*
+    ==================================================
+    TEMPORAL MARKET MEMORY
+    ==================================================
+    */
+
+    const memory =
+      await getRegimeMemory({
+
+        currentState:
+          features.marketState,
+
+        trend:
+          features.trend,
+
+        volatilityRegime:
+          features.volatilityRegime,
+
+        momentumState:
+          features.momentumState,
+      });
+
+    /*
+    ==================================================
+    MEMORY CONFIDENCE
+    ==================================================
+    */
+
+    let memoryBoost = 0;
+
+    if (
+      memory.found
+    ) {
+
+      for (
+        const prediction of
+        memory.predictions
+      ) {
+
+        memoryBoost +=
+
+          (
+            prediction.avgProbability
+            || 0
+          ) * 0.05;
+      }
+    }
+
+    /*
+    ==================================================
+    ADAPTIVE CONFIDENCE
+    ==================================================
+    */
+
+    const adaptive =
+      await calculateAdaptiveConfidence({
+
+        baseConfidence:
+          features.confidence,
+
+        trend:
+          features.trend,
+
+        regime:
+          features.regime,
+
+        volatilityRegime:
+          features.volatilityRegime,
+
+        momentumState:
+          features.momentumState,
+
+        overallTrend:
+          features.overallTrend,
+      });
+
+    /*
+    ==================================================
+    FINAL ENSEMBLE CONFIDENCE
+    ==================================================
+    */
+
+    let ensembleConfidence =
+
+      (
+        mlProbability * 0.35
+      )
+
+      +
+
+      (
+        probabilistic.buyScore
+        * 0.25
+      )
+
+      +
+
+      (
+        adaptive.adjustedConfidence
+        * 0.30
+      )
+
+      +
+
+      (
+        memoryBoost
+      );
+
+    ensembleConfidence =
+      Number(
+        ensembleConfidence.toFixed(2)
+      );
+
+    /*
+    ==================================================
+    ADAPTIVE THRESHOLD
+    ==================================================
+    */
+
+    const thresholdData =
+      await calculateAdaptiveThreshold({
+
+        baseThreshold: 57,
+
+        regime:
+          features.regime,
+
+        volatilityRegime:
+          features.volatilityRegime,
+
+        trend:
+          features.trend,
+
+        momentumState:
+          features.momentumState,
+
+        performanceScore:
+          adaptive.reinforcementBoost,
+      });
+
+    const adaptiveThreshold =
+      thresholdData.threshold;
+
+    /*
+    ==================================================
+    FINAL DECISION
+    ==================================================
+    */
+
+    let decision = "HOLD";
+
+    if (
+
+      ensembleConfidence >=
+      adaptiveThreshold
+    ) {
+
+      if (
+
+        probabilistic.buyScore >
+        probabilistic.sellScore
+      ) {
+
+        decision = "BUY";
+      }
+
+      else if (
+
+        probabilistic.sellScore >
+        probabilistic.buyScore
+      ) {
+
+        decision = "SELL";
+      }
+    }
+
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
+
+    console.log(`
+==================================
+ENSEMBLE PREDICTIVE ENGINE
+==================================
+
+ML Probability:
+${mlProbability}
+
+Buy Score:
+${probabilistic.buyScore}
+
+Sell Score:
+${probabilistic.sellScore}
+
+Adaptive Confidence:
+${adaptive.adjustedConfidence}
+
+Memory Boost:
+${memoryBoost.toFixed(2)}
+
+Ensemble Confidence:
+${ensembleConfidence}
+
+Adaptive Threshold:
+${adaptiveThreshold}
+
+Decision:
+${decision}
+
+==================================
+`);
+
+    return {
+
+      decision,
+
+      confidence:
+        ensembleConfidence,
+
+      threshold:
+        adaptiveThreshold,
+
+      mlProbability,
+
+      buyScore:
+        probabilistic.buyScore,
+
+      sellScore:
+        probabilistic.sellScore,
+
+      adaptiveConfidence:
+        adaptive.adjustedConfidence,
+
+      memoryBoost:
+        Number(
+          memoryBoost.toFixed(2)
+        ),
+    };
+
+  } catch (err) {
+
+    console.log(`
+==================================
+ENSEMBLE PREDICTION ERROR
+==================================
+`);
+
+    console.log(err);
+
+    console.log(`
+==================================
+`);
+
+    return {
+
+      decision: "HOLD",
+
+      confidence: 50,
+
+      threshold: 57,
+
+      mlProbability: 0,
+
+      buyScore: 0,
+
+      sellScore: 0,
+
+      adaptiveConfidence: 50,
+
+      memoryBoost: 0,
+    };
+  }
 }
 
 module.exports = {

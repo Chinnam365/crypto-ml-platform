@@ -3,23 +3,23 @@ const pool =
 
 /*
 ==================================================
-TEMPORAL REGIME MEMORY
+UPDATE REGIME MEMORY
 ==================================================
 */
 
 async function updateRegimeMemory({
 
-  currentState,
+  currentState = "NEUTRAL",
 
-  predictedState,
+  predictedState = "NEUTRAL",
 
-  transitionProbability,
+  transitionProbability = 0,
 
-  trend,
+  trend = "SIDEWAYS",
 
-  volatilityRegime,
+  volatilityRegime = "NORMAL",
 
-  momentumState,
+  momentumState = "NEUTRAL",
 }) {
 
   try {
@@ -152,7 +152,7 @@ async function updateRegimeMemory({
       const occurrences =
 
         Number(
-          existing.occurrences
+          existing.occurrences || 0
         ) + 1;
 
       const avgProbability =
@@ -160,19 +160,22 @@ async function updateRegimeMemory({
         (
           (
             Number(
-              existing.avg_probability
+              existing.avg_probability || 0
             )
 
             *
 
             Number(
-              existing.occurrences
+              existing.occurrences || 0
             )
           )
 
           +
 
-          transitionProbability
+          Number(
+            transitionProbability || 0
+          )
+
         )
 
         /
@@ -264,25 +267,27 @@ REGIME MEMORY ERROR
     return {
 
       success: false,
+
+      error: err.message,
     };
   }
 }
 
 /*
 ==================================================
-LOAD TEMPORAL MARKET MEMORY
+GET REGIME MEMORY
 ==================================================
 */
 
 async function getRegimeMemory({
 
-  currentState,
+  currentState = "NEUTRAL",
 
-  trend,
+  trend = "SIDEWAYS",
 
-  volatilityRegime,
+  volatilityRegime = "NORMAL",
 
-  momentumState,
+  momentumState = "NEUTRAL",
 }) {
 
   try {
@@ -333,7 +338,7 @@ async function getRegimeMemory({
 
     /*
     ==================================================
-    NO MEMORY
+    NO MEMORY FOUND
     ==================================================
     */
 
@@ -364,12 +369,12 @@ async function getRegimeMemory({
 
         avgProbability:
           Number(
-            memory.avg_probability
+            memory.avg_probability || 0
           ),
 
         occurrences:
           Number(
-            memory.occurrences
+            memory.occurrences || 0
           ),
       }));
 
@@ -385,7 +390,9 @@ TEMPORAL REGIME MEMORY
 ==================================
 `);
 
-    console.table(predictions);
+    console.table(
+      predictions
+    );
 
     console.log(`
 ==================================
@@ -417,6 +424,8 @@ REGIME MEMORY LOAD ERROR
       found: false,
 
       predictions: [],
+
+      error: err.message,
     };
   }
 }

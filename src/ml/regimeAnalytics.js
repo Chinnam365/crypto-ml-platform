@@ -3,189 +3,493 @@ const pool =
 
 /*
 ==================================================
-REGIME ANALYTICS ENGINE
+AUTONOMOUS MARKET BEHAVIOR PROFILING
 ==================================================
 */
 
-async function calculateRegimeAnalytics() {
+async function analyzeMarketBehavior() {
 
   try {
+
+    /*
+    ==================================================
+    LOAD RECENT MARKET MEMORY
+    ==================================================
+    */
 
     const result =
       await pool.query(
 
         `
         SELECT *
-        FROM trade_history
-        WHERE pnl IS NOT NULL
+
+        FROM signal_memory
+
         ORDER BY id DESC
-        LIMIT 500
+
+        LIMIT 3000
         `
       );
 
-    const trades =
+    const signals =
       result.rows;
 
+    /*
+    ==================================================
+    DEFAULT PROFILE
+    ==================================================
+    */
+
+    const profile = {
+
+      trendingBehavior: 0,
+
+      sidewaysBehavior: 0,
+
+      volatileBehavior: 0,
+
+      breakoutBehavior: 0,
+
+      fakeoutBehavior: 0,
+
+      momentumPersistence: 0,
+
+      reversalBehavior: 0,
+
+      emotionalVolatility: 0,
+    };
+
+    /*
+    ==================================================
+    EMPTY DATA
+    ==================================================
+    */
+
     if (
-      trades.length < 10
+      signals.length < 30
     ) {
 
       return {
 
-        success: false,
+        profile,
 
-        message:
-          "Not enough completed trades",
+        dominantBehavior:
+          "UNKNOWN",
+
+        behaviorScore: 50,
       };
     }
 
     /*
     ==================================================
-    HELPERS
+    ANALYSIS COUNTERS
     ==================================================
     */
 
-    function calculateStats(
-      filteredTrades
+    let trendingCount = 0;
+
+    let sidewaysCount = 0;
+
+    let volatileCount = 0;
+
+    let breakoutCount = 0;
+
+    let fakeoutCount = 0;
+
+    let momentumCount = 0;
+
+    let reversalCount = 0;
+
+    let emotionalCount = 0;
+
+    /*
+    ==================================================
+    PROCESS SIGNALS
+    ==================================================
+    */
+
+    for (
+      const signal of signals
+    ) {
+
+      /*
+      ================================================
+      TRENDING
+      ================================================
+      */
+
+      if (
+        signal.regime ===
+        "TRENDING"
+      ) {
+
+        trendingCount++;
+      }
+
+      /*
+      ================================================
+      SIDEWAYS
+      ================================================
+      */
+
+      if (
+        signal.regime ===
+        "SIDEWAYS"
+      ) {
+
+        sidewaysCount++;
+      }
+
+      /*
+      ================================================
+      VOLATILE
+      ================================================
+      */
+
+      if (
+        signal.volatility_regime ===
+        "HIGH"
+      ) {
+
+        volatileCount++;
+      }
+
+      /*
+      ================================================
+      BREAKOUT BEHAVIOR
+      ================================================
+      */
+
+      if (
+
+        signal.momentum_state ===
+        "BULLISH_ACCELERATION"
+
+        ||
+
+        signal.momentum_state ===
+        "BEARISH_ACCELERATION"
+      ) {
+
+        breakoutCount++;
+      }
+
+      /*
+      ================================================
+      FAKEOUT BEHAVIOR
+      ================================================
+      */
+
+      if (
+
+        signal.regime ===
+        "SIDEWAYS"
+
+        &&
+
+        (
+          signal.momentum_state ===
+          "BULLISH_ACCELERATION"
+
+          ||
+
+          signal.momentum_state ===
+          "BEARISH_ACCELERATION"
+        )
+      ) {
+
+        fakeoutCount++;
+      }
+
+      /*
+      ================================================
+      MOMENTUM PERSISTENCE
+      ================================================
+      */
+
+      if (
+
+        signal.alignment_score >= 80
+
+        &&
+
+        signal.regime ===
+        "TRENDING"
+      ) {
+
+        momentumCount++;
+      }
+
+      /*
+      ================================================
+      REVERSAL BEHAVIOR
+      ================================================
+      */
+
+      if (
+
+        signal.rsi >= 75
+
+        ||
+
+        signal.rsi <= 25
+      ) {
+
+        reversalCount++;
+      }
+
+      /*
+      ================================================
+      EMOTIONAL VOLATILITY
+      ================================================
+      */
+
+      if (
+
+        signal.volatility_regime ===
+        "HIGH"
+
+        &&
+
+        signal.alignment_score < 50
+      ) {
+
+        emotionalCount++;
+      }
+    }
+
+    /*
+    ==================================================
+    BUILD PROFILE
+    ==================================================
+    */
+
+    const total =
+      signals.length;
+
+    profile.trendingBehavior =
+
+      Number(
+        (
+          (trendingCount / total)
+          * 100
+        ).toFixed(2)
+      );
+
+    profile.sidewaysBehavior =
+
+      Number(
+        (
+          (sidewaysCount / total)
+          * 100
+        ).toFixed(2)
+      );
+
+    profile.volatileBehavior =
+
+      Number(
+        (
+          (volatileCount / total)
+          * 100
+        ).toFixed(2)
+      );
+
+    profile.breakoutBehavior =
+
+      Number(
+        (
+          (breakoutCount / total)
+          * 100
+        ).toFixed(2)
+      );
+
+    profile.fakeoutBehavior =
+
+      Number(
+        (
+          (fakeoutCount / total)
+          * 100
+        ).toFixed(2)
+      );
+
+    profile.momentumPersistence =
+
+      Number(
+        (
+          (momentumCount / total)
+          * 100
+        ).toFixed(2)
+      );
+
+    profile.reversalBehavior =
+
+      Number(
+        (
+          (reversalCount / total)
+          * 100
+        ).toFixed(2)
+      );
+
+    profile.emotionalVolatility =
+
+      Number(
+        (
+          (emotionalCount / total)
+          * 100
+        ).toFixed(2)
+      );
+
+    /*
+    ==================================================
+    DOMINANT MARKET BEHAVIOR
+    ==================================================
+    */
+
+    let dominantBehavior =
+      "BALANCED";
+
+    let highestScore = 0;
+
+    for (
+      const key of
+      Object.keys(profile)
     ) {
 
       if (
-        filteredTrades.length === 0
+        profile[key] >
+        highestScore
       ) {
 
-        return {
+        highestScore =
+          profile[key];
 
-          trades: 0,
-
-          winRate: 0,
-
-          avgPnL: 0,
-        };
+        dominantBehavior =
+          key;
       }
-
-      let wins = 0;
-
-      let totalPnL = 0;
-
-      for (
-        const trade of filteredTrades
-      ) {
-
-        const pnl =
-          Number(
-            trade.pnl || 0
-          );
-
-        totalPnL += pnl;
-
-        if (pnl > 0) {
-          wins++;
-        }
-      }
-
-      return {
-
-        trades:
-          filteredTrades.length,
-
-        winRate:
-          Number(
-            (
-              (
-                wins /
-                filteredTrades.length
-              ) * 100
-            ).toFixed(2)
-          ),
-
-        avgPnL:
-          Number(
-            (
-              totalPnL /
-              filteredTrades.length
-            ).toFixed(2)
-          ),
-      };
     }
 
     /*
     ==================================================
-    GROUP REGIMES
+    MARKET STABILITY SCORE
     ==================================================
     */
 
-    const trendingTrades =
-      trades.filter(
-        t =>
-          t.regime ===
-          "TRENDING"
+    let behaviorScore =
+
+      100 -
+
+      (
+        profile.emotionalVolatility
+        * 0.7
+      )
+
+      -
+
+      (
+        profile.fakeoutBehavior
+        * 0.5
       );
 
-    const rangingTrades =
-      trades.filter(
-        t =>
-          t.regime ===
-          "RANGING"
+    behaviorScore =
+
+      Math.max(
+        1,
+        Math.min(
+          behaviorScore,
+          100
+        )
       );
 
-    const chaoticTrades =
-      trades.filter(
-        t =>
-          t.regime ===
-          "CHAOTIC"
+    behaviorScore =
+      Number(
+        behaviorScore.toFixed(2)
       );
 
     /*
     ==================================================
-    RESULTS
+    LOGGING
+    ==================================================
+    */
+
+    console.log(`
+==================================
+MARKET BEHAVIOR PROFILING
+==================================
+
+Dominant Behavior:
+${dominantBehavior}
+
+Behavior Stability Score:
+${behaviorScore}
+
+Trending:
+${profile.trendingBehavior}%
+
+Sideways:
+${profile.sidewaysBehavior}%
+
+Volatile:
+${profile.volatileBehavior}%
+
+Breakout:
+${profile.breakoutBehavior}%
+
+Fakeout:
+${profile.fakeoutBehavior}%
+
+Momentum Persistence:
+${profile.momentumPersistence}%
+
+Reversal:
+${profile.reversalBehavior}%
+
+Emotional Volatility:
+${profile.emotionalVolatility}%
+
+==================================
+`);
+
+    /*
+    ==================================================
+    RETURN
     ==================================================
     */
 
     return {
 
-      success: true,
+      profile,
 
-      report: {
+      dominantBehavior,
 
-        sampleSize:
-          trades.length,
-
-        TRENDING:
-          calculateStats(
-            trendingTrades
-          ),
-
-        RANGING:
-          calculateStats(
-            rangingTrades
-          ),
-
-        CHAOTIC:
-          calculateStats(
-            chaoticTrades
-          ),
-      },
+      behaviorScore,
     };
 
   } catch (err) {
 
-    console.log(
+    console.log(`
+==================================
+MARKET BEHAVIOR ERROR
+==================================
+`);
 
-      "Regime analytics error:",
+    console.log(err);
 
-      err.message
-    );
+    console.log(`
+==================================
+`);
 
     return {
 
-      success: false,
+      profile: {},
 
-      error:
-        err.message,
+      dominantBehavior:
+        "UNKNOWN",
+
+      behaviorScore: 50,
     };
   }
 }
 
 module.exports = {
-  calculateRegimeAnalytics,
+  analyzeMarketBehavior,
 };

@@ -275,10 +275,9 @@ async function getBestSymbols(
   options = {}
 ) {
 
-  return await
-    selectTradingSymbols(
-      options
-    );
+  return await selectTradingSymbols(
+    options || {}
+  );
 }
 
 module.exports = {

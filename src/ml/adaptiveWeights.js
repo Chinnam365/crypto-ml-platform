@@ -1,10 +1,9 @@
-const {
-  calculateFeatureImportance,
-} = require("./featureImportanceEngine");
+const pool =
+  require("../db/db");
 
 /*
 ==================================================
-ADAPTIVE WEIGHT ENGINE
+ADAPTIVE FEATURE WEIGHTS
 ==================================================
 */
 
@@ -12,8 +11,36 @@ async function getAdaptiveWeights() {
 
   try {
 
-    const analytics =
-      await calculateFeatureImportance();
+    /*
+    ==================================================
+    LOAD COMPLETED TRADES
+    ==================================================
+    */
+
+    const result =
+      await pool.query(
+
+        `
+        SELECT *
+
+        FROM trade_history
+
+        WHERE
+
+          outcome IS NOT NULL
+
+          AND
+
+          outcome != 'PENDING'
+
+        ORDER BY id DESC
+
+        LIMIT 1000
+        `
+      );
+
+    const trades =
+      result.rows;
 
     /*
     ==================================================
@@ -21,180 +48,308 @@ async function getAdaptiveWeights() {
     ==================================================
     */
 
-    let weights = {
+    const weights = {
 
-      trend: 25,
+      rsi: 1,
 
-      momentum: 25,
+      macd: 1,
 
-      alignment: 20,
+      trend: 1,
 
-      volatility: 15,
+      volatility: 1,
 
-      rsi: 15,
+      alignment: 1,
+
+      momentum: 1,
     };
 
     /*
     ==================================================
-    NOT ENOUGH DATA
+    MINIMUM SAMPLE SIZE
     ==================================================
     */
 
     if (
-      !analytics.success
+      trades.length < 30
     ) {
 
       return weights;
     }
 
-    const report =
-      analytics.report;
-
     /*
     ==================================================
-    ADJUST ALIGNMENT
+    FEATURE TRACKERS
     ==================================================
     */
 
-    const alignmentWinRate =
-      report?.alignment
-        ?.highAlignmentWinRate || 50;
+    const stats = {
 
-    if (
-      alignmentWinRate >= 70
+      rsi: {
+        wins: 0,
+        total: 0,
+      },
+
+      macd: {
+        wins: 0,
+        total: 0,
+      },
+
+      trend: {
+        wins: 0,
+        total: 0,
+      },
+
+      volatility: {
+        wins: 0,
+        total: 0,
+      },
+
+      alignment: {
+        wins: 0,
+        total: 0,
+      },
+
+      momentum: {
+        wins: 0,
+        total: 0,
+      },
+    };
+
+    /*
+    ==================================================
+    PROCESS TRADES
+    ==================================================
+    */
+
+    for (
+      const trade of trades
     ) {
 
-      weights.alignment = 30;
-    }
+      const isWin =
+        trade.outcome === "WIN";
 
-    else if (
-      alignmentWinRate >= 60
-    ) {
+      /*
+      ================================================
+      RSI
+      ================================================
+      */
 
-      weights.alignment = 25;
+      if (
+
+        Number(trade.rsi) < 35
+
+        ||
+
+        Number(trade.rsi) > 65
+      ) {
+
+        stats.rsi.total++;
+
+        if (isWin) {
+          stats.rsi.wins++;
+        }
+      }
+
+      /*
+      ================================================
+      MACD
+      ================================================
+      */
+
+      if (
+        Math.abs(
+          Number(trade.macd || 0)
+        ) > 0.5
+      ) {
+
+        stats.macd.total++;
+
+        if (isWin) {
+          stats.macd.wins++;
+        }
+      }
+
+      /*
+      ================================================
+      TREND
+      ================================================
+      */
+
+      if (
+        trade.trend !== "SIDEWAYS"
+      ) {
+
+        stats.trend.total++;
+
+        if (isWin) {
+          stats.trend.wins++;
+        }
+      }
+
+      /*
+      ================================================
+      VOLATILITY
+      ================================================
+      */
+
+      if (
+        trade.volatility_regime ===
+        "HIGH"
+      ) {
+
+        stats.volatility.total++;
+
+        if (isWin) {
+          stats.volatility.wins++;
+        }
+      }
+
+      /*
+      ================================================
+      ALIGNMENT
+      ================================================
+      */
+
+      if (
+        Number(
+          trade.alignment_score
+        ) >= 70
+      ) {
+
+        stats.alignment.total++;
+
+        if (isWin) {
+          stats.alignment.wins++;
+        }
+      }
+
+      /*
+      ================================================
+      MOMENTUM
+      ================================================
+      */
+
+      if (
+
+        trade.momentum_state ===
+        "BULLISH_ACCELERATION"
+
+        ||
+
+        trade.momentum_state ===
+        "BEARISH_ACCELERATION"
+      ) {
+
+        stats.momentum.total++;
+
+        if (isWin) {
+          stats.momentum.wins++;
+        }
+      }
     }
 
     /*
     ==================================================
-    ADJUST MOMENTUM
+    CALCULATE WEIGHTS
     ==================================================
     */
 
-    const momentumWinRate =
-      report?.momentum
-        ?.bullishMomentumWinRate || 50;
-
-    if (
-      momentumWinRate >= 70
+    for (
+      const feature of
+      Object.keys(stats)
     ) {
 
-      weights.momentum = 30;
+      const total =
+        stats[feature].total;
+
+      const wins =
+        stats[feature].wins;
+
+      if (
+        total === 0
+      ) {
+
+        continue;
+      }
+
+      const winRate =
+
+        wins / total;
+
+      /*
+      ================================================
+      WEIGHT CALCULATION
+      ================================================
+      */
+
+      let weight =
+
+        0.5 +
+        (winRate * 1.5);
+
+      /*
+      ================================================
+      CLAMPING
+      ================================================
+      */
+
+      weight =
+
+        Math.max(
+          0.5,
+          Math.min(
+            weight,
+            2
+          )
+        );
+
+      weights[feature] =
+        Number(
+          weight.toFixed(2)
+        );
     }
 
-    else if (
-      momentumWinRate >= 60
-    ) {
+    console.log(`
+==================================
+ADAPTIVE FEATURE WEIGHTS
+==================================
+`);
 
-      weights.momentum = 25;
-    }
+    console.log(weights);
 
-    /*
-    ==================================================
-    ADJUST VOLATILITY
-    ==================================================
-    */
-
-    const volatilityWinRate =
-      report?.volatility
-        ?.normalVolatilityWinRate || 50;
-
-    if (
-      volatilityWinRate < 45
-    ) {
-
-      weights.volatility = 10;
-    }
-
-    /*
-    ==================================================
-    NORMALIZE TOTAL
-    ==================================================
-    */
-
-    const total =
-
-      weights.trend +
-
-      weights.momentum +
-
-      weights.alignment +
-
-      weights.volatility +
-
-      weights.rsi;
-
-    weights.trend =
-      Number(
-        (
-          (weights.trend / total)
-          * 100
-        ).toFixed(2)
-      );
-
-    weights.momentum =
-      Number(
-        (
-          (weights.momentum / total)
-          * 100
-        ).toFixed(2)
-      );
-
-    weights.alignment =
-      Number(
-        (
-          (weights.alignment / total)
-          * 100
-        ).toFixed(2)
-      );
-
-    weights.volatility =
-      Number(
-        (
-          (weights.volatility / total)
-          * 100
-        ).toFixed(2)
-      );
-
-    weights.rsi =
-      Number(
-        (
-          (weights.rsi / total)
-          * 100
-        ).toFixed(2)
-      );
+    console.log(`
+==================================
+`);
 
     return weights;
 
   } catch (err) {
 
-    console.log(
+    console.log(`
+==================================
+ADAPTIVE WEIGHTS ERROR
+==================================
+`);
 
-      "Adaptive weight error:",
+    console.log(err);
 
-      err.message
-    );
+    console.log(`
+==================================
+`);
 
     return {
 
-      trend: 25,
+      rsi: 1,
 
-      momentum: 25,
+      macd: 1,
 
-      alignment: 20,
+      trend: 1,
 
-      volatility: 15,
+      volatility: 1,
 
-      rsi: 15,
+      alignment: 1,
+
+      momentum: 1,
     };
   }
 }

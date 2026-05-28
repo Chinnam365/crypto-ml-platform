@@ -1,119 +1,434 @@
-function calculatePositionSize({
+/*
+==================================================
+AUTONOMOUS RISK EVOLUTION ENGINE
+==================================================
+*/
 
-  equity,
+function evaluateRiskEnvironment({
 
-  riskPercent,
+  confidence = 50,
 
-  entryPrice,
+  consensusStrength = 0,
 
-  stopLoss,
+  qualityScore = 50,
+
+  volatility = 1,
+
+  regime = "SIDEWAYS",
+
+  trend = "SIDEWAYS",
+
+  drawdownPercent = 0,
+
+  portfolioRiskScore = 0,
+
+  slippageRisk = "LOW",
+
+  executionProfile = "NORMAL",
 }) {
 
-  // ==========================================
-  // SAFE INPUTS
-  // ==========================================
+  try {
 
-  const safeEquity =
-    Number(equity || 0);
+    /*
+    ==================================================
+    BASE RISK SCORE
+    ==================================================
+    */
 
-  const safeRiskPercent =
-    Number(riskPercent || 0);
+    let riskScore = 50;
 
-  const safeEntry =
-    Number(entryPrice || 0);
+    /*
+    ==================================================
+    CONFIDENCE
+    ==================================================
+    */
 
-  const safeStop =
-    Number(stopLoss || 0);
+    riskScore -=
+      confidence * 0.20;
 
-  // ==========================================
-  // VALIDATION
-  // ==========================================
+    /*
+    ==================================================
+    CONSENSUS
+    ==================================================
+    */
 
-  if (
+    riskScore -=
+      consensusStrength * 0.15;
 
-    isNaN(safeEquity) ||
+    /*
+    ==================================================
+    EXECUTION QUALITY
+    ==================================================
+    */
 
-    isNaN(safeRiskPercent) ||
+    riskScore -=
+      qualityScore * 0.15;
 
-    isNaN(safeEntry) ||
+    /*
+    ==================================================
+    VOLATILITY
+    ==================================================
+    */
 
-    isNaN(safeStop)
+    riskScore +=
+      volatility * 8;
 
-  ) {
+    /*
+    ==================================================
+    DRAWDOWN
+    ==================================================
+    */
 
-    return 0;
+    riskScore +=
+      drawdownPercent * 1.5;
+
+    /*
+    ==================================================
+    PORTFOLIO RISK
+    ==================================================
+    */
+
+    riskScore +=
+      portfolioRiskScore * 0.30;
+
+    /*
+    ==================================================
+    SIDEWAYS PENALTY
+    ==================================================
+    */
+
+    if (
+      regime === "SIDEWAYS"
+    ) {
+
+      riskScore += 8;
+    }
+
+    /*
+    ==================================================
+    TRENDING BONUS
+    ==================================================
+    */
+
+    if (
+      regime === "TRENDING"
+    ) {
+
+      riskScore -= 5;
+    }
+
+    /*
+    ==================================================
+    SLIPPAGE RISK
+    ==================================================
+    */
+
+    if (
+      slippageRisk === "MEDIUM"
+    ) {
+
+      riskScore += 10;
+    }
+
+    else if (
+      slippageRisk === "HIGH"
+    ) {
+
+      riskScore += 20;
+    }
+
+    /*
+    ==================================================
+    EXECUTION PROFILE
+    ==================================================
+    */
+
+    if (
+      executionProfile ===
+      "DEFENSIVE"
+    ) {
+
+      riskScore += 8;
+    }
+
+    else if (
+      executionProfile ===
+      "AGGRESSIVE"
+    ) {
+
+      riskScore -= 5;
+    }
+
+    /*
+    ==================================================
+    TREND CONFIRMATION
+    ==================================================
+    */
+
+    if (
+
+      trend === "BULLISH"
+
+      ||
+
+      trend === "BEARISH"
+    ) {
+
+      riskScore -= 4;
+    }
+
+    /*
+    ==================================================
+    CLAMP
+    ==================================================
+    */
+
+    riskScore =
+
+      Math.max(
+        1,
+        Math.min(
+          riskScore,
+          100
+        )
+      );
+
+    riskScore =
+      Number(
+        riskScore.toFixed(2)
+      );
+
+    /*
+    ==================================================
+    RISK MODE
+    ==================================================
+    */
+
+    let riskMode =
+      "NORMAL";
+
+    /*
+    Critical defense
+    */
+
+    if (
+      riskScore >= 80
+    ) {
+
+      riskMode =
+        "CAPITAL_PRESERVATION";
+    }
+
+    /*
+    Defensive
+    */
+
+    else if (
+      riskScore >= 65
+    ) {
+
+      riskMode =
+        "DEFENSIVE";
+    }
+
+    /*
+    Aggressive
+    */
+
+    else if (
+      riskScore <= 30
+    ) {
+
+      riskMode =
+        "AGGRESSIVE";
+    }
+
+    /*
+    ==================================================
+    EXPOSURE MULTIPLIER
+    ==================================================
+    */
+
+    let exposureMultiplier = 1;
+
+    if (
+      riskMode ===
+      "CAPITAL_PRESERVATION"
+    ) {
+
+      exposureMultiplier = 0.3;
+    }
+
+    else if (
+      riskMode ===
+      "DEFENSIVE"
+    ) {
+
+      exposureMultiplier = 0.6;
+    }
+
+    else if (
+      riskMode ===
+      "AGGRESSIVE"
+    ) {
+
+      exposureMultiplier = 1.4;
+    }
+
+    /*
+    ==================================================
+    TRADE FREQUENCY
+    ==================================================
+    */
+
+    let tradeFrequency =
+      "NORMAL";
+
+    if (
+      riskMode ===
+      "CAPITAL_PRESERVATION"
+    ) {
+
+      tradeFrequency =
+        "MINIMAL";
+    }
+
+    else if (
+      riskMode ===
+      "DEFENSIVE"
+    ) {
+
+      tradeFrequency =
+        "REDUCED";
+    }
+
+    else if (
+      riskMode ===
+      "AGGRESSIVE"
+    ) {
+
+      tradeFrequency =
+        "HIGH";
+    }
+
+    /*
+    ==================================================
+    AUTONOMOUS RISK RESPONSE
+    ==================================================
+    */
+
+    let allowNewTrades =
+      true;
+
+    if (
+      riskScore >= 90
+    ) {
+
+      allowNewTrades =
+        false;
+    }
+
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
+
+    console.log(`
+==================================
+AUTONOMOUS RISK EVOLUTION
+==================================
+
+Risk Score:
+${riskScore}
+
+Risk Mode:
+${riskMode}
+
+Exposure Multiplier:
+${exposureMultiplier}
+
+Trade Frequency:
+${tradeFrequency}
+
+Allow New Trades:
+${allowNewTrades}
+
+Confidence:
+${confidence}
+
+Consensus Strength:
+${consensusStrength}
+
+Quality Score:
+${qualityScore}
+
+Volatility:
+${volatility}
+
+Drawdown:
+${drawdownPercent}
+
+Portfolio Risk:
+${portfolioRiskScore}
+
+Slippage Risk:
+${slippageRisk}
+
+Execution Profile:
+${executionProfile}
+
+==================================
+`);
+
+    /*
+    ==================================================
+    RETURN
+    ==================================================
+    */
+
+    return {
+
+      riskScore,
+
+      riskMode,
+
+      exposureMultiplier,
+
+      tradeFrequency,
+
+      allowNewTrades,
+    };
+
+  } catch (err) {
+
+    console.log(`
+==================================
+RISK EVOLUTION ERROR
+==================================
+`);
+
+    console.log(err);
+
+    console.log(`
+==================================
+`);
+
+    return {
+
+      riskScore: 50,
+
+      riskMode: "NORMAL",
+
+      exposureMultiplier: 1,
+
+      tradeFrequency: "NORMAL",
+
+      allowNewTrades: true,
+    };
   }
-
-  // ==========================================
-  // STOP DISTANCE
-  // ==========================================
-
-  const stopDistance =
-    Math.abs(
-      safeEntry - safeStop
-    );
-
-  // ==========================================
-  // PROTECT AGAINST ZERO
-  // ==========================================
-
-  if (
-    stopDistance <= 0
-  ) {
-
-    return 0;
-  }
-
-  // ==========================================
-  // RISK AMOUNT
-  // ==========================================
-
-  const riskAmount =
-    safeEquity *
-    (safeRiskPercent / 100);
-
-  // ==========================================
-  // POSITION SIZE
-  // ==========================================
-
-  const positionSize =
-    riskAmount /
-    stopDistance;
-
-  // ==========================================
-  // FINAL SAFETY
-  // ==========================================
-
-  if (
-    isNaN(positionSize) ||
-    !isFinite(positionSize)
-  ) {
-
-    return 0;
-  }
-
-  // ==========================================
-// MAX POSITION CAP
-// ==========================================
-
-const maxPositionSize =
-  safeEquity * 0.05;
-
-// ==========================================
-// APPLY CAP
-// ==========================================
-
-const finalSize =
-  Math.min(
-    positionSize,
-    maxPositionSize
-  );
-
-return Number(
-  finalSize.toFixed(6)
-);
 }
 
 module.exports = {
-  calculatePositionSize,
+  evaluateRiskEnvironment,
 };

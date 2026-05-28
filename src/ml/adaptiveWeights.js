@@ -1,54 +1,35 @@
-const pool =
-  require("../db/db");
+const {
+  analyzeStrategyPerformance,
+} = require("./strategyAnalytics");
 
 /*
 ==================================================
-ADAPTIVE FEATURE WEIGHTS
+STRATEGY-AWARE ADAPTIVE WEIGHTS
 ==================================================
 */
 
-async function getAdaptiveWeights() {
+async function getAdaptiveWeights({
+
+  regime = "SIDEWAYS",
+
+  trend = "SIDEWAYS",
+
+  volatilityRegime = "NORMAL",
+
+  momentumState = "NEUTRAL",
+
+  decision = "HOLD",
+}) {
 
   try {
 
     /*
     ==================================================
-    LOAD COMPLETED TRADES
+    BASE WEIGHTS
     ==================================================
     */
 
-    const result =
-      await pool.query(
-
-        `
-        SELECT *
-
-        FROM trade_history
-
-        WHERE
-
-          outcome IS NOT NULL
-
-          AND
-
-          outcome != 'PENDING'
-
-        ORDER BY id DESC
-
-        LIMIT 1000
-        `
-      );
-
-    const trades =
-      result.rows;
-
-    /*
-    ==================================================
-    DEFAULT WEIGHTS
-    ==================================================
-    */
-
-    const weights = {
+    let weights = {
 
       rsi: 1,
 
@@ -65,259 +46,185 @@ async function getAdaptiveWeights() {
 
     /*
     ==================================================
-    MINIMUM SAMPLE SIZE
+    LOAD STRATEGY EVOLUTION
     ==================================================
     */
 
-    if (
-      trades.length < 30
-    ) {
+    const analytics =
+      await analyzeStrategyPerformance();
+
+    /*
+    ==================================================
+    STRATEGY SIGNATURE
+    ==================================================
+    */
+
+    const strategyKey =
+
+      `${regime}_` +
+
+      `${trend}_` +
+
+      `${volatilityRegime}_` +
+
+      `${momentumState}_` +
+
+      `${decision}`;
+
+    /*
+    ==================================================
+    FIND MATCHING STRATEGY
+    ==================================================
+    */
+
+    const strategy =
+
+      analytics.strategies.find(
+
+        s =>
+
+          s.strategyKey ===
+          strategyKey
+      );
+
+    /*
+    ==================================================
+    NO MATCH
+    ==================================================
+    */
+
+    if (!strategy) {
 
       return weights;
     }
 
     /*
     ==================================================
-    FEATURE TRACKERS
+    PROMOTED STRATEGY
     ==================================================
     */
 
-    const stats = {
+    if (
 
-      rsi: {
-        wins: 0,
-        total: 0,
-      },
-
-      macd: {
-        wins: 0,
-        total: 0,
-      },
-
-      trend: {
-        wins: 0,
-        total: 0,
-      },
-
-      volatility: {
-        wins: 0,
-        total: 0,
-      },
-
-      alignment: {
-        wins: 0,
-        total: 0,
-      },
-
-      momentum: {
-        wins: 0,
-        total: 0,
-      },
-    };
-
-    /*
-    ==================================================
-    PROCESS TRADES
-    ==================================================
-    */
-
-    for (
-      const trade of trades
+      strategy.classification ===
+      "PROMOTE"
     ) {
 
-      const isWin =
-        trade.outcome === "WIN";
+      weights = {
 
-      /*
-      ================================================
-      RSI
-      ================================================
-      */
+        rsi: 1.2,
 
-      if (
+        macd: 1.5,
 
-        Number(trade.rsi) < 35
+        trend: 1.6,
 
-        ||
+        volatility: 1.1,
 
-        Number(trade.rsi) > 65
-      ) {
+        alignment: 1.4,
 
-        stats.rsi.total++;
-
-        if (isWin) {
-          stats.rsi.wins++;
-        }
-      }
-
-      /*
-      ================================================
-      MACD
-      ================================================
-      */
-
-      if (
-        Math.abs(
-          Number(trade.macd || 0)
-        ) > 0.5
-      ) {
-
-        stats.macd.total++;
-
-        if (isWin) {
-          stats.macd.wins++;
-        }
-      }
-
-      /*
-      ================================================
-      TREND
-      ================================================
-      */
-
-      if (
-        trade.trend !== "SIDEWAYS"
-      ) {
-
-        stats.trend.total++;
-
-        if (isWin) {
-          stats.trend.wins++;
-        }
-      }
-
-      /*
-      ================================================
-      VOLATILITY
-      ================================================
-      */
-
-      if (
-        trade.volatility_regime ===
-        "HIGH"
-      ) {
-
-        stats.volatility.total++;
-
-        if (isWin) {
-          stats.volatility.wins++;
-        }
-      }
-
-      /*
-      ================================================
-      ALIGNMENT
-      ================================================
-      */
-
-      if (
-        Number(
-          trade.alignment_score
-        ) >= 70
-      ) {
-
-        stats.alignment.total++;
-
-        if (isWin) {
-          stats.alignment.wins++;
-        }
-      }
-
-      /*
-      ================================================
-      MOMENTUM
-      ================================================
-      */
-
-      if (
-
-        trade.momentum_state ===
-        "BULLISH_ACCELERATION"
-
-        ||
-
-        trade.momentum_state ===
-        "BEARISH_ACCELERATION"
-      ) {
-
-        stats.momentum.total++;
-
-        if (isWin) {
-          stats.momentum.wins++;
-        }
-      }
+        momentum: 1.5,
+      };
     }
 
     /*
     ==================================================
-    CALCULATE WEIGHTS
+    SUPPRESSED STRATEGY
+    ==================================================
+    */
+
+    else if (
+
+      strategy.classification ===
+      "SUPPRESS"
+    ) {
+
+      weights = {
+
+        rsi: 0.8,
+
+        macd: 0.7,
+
+        trend: 0.7,
+
+        volatility: 1.0,
+
+        alignment: 0.7,
+
+        momentum: 0.6,
+      };
+    }
+
+    /*
+    ==================================================
+    EVOLUTION SCORE BOOST
+    ==================================================
+    */
+
+    const evolutionBoost =
+
+      strategy.evolutionScore / 100;
+
+    weights.rsi *= evolutionBoost;
+
+    weights.macd *= evolutionBoost;
+
+    weights.trend *= evolutionBoost;
+
+    weights.volatility *= evolutionBoost;
+
+    weights.alignment *= evolutionBoost;
+
+    weights.momentum *= evolutionBoost;
+
+    /*
+    ==================================================
+    CLAMPING
     ==================================================
     */
 
     for (
-      const feature of
-      Object.keys(stats)
+      const key of
+      Object.keys(weights)
     ) {
 
-      const total =
-        stats[feature].total;
-
-      const wins =
-        stats[feature].wins;
-
-      if (
-        total === 0
-      ) {
-
-        continue;
-      }
-
-      const winRate =
-
-        wins / total;
-
-      /*
-      ================================================
-      WEIGHT CALCULATION
-      ================================================
-      */
-
-      let weight =
-
-        0.5 +
-        (winRate * 1.5);
-
-      /*
-      ================================================
-      CLAMPING
-      ================================================
-      */
-
-      weight =
+      weights[key] =
 
         Math.max(
-          0.5,
-          Math.min(
-            weight,
-            2
-          )
-        );
+          0.3,
 
-      weights[feature] =
-        Number(
-          weight.toFixed(2)
+          Math.min(
+            Number(
+              weights[key].toFixed(2)
+            ),
+
+            3
+          )
         );
     }
 
-    console.log(`
-==================================
-ADAPTIVE FEATURE WEIGHTS
-==================================
-`);
-
-    console.log(weights);
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
 
     console.log(`
+==================================
+STRATEGY-AWARE WEIGHTS
+==================================
+
+Strategy:
+${strategyKey}
+
+Classification:
+${strategy.classification}
+
+Evolution Score:
+${strategy.evolutionScore}
+
+Weights:
+${JSON.stringify(weights)}
+
 ==================================
 `);
 
@@ -327,7 +234,7 @@ ADAPTIVE FEATURE WEIGHTS
 
     console.log(`
 ==================================
-ADAPTIVE WEIGHTS ERROR
+ADAPTIVE WEIGHT ERROR
 ==================================
 `);
 

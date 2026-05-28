@@ -61,6 +61,10 @@ const {
   classifyMarketState,
 } = require("../ml/marketStateClassifier");
 
+const {
+  calculateSignalScores,
+} = require("../ml/probabilisticSignals");
+
 /*
 ==================================================
 MAIN FEATURE ENGINE
@@ -485,41 +489,90 @@ async function generateFeatures(
         overallTrend:
           multiTf?.overallTrend,
       });
+/*
+==================================================
+PROBABILISTIC SCORES
+==================================================
+*/
 
-    /*
-    ==================================================
-    TRADE DECISION
-    ==================================================
-    */
+const {
+  calculateSignalScores,
+} = require("../ml/probabilisticSignals");
 
-    const tradeDecision =
-      generateTradeDecision({
+const signalScores =
+  calculateSignalScores({
 
-        trend,
+    rsi,
 
-        rsi,
+    macd:
+      macdData?.macd || 0,
 
-        confidence:
-          signalQuality.confidence,
+    trend,
 
-        signalQuality:
-          signalQuality.quality,
+    regime,
 
-        regime,
+    multiTf,
+  });
+/*
+==================================================
+PROBABILISTIC SCORES
+==================================================
+*/
 
-        volatilityRegime:
-          volatilityData?.volatilityRegime,
+const signalScores =
+  calculateSignalScores({
 
-        alignmentScore:
-          multiTf?.alignmentScore,
+    rsi,
 
-        overallTrend:
-          multiTf?.overallTrend,
+    macd:
+      macdData?.macd || 0,
 
-        momentumState:
-          macdData?.momentumState,
-      });
+    trend,
 
+    regime,
+
+    multiTf,
+  });
+
+const buyScore =
+  signalScores.buyScore;
+
+const sellScore =
+  signalScores.sellScore;
+
+/*
+==================================================
+TRADE DECISION
+==================================================
+*/
+
+const tradeDecision =
+  generateTradeDecision({
+
+    trend,
+
+    rsi,
+
+    confidence:
+      signalQuality.confidence,
+
+    signalQuality:
+      signalQuality.quality,
+
+    regime,
+
+    volatilityRegime:
+      volatilityData?.volatilityRegime,
+
+    alignmentScore:
+      multiTf?.alignmentScore,
+
+    overallTrend:
+      multiTf?.overallTrend,
+
+    momentumState:
+      macdData?.momentumState,
+  });
     /*
     ==================================================
     POSITION SIZING

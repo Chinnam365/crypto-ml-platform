@@ -6,15 +6,15 @@ PREDICTIVE MARKET STATE ENGINE
 
 function classifyMarketState({
 
-  rsi,
+  rsi = 50,
 
-  volatility,
+  volatility = 1,
 
-  macd,
+  macd = 0,
 
-  trend,
+  trend = "SIDEWAYS",
 
-  momentumState,
+  momentumState = "NEUTRAL",
 
   volumeRatio = 1,
 }) {
@@ -23,7 +23,7 @@ function classifyMarketState({
 
     /*
     ==================================================
-    DEFAULT
+    DEFAULTS
     ==================================================
     */
 
@@ -43,7 +43,9 @@ function classifyMarketState({
     */
 
     /*
-    Trending
+    ----------------------------------------------
+    TRENDING MARKET
+    ----------------------------------------------
     */
 
     if (
@@ -66,7 +68,9 @@ function classifyMarketState({
     }
 
     /*
-    Sideways
+    ----------------------------------------------
+    SIDEWAYS MARKET
+    ----------------------------------------------
     */
 
     else if (
@@ -83,7 +87,9 @@ function classifyMarketState({
     }
 
     /*
-    Volatile
+    ----------------------------------------------
+    VOLATILE MARKET
+    ----------------------------------------------
     */
 
     if (
@@ -95,7 +101,9 @@ function classifyMarketState({
     }
 
     /*
-    Low activity
+    ----------------------------------------------
+    LOW ACTIVITY MARKET
+    ----------------------------------------------
     */
 
     if (
@@ -113,7 +121,9 @@ function classifyMarketState({
     */
 
     /*
-    Breakout Forecast
+    ----------------------------------------------
+    SIDEWAYS → TRENDING BREAKOUT
+    ----------------------------------------------
     */
 
     if (
@@ -133,11 +143,13 @@ function classifyMarketState({
       predictedState =
         "TRENDING";
 
-      transitionProbability = 70;
+      transitionProbability += 70;
     }
 
     /*
-    Volatility Expansion
+    ----------------------------------------------
+    VOLATILITY EXPANSION
+    ----------------------------------------------
     */
 
     if (
@@ -152,11 +164,13 @@ function classifyMarketState({
       predictedState =
         "VOLATILE";
 
-      transitionProbability = 80;
+      transitionProbability += 80;
     }
 
     /*
-    Momentum Acceleration
+    ----------------------------------------------
+    MOMENTUM ACCELERATION
+    ----------------------------------------------
     */
 
     if (
@@ -177,7 +191,9 @@ function classifyMarketState({
     }
 
     /*
-    Momentum Exhaustion
+    ----------------------------------------------
+    REVERSAL RISK
+    ----------------------------------------------
     */
 
     if (
@@ -196,7 +212,9 @@ function classifyMarketState({
     }
 
     /*
-    Trend Exhaustion
+    ----------------------------------------------
+    TREND EXHAUSTION
+    ----------------------------------------------
     */
 
     if (
@@ -210,7 +228,7 @@ function classifyMarketState({
 
       &&
 
-      volatility declining
+      volatility < 1.2
     ) {
 
       predictedState =
@@ -221,7 +239,7 @@ function classifyMarketState({
 
     /*
     ==================================================
-    CLAMPING
+    CLAMP PROBABILITY
     ==================================================
     */
 
@@ -237,7 +255,7 @@ function classifyMarketState({
 
     /*
     ==================================================
-    CONFIDENCE
+    FORECAST CONFIDENCE
     ==================================================
     */
 
@@ -303,8 +321,17 @@ ${volatility}
 Momentum:
 ${momentumState}
 
+Volume Ratio:
+${volumeRatio}
+
 ==================================
 `);
+
+    /*
+    ==================================================
+    RETURN
+    ==================================================
+    */
 
     return {
 

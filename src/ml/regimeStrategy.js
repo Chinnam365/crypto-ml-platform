@@ -1,122 +1,319 @@
-function getRegimeStrategy({
+const {
+  getAdaptiveWeights,
+} = require("./adaptiveWeights");
+
+/*
+==================================================
+REGIME SPECIALIZATION ENGINE
+==================================================
+*/
+
+async function getRegimeStrategy({
 
   regime,
 
+  volatilityRegime,
+
   trend,
 
-  rsi,
-
-  macd,
+  momentumState,
 }) {
 
-  let side = "HOLD";
+  try {
 
-  let confidenceBoost = 0;
+    /*
+    ==================================================
+    ADAPTIVE WEIGHTS
+    ==================================================
+    */
 
-  // ==========================================
-  // TRENDING BULLISH
-  // ==========================================
+    const weights =
+      await getAdaptiveWeights();
 
-  if (
+    /*
+    ==================================================
+    DEFAULT STRATEGY
+    ==================================================
+    */
 
-    regime ===
-      "TRENDING" &&
+    let strategy = {
 
-    trend ===
-      "BULLISH"
+      mode: "BALANCED",
 
-  ) {
+      confidenceMultiplier: 1,
 
-    if (
+      thresholdAdjustment: 0,
 
-      rsi < 55 &&
+      explorationBias: 0.3,
 
-      macd > 0
+      positionSizingMultiplier: 1,
 
-    ) {
+      featureBias: {
 
-      side = "BUY";
+        rsi: weights.rsi,
 
-      confidenceBoost = 10;
-    }
-  }
+        macd: weights.macd,
 
-  // ==========================================
-  // TRENDING BEARISH
-  // ==========================================
+        trend: weights.trend,
 
-  else if (
+        volatility: weights.volatility,
 
-    regime ===
-      "TRENDING" &&
+        alignment: weights.alignment,
 
-    trend ===
-      "BEARISH"
+        momentum: weights.momentum,
+      },
+    };
 
-  ) {
-
-    if (
-
-      rsi > 45 &&
-
-      macd < 0
-
-    ) {
-
-      side = "SELL";
-
-      confidenceBoost = 10;
-    }
-  }
-
-  // ==========================================
-  // SIDEWAYS MARKET
-  // ==========================================
-
-  else if (
-
-    regime ===
-      "SIDEWAYS"
-
-  ) {
-
-    // Mean Reversion BUY
+    /*
+    ==================================================
+    TRENDING MARKET
+    ==================================================
+    */
 
     if (
-
-      rsi < 48 &&
-
-      macd > -1
-
+      regime === "TRENDING"
     ) {
 
-      side = "BUY";
+      strategy = {
 
-      confidenceBoost = 5;
+        mode: "TREND_FOLLOWING",
+
+        confidenceMultiplier: 1.15,
+
+        thresholdAdjustment: -5,
+
+        explorationBias: 0.2,
+
+        positionSizingMultiplier: 1.2,
+
+        featureBias: {
+
+          rsi:
+            weights.rsi * 0.9,
+
+          macd:
+            weights.macd * 1.4,
+
+          trend:
+            weights.trend * 1.5,
+
+          volatility:
+            weights.volatility,
+
+          alignment:
+            weights.alignment * 1.3,
+
+          momentum:
+            weights.momentum * 1.5,
+        },
+      };
     }
 
-    // Mean Reversion SELL
+    /*
+    ==================================================
+    SIDEWAYS MARKET
+    ==================================================
+    */
 
     else if (
-
-      rsi > 52 &&
-
-      macd < 1
-
+      regime === "SIDEWAYS"
     ) {
 
-      side = "SELL";
+      strategy = {
 
-      confidenceBoost = 5;
+        mode: "MEAN_REVERSION",
+
+        confidenceMultiplier: 0.9,
+
+        thresholdAdjustment: 8,
+
+        explorationBias: 0.4,
+
+        positionSizingMultiplier: 0.7,
+
+        featureBias: {
+
+          rsi:
+            weights.rsi * 1.5,
+
+          macd:
+            weights.macd * 0.6,
+
+          trend:
+            weights.trend * 0.5,
+
+          volatility:
+            weights.volatility,
+
+          alignment:
+            weights.alignment * 0.7,
+
+          momentum:
+            weights.momentum * 0.5,
+        },
+      };
     }
+
+    /*
+    ==================================================
+    VOLATILE MARKET
+    ==================================================
+    */
+
+    else if (
+      volatilityRegime === "HIGH"
+    ) {
+
+      strategy = {
+
+        mode: "DEFENSIVE",
+
+        confidenceMultiplier: 0.8,
+
+        thresholdAdjustment: 10,
+
+        explorationBias: 0.15,
+
+        positionSizingMultiplier: 0.5,
+
+        featureBias: {
+
+          rsi:
+            weights.rsi,
+
+          macd:
+            weights.macd * 0.8,
+
+          trend:
+            weights.trend * 0.7,
+
+          volatility:
+            weights.volatility * 1.7,
+
+          alignment:
+            weights.alignment * 0.8,
+
+          momentum:
+            weights.momentum * 0.7,
+        },
+      };
+    }
+
+    /*
+    ==================================================
+    MOMENTUM OVERRIDE
+    ==================================================
+    */
+
+    if (
+
+      momentumState ===
+      "BULLISH_ACCELERATION"
+
+      ||
+
+      momentumState ===
+      "BEARISH_ACCELERATION"
+    ) {
+
+      strategy.confidenceMultiplier *= 1.1;
+
+      strategy.featureBias.momentum *= 1.2;
+    }
+
+    /*
+    ==================================================
+    ROUNDING
+    ==================================================
+    */
+
+    strategy.confidenceMultiplier =
+      Number(
+        strategy.confidenceMultiplier.toFixed(2)
+      );
+
+    strategy.positionSizingMultiplier =
+      Number(
+        strategy.positionSizingMultiplier.toFixed(2)
+      );
+
+    strategy.explorationBias =
+      Number(
+        strategy.explorationBias.toFixed(2)
+      );
+
+    /*
+    ==================================================
+    LOGGING
+    ==================================================
+    */
+
+    console.log(`
+==================================
+REGIME STRATEGY ENGINE
+==================================
+
+Mode:
+${strategy.mode}
+
+Regime:
+${regime}
+
+Volatility:
+${volatilityRegime}
+
+Trend:
+${trend}
+
+Momentum:
+${momentumState}
+
+Confidence Multiplier:
+${strategy.confidenceMultiplier}
+
+Threshold Adjustment:
+${strategy.thresholdAdjustment}
+
+Exploration Bias:
+${strategy.explorationBias}
+
+Position Sizing:
+${strategy.positionSizingMultiplier}
+
+==================================
+`);
+
+    return strategy;
+
+  } catch (err) {
+
+    console.log(`
+==================================
+REGIME STRATEGY ERROR
+==================================
+`);
+
+    console.log(err);
+
+    console.log(`
+==================================
+`);
+
+    return {
+
+      mode: "BALANCED",
+
+      confidenceMultiplier: 1,
+
+      thresholdAdjustment: 0,
+
+      explorationBias: 0.3,
+
+      positionSizingMultiplier: 1,
+
+      featureBias: {},
+    };
   }
-
-  return {
-
-    side,
-
-    confidenceBoost,
-  };
 }
 
 module.exports = {

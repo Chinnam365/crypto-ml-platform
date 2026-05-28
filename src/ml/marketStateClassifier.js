@@ -1,6 +1,6 @@
 /*
 ==================================================
-PREDICTIVE MARKET STATE ENGINE
+AUTONOMOUS MARKET SENTIMENT INTELLIGENCE
 ==================================================
 */
 
@@ -17,24 +17,35 @@ function classifyMarketState({
   momentumState = "NEUTRAL",
 
   volumeRatio = 1,
+
+  confidence = 50,
+
+  consensusStrength = 50,
+
+  alignmentScore = 50,
 }) {
 
   try {
 
     /*
     ==================================================
-    DEFAULTS
+    MARKET STATE
     ==================================================
     */
 
     let currentState =
       "NEUTRAL";
 
-    let predictedState =
+    /*
+    ==================================================
+    SENTIMENT PROFILE
+    ==================================================
+    */
+
+    let sentiment =
       "NEUTRAL";
 
-    let transitionProbability =
-      0;
+    let emotionalPressure = 0;
 
     /*
     ==================================================
@@ -44,7 +55,7 @@ function classifyMarketState({
 
     /*
     ----------------------------------------------
-    TRENDING MARKET
+    TRENDING
     ----------------------------------------------
     */
 
@@ -69,7 +80,7 @@ function classifyMarketState({
 
     /*
     ----------------------------------------------
-    SIDEWAYS MARKET
+    SIDEWAYS
     ----------------------------------------------
     */
 
@@ -88,7 +99,7 @@ function classifyMarketState({
 
     /*
     ----------------------------------------------
-    VOLATILE MARKET
+    VOLATILE
     ----------------------------------------------
     */
 
@@ -102,7 +113,7 @@ function classifyMarketState({
 
     /*
     ----------------------------------------------
-    LOW ACTIVITY MARKET
+    LOW ACTIVITY
     ----------------------------------------------
     */
 
@@ -116,132 +127,262 @@ function classifyMarketState({
 
     /*
     ==================================================
-    PREDICTIVE TRANSITION LOGIC
+    EMOTIONAL MARKET ANALYSIS
     ==================================================
     */
 
     /*
     ----------------------------------------------
-    SIDEWAYS → TRENDING BREAKOUT
+    FEAR
     ----------------------------------------------
     */
 
     if (
 
-      currentState ===
-      "SIDEWAYS"
+      rsi < 30
 
       &&
 
-      Math.abs(macd) > 0.4
-
-      &&
-
-      volumeRatio > 1.5
+      volatility >= 2
     ) {
 
-      predictedState =
-        "TRENDING";
+      sentiment =
+        "FEAR";
 
-      transitionProbability += 70;
+      emotionalPressure += 35;
     }
 
     /*
     ----------------------------------------------
-    VOLATILITY EXPANSION
+    GREED
     ----------------------------------------------
     */
 
     if (
 
-      volatility > 2.2
+      rsi > 70
 
       &&
 
-      volumeRatio > 1.8
+      trend === "BULLISH"
     ) {
 
-      predictedState =
-        "VOLATILE";
+      sentiment =
+        "GREED";
 
-      transitionProbability += 80;
+      emotionalPressure += 30;
     }
 
     /*
     ----------------------------------------------
-    MOMENTUM ACCELERATION
+    PANIC
     ----------------------------------------------
     */
 
     if (
+
+      volatility >= 4
+
+      &&
+
+      consensusStrength <= 35
+    ) {
+
+      sentiment =
+        "PANIC";
+
+      emotionalPressure += 45;
+    }
+
+    /*
+    ----------------------------------------------
+    EUPHORIA
+    ----------------------------------------------
+    */
+
+    if (
+
+      volumeRatio >= 2
+
+      &&
 
       momentumState ===
       "BULLISH_ACCELERATION"
-
-      ||
-
-      momentumState ===
-      "BEARISH_ACCELERATION"
     ) {
 
-      predictedState =
-        "TRENDING";
+      sentiment =
+        "EUPHORIA";
 
-      transitionProbability += 15;
+      emotionalPressure += 40;
     }
 
     /*
     ----------------------------------------------
-    REVERSAL RISK
+    EXHAUSTION
     ----------------------------------------------
     */
 
     if (
 
-      rsi > 80
+      Math.abs(macd) < 0.05
 
-      ||
+      &&
 
-      rsi < 20
+      confidence <= 45
+    ) {
+
+      sentiment =
+        "EXHAUSTION";
+
+      emotionalPressure += 20;
+    }
+
+    /*
+    ----------------------------------------------
+    CONVICTION
+    ----------------------------------------------
+    */
+
+    if (
+
+      consensusStrength >= 75
+
+      &&
+
+      alignmentScore >= 75
+    ) {
+
+      sentiment =
+        "CONVICTION";
+
+      emotionalPressure += 10;
+    }
+
+    /*
+    ==================================================
+    PREDICTIVE MARKET STATE
+    ==================================================
+    */
+
+    let predictedState =
+      currentState;
+
+    /*
+    Fear reversal
+    */
+
+    if (
+      sentiment === "FEAR"
     ) {
 
       predictedState =
         "REVERSAL_RISK";
-
-      transitionProbability += 20;
     }
 
     /*
-    ----------------------------------------------
-    TREND EXHAUSTION
-    ----------------------------------------------
+    Panic instability
     */
 
     if (
+      sentiment === "PANIC"
+    ) {
 
-      currentState ===
-      "TRENDING"
+      predictedState =
+        "VOLATILE";
+    }
 
-      &&
+    /*
+    Euphoric continuation
+    */
 
-      Math.abs(macd) < 0.1
+    if (
+      sentiment === "EUPHORIA"
+    ) {
 
-      &&
+      predictedState =
+        "TRENDING";
+    }
 
-      volatility < 1.2
+    /*
+    Exhaustion collapse
+    */
+
+    if (
+      sentiment === "EXHAUSTION"
     ) {
 
       predictedState =
         "SIDEWAYS";
+    }
 
-      transitionProbability += 15;
+    /*
+    Conviction continuation
+    */
+
+    if (
+      sentiment === "CONVICTION"
+    ) {
+
+      predictedState =
+        "TRENDING";
     }
 
     /*
     ==================================================
-    CLAMP PROBABILITY
+    EMOTIONAL STABILITY
     ==================================================
     */
+
+    let emotionalStability =
+
+      100 -
+      emotionalPressure;
+
+    emotionalStability =
+
+      Math.max(
+        1,
+        Math.min(
+          emotionalStability,
+          100
+        )
+      );
+
+    emotionalStability =
+      Number(
+        emotionalStability.toFixed(2)
+      );
+
+    /*
+    ==================================================
+    CLAMP PRESSURE
+    ==================================================
+    */
+
+    emotionalPressure =
+
+      Math.max(
+        0,
+        Math.min(
+          emotionalPressure,
+          100
+        )
+      );
+
+    emotionalPressure =
+      Number(
+        emotionalPressure.toFixed(2)
+      );
+
+    /*
+    ==================================================
+    TRANSITION PROBABILITY
+    ==================================================
+    */
+
+    let transitionProbability =
+
+      emotionalPressure * 0.8;
 
     transitionProbability =
 
@@ -251,6 +392,11 @@ function classifyMarketState({
           transitionProbability,
           95
         )
+      );
+
+    transitionProbability =
+      Number(
+        transitionProbability.toFixed(2)
       );
 
     /*
@@ -291,7 +437,7 @@ function classifyMarketState({
 
     console.log(`
 ==================================
-PREDICTIVE MARKET STATE
+MARKET SENTIMENT INTELLIGENCE
 ==================================
 
 Current State:
@@ -300,14 +446,20 @@ ${currentState}
 Predicted State:
 ${predictedState}
 
+Sentiment:
+${sentiment}
+
+Emotional Pressure:
+${emotionalPressure}
+
+Emotional Stability:
+${emotionalStability}
+
 Transition Probability:
-${transitionProbability}%
+${transitionProbability}
 
 Forecast Confidence:
 ${forecastConfidence}
-
-Trend:
-${trend}
 
 RSI:
 ${rsi}
@@ -315,14 +467,23 @@ ${rsi}
 MACD:
 ${macd}
 
+Trend:
+${trend}
+
 Volatility:
 ${volatility}
 
-Momentum:
-${momentumState}
+Consensus Strength:
+${consensusStrength}
+
+Alignment Score:
+${alignmentScore}
 
 Volume Ratio:
 ${volumeRatio}
+
+Momentum:
+${momentumState}
 
 ==================================
 `);
@@ -339,6 +500,12 @@ ${volumeRatio}
 
       predictedState,
 
+      sentiment,
+
+      emotionalPressure,
+
+      emotionalStability,
+
       transitionProbability,
 
       forecastConfidence,
@@ -348,7 +515,7 @@ ${volumeRatio}
 
     console.log(`
 ==================================
-MARKET STATE ERROR
+MARKET SENTIMENT ERROR
 ==================================
 `);
 
@@ -365,6 +532,13 @@ MARKET STATE ERROR
 
       predictedState:
         "NEUTRAL",
+
+      sentiment:
+        "NEUTRAL",
+
+      emotionalPressure: 0,
+
+      emotionalStability: 50,
 
       transitionProbability: 0,
 

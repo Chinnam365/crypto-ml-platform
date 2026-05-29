@@ -533,7 +533,7 @@ TRADE DECISION
 */
 
 const tradeDecision =
-  generateTradeDecision({
+  await generateTradeDecision({
 
     trend,
 

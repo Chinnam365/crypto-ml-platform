@@ -831,20 +831,20 @@ REACHED SIGNAL MEMORY SECTION
       volatilityRegime:
         volatilityData?.volatilityRegime,
 
-      confidence:
-        Number(
-          (
-            (
-              signalQuality.confidence
-              * 0.7
-            )
-            +
-            (
-              reinforcementData.reinforcementScore
-              * 0.3
-            )
-          ).toFixed(2)
-        ),
+    confidence:
+  Number(
+    (
+      (
+        (Number(signalQuality?.confidence) || 0)
+        * 0.7
+      )
+      +
+      (
+        (Number(reinforcementData?.reinforcementScore) || 0)
+        * 0.3
+      )
+    ).toFixed(2)
+  ),
 
       signalQuality:
         signalQuality.quality,

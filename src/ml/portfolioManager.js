@@ -426,6 +426,50 @@ CAPITAL ROTATION ERROR
   }
 }
 
+/*
+==================================================
+BACKWARD COMPATIBILITY
+==================================================
+*/
+
+async function getPortfolioStats() {
+
+  const result =
+    await evaluatePortfolioRisk({});
+
+  return {
+
+    equity:
+      result.maxExposure -
+      result.totalExposure,
+
+    availableCapital:
+      result.maxExposure -
+      result.totalExposure,
+
+    usedCapital:
+      result.totalExposure,
+
+    openPositions:
+      result.openPositions,
+
+    riskScore:
+      result.riskScore,
+
+    canTrade:
+      result.canTrade,
+
+    maxExposure:
+      result.maxExposure,
+
+    maxPositions:
+      result.maxPositions,
+  };
+}
+
 module.exports = {
+
   evaluatePortfolioRisk,
+
+  getPortfolioStats,
 };

@@ -1057,21 +1057,39 @@ const avgSymbolPnL =
 // ==========================================
 
 let confidence =
-  calculateConfidence({
+  await calculateConfidence({
 
-    rsi,
+  rsi,
 
-    macd,
+  trend,
 
-    trend,
-
-    regime,
+  regime,
 
     volatility,
 
     avgSymbolPnL,
-  });
+    
+  volatilityRegime:
+    volatilityData?.volatilityRegime,
 
+  momentumState:
+    macdData?.momentumState,
+
+  momentumStrength:
+    macdData?.momentumStrength || 50,
+
+  alignmentScore:
+    multiTf?.alignmentScore,
+
+  overallTrend:
+    multiTf?.overallTrend,
+
+  marketState,
+
+  decision,
+});
+  
+ 
 // ==========================================
 // ML PREDICTION
 // ==========================================

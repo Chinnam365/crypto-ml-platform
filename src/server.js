@@ -8,6 +8,7 @@ const {
   getCandles,
 } = require("./market/binance");
 
+
 const {
   generateAnalytics,
 } = require("./ml/analytics");

@@ -879,14 +879,20 @@ REACHED SIGNAL MEMORY SECTION
       candleCount:
         candles.length,
 
-      reinforcementScore:
-        reinforcementData.reinforcementScore,
+     reinforcementScore:
+  Number(
+    reinforcementData?.reinforcementScore || 0
+  ),
 
-      historicalWinRate:
-        reinforcementData.winRate,
+historicalWinRate:
+  Number(
+    reinforcementData?.winRate || 0
+  ),
 
-      historicalSampleSize:
-        reinforcementData.sampleSize,
+historicalSampleSize:
+  Number(
+    reinforcementData?.sampleSize || 0
+  ),
 
       /*
       ==================================================

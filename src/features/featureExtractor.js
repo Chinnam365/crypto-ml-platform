@@ -559,6 +559,23 @@ const tradeDecision =
     momentumState:
       macdData?.momentumState,
   });
+    console.log(`
+==================================
+TRADE DECISION DEBUG
+==================================
+`);
+
+console.log(
+  JSON.stringify(
+    tradeDecision,
+    null,
+    2
+  )
+);
+
+console.log(`
+==================================
+`);
     /*
     ==================================================
     POSITION SIZING
@@ -596,7 +613,8 @@ const tradeDecision =
           volatilityData?.volatility,
 
         decision:
-          tradeDecision.action,
+  tradeDecision?.action ||
+  "HOLD",
       });
 
     /*
@@ -623,7 +641,8 @@ REACHED SIGNAL MEMORY SECTION
       symbol,
 
       decision:
-        tradeDecision.action,
+  tradeDecision?.action ||
+  "HOLD",
 
       confidence:
         signalQuality.confidence,
@@ -713,7 +732,8 @@ REACHED SIGNAL MEMORY SECTION
         symbol,
 
         decision:
-          tradeDecision.action,
+  tradeDecision?.action ||
+  "HOLD",
 
         confidence:
           signalQuality.confidence,
@@ -850,7 +870,8 @@ REACHED SIGNAL MEMORY SECTION
         signalQuality.quality,
 
       decision:
-        tradeDecision.action,
+  tradeDecision?.action ||
+  "HOLD",
 
       explorationTrade:
         tradeDecision.explorationTrade,

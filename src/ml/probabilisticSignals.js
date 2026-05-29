@@ -23,7 +23,7 @@ async function calculateSignalScores({
   volatilityRegime = "NORMAL",
 
   momentumState = "NEUTRAL",
-}) {
+} = {}) {
 
   try {
 
@@ -34,7 +34,18 @@ async function calculateSignalScores({
     */
 
     const weights =
-      await getAdaptiveWeights();
+      await getAdaptiveWeights({
+
+        regime,
+
+        trend,
+
+        volatilityRegime,
+
+        momentumState,
+
+        decision: "HOLD",
+      });
 
     let buyScore = 0;
 
@@ -279,14 +290,28 @@ async function calculateSignalScores({
     let decision = "HOLD";
 
     if (
+
       buyScore >= 45
+
+      &&
+
+      buyScore >
+      sellScore
+
     ) {
 
       decision = "BUY";
     }
 
     else if (
+
       sellScore >= 45
+
+      &&
+
+      sellScore >
+      buyScore
+
     ) {
 
       decision = "SELL";
@@ -366,7 +391,20 @@ PROBABILISTIC SIGNAL ERROR
 
       decision: "HOLD",
 
-      weights: {},
+      weights: {
+
+        rsi: 1,
+
+        macd: 1,
+
+        trend: 1,
+
+        volatility: 1,
+
+        alignment: 1,
+
+        momentum: 1,
+      },
     };
   }
 }

@@ -8,18 +8,21 @@ STRATEGY-AWARE ADAPTIVE WEIGHTS
 ==================================================
 */
 
-async function getAdaptiveWeights({
+async function getAdaptiveWeights(
+  {
 
-  regime = "SIDEWAYS",
+    regime = "SIDEWAYS",
 
-  trend = "SIDEWAYS",
+    trend = "SIDEWAYS",
 
-  volatilityRegime = "NORMAL",
+    volatilityRegime = "NORMAL",
 
-  momentumState = "NEUTRAL",
+    momentumState = "NEUTRAL",
 
-  decision = "HOLD",
-}) {
+    decision = "HOLD",
+
+  } = {}
+) {
 
   try {
 
@@ -52,6 +55,23 @@ async function getAdaptiveWeights({
 
     const analytics =
       await analyzeStrategyPerformance();
+
+    /*
+    ==================================================
+    SAFETY
+    ==================================================
+    */
+
+    if (
+      !analytics ||
+      !analytics.strategies ||
+      !Array.isArray(
+        analytics.strategies
+      )
+    ) {
+
+      return weights;
+    }
 
     /*
     ==================================================
@@ -156,13 +176,18 @@ async function getAdaptiveWeights({
 
     /*
     ==================================================
-    EVOLUTION SCORE BOOST
+    EVOLUTION BOOST
     ==================================================
     */
 
     const evolutionBoost =
 
-      strategy.evolutionScore / 100;
+      Math.max(
+        0.5,
+        Number(
+          strategy.evolutionScore || 100
+        ) / 100
+      );
 
     weights.rsi *= evolutionBoost;
 
@@ -178,7 +203,7 @@ async function getAdaptiveWeights({
 
     /*
     ==================================================
-    CLAMPING
+    CLAMP
     ==================================================
     */
 

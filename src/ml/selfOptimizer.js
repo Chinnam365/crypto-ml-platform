@@ -11,30 +11,16 @@ async function optimizeSystemBehavior() {
 
   try {
 
-    /*
-    ==================================================
-    LOAD RECENT TRADES
-    ==================================================
-    */
-
     const result =
       await pool.query(
-
         `
         SELECT *
-
         FROM trade_history
-
         WHERE
-
           outcome IS NOT NULL
-
           AND
-
           outcome != 'PENDING'
-
         ORDER BY id DESC
-
         LIMIT 500
         `
       );
@@ -65,14 +51,10 @@ async function optimizeSystemBehavior() {
         healingMode: false,
 
         degradationScore: 0,
+
+        tradingAllowed: true,
       };
     }
-
-    /*
-    ==================================================
-    METRICS
-    ==================================================
-    */
 
     let wins = 0;
 
@@ -170,20 +152,12 @@ async function optimizeSystemBehavior() {
 
     let degradationScore = 0;
 
-    /*
-    Poor win rate
-    */
-
     if (
       winRate < 45
     ) {
 
       degradationScore += 25;
     }
-
-    /*
-    Negative profitability
-    */
 
     if (
       avgPnL < 0
@@ -192,17 +166,9 @@ async function optimizeSystemBehavior() {
       degradationScore += 25;
     }
 
-    /*
-    Loss streaks
-    */
-
     degradationScore +=
 
       maxConsecutiveLosses * 4;
-
-    /*
-    Clamp
-    */
 
     degradationScore =
 
@@ -221,33 +187,23 @@ async function optimizeSystemBehavior() {
 
     /*
     ==================================================
-    SELF-HEALING MODE
+    HEALING MODE
     ==================================================
     */
 
-    let healingMode =
-      false;
+    const healingMode =
 
-    if (
-      degradationScore >= 60
-    ) {
-
-      healingMode = true;
-    }
+      degradationScore >= 60;
 
     /*
     ==================================================
-    EXPLORATION / EXPLOITATION
+    EXPLORATION
     ==================================================
     */
 
     let explorationRate = 0.3;
 
     let exploitationRate = 0.7;
-
-    /*
-    Healing mode explores carefully
-    */
 
     if (
       healingMode
@@ -258,10 +214,6 @@ async function optimizeSystemBehavior() {
       exploitationRate = 0.85;
     }
 
-    /*
-    Weak system explores more
-    */
-
     else if (
       winRate < 45
     ) {
@@ -270,10 +222,6 @@ async function optimizeSystemBehavior() {
 
       exploitationRate = 0.5;
     }
-
-    /*
-    Strong system exploits more
-    */
 
     else if (
       winRate > 60
@@ -286,7 +234,7 @@ async function optimizeSystemBehavior() {
 
     /*
     ==================================================
-    CONFIDENCE MULTIPLIER
+    CONFIDENCE
     ==================================================
     */
 
@@ -306,10 +254,6 @@ async function optimizeSystemBehavior() {
       confidenceMultiplier = 0.8;
     }
 
-    /*
-    Healing mode defensive reduction
-    */
-
     if (
       healingMode
     ) {
@@ -324,7 +268,7 @@ async function optimizeSystemBehavior() {
 
     /*
     ==================================================
-    THRESHOLD ADJUSTMENT
+    THRESHOLD
     ==================================================
     */
 
@@ -344,10 +288,6 @@ async function optimizeSystemBehavior() {
       thresholdAdjustment = 8;
     }
 
-    /*
-    Healing mode stricter
-    */
-
     if (
       healingMode
     ) {
@@ -357,19 +297,17 @@ async function optimizeSystemBehavior() {
 
     /*
     ==================================================
-    AUTONOMOUS SAFETY RESPONSE
+    SAFETY
     ==================================================
     */
 
-    let tradingAllowed =
-      true;
+    let tradingAllowed = true;
 
     if (
       degradationScore >= 85
     ) {
 
-      tradingAllowed =
-        false;
+      tradingAllowed = false;
     }
 
     /*
@@ -380,32 +318,13 @@ async function optimizeSystemBehavior() {
 
     console.log(`
 ==================================
-SELF-HEALING AI INTELLIGENCE
+SELF OPTIMIZER
 ==================================
-
 Win Rate:
-${winRate.toFixed(2)}%
+${winRate.toFixed(2)}
 
 Avg PnL:
 ${avgPnL.toFixed(2)}
-
-Max Consecutive Losses:
-${maxConsecutiveLosses}
-
-Degradation Score:
-${degradationScore}
-
-Healing Mode:
-${healingMode}
-
-Trading Allowed:
-${tradingAllowed}
-
-Exploration Rate:
-${explorationRate}
-
-Exploitation Rate:
-${exploitationRate}
 
 Confidence Multiplier:
 ${confidenceMultiplier}
@@ -413,14 +332,14 @@ ${confidenceMultiplier}
 Threshold Adjustment:
 ${thresholdAdjustment}
 
+Healing Mode:
+${healingMode}
+
+Trading Allowed:
+${tradingAllowed}
+
 ==================================
 `);
-
-    /*
-    ==================================================
-    RETURN
-    ==================================================
-    */
 
     return {
 
@@ -449,7 +368,7 @@ ${thresholdAdjustment}
 
     console.log(`
 ==================================
-SELF-HEALING ERROR
+SELF OPTIMIZER ERROR
 ==================================
 `);
 
@@ -478,6 +397,39 @@ SELF-HEALING ERROR
   }
 }
 
+/*
+==================================================
+BACKWARD COMPATIBILITY
+==================================================
+*/
+
+async function getOptimizationAdjustments() {
+
+  const result =
+    await optimizeSystemBehavior();
+
+  return {
+
+    confidenceMultiplier:
+      result.confidenceMultiplier || 1,
+
+    thresholdAdjustment:
+      result.thresholdAdjustment || 0,
+
+    healingMode:
+      result.healingMode || false,
+
+    degradationScore:
+      result.degradationScore || 0,
+
+    tradingAllowed:
+      result.tradingAllowed !== false,
+  };
+}
+
 module.exports = {
+
   optimizeSystemBehavior,
+
+  getOptimizationAdjustments,
 };

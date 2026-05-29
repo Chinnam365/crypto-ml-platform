@@ -1068,13 +1068,22 @@ let confidence =
    
     
   volatilityRegime:
-    volatilityData?.volatilityRegime,
+  volatility > 3
+    ? "HIGH"
+    : volatility > 1
+    ? "MEDIUM"
+    : "LOW",
 
-  momentumState:
-    macdData?.momentumState,
+ momentumState:
+  macd > 0
+    ? "BULLISH_ACCELERATION"
+    : "BEARISH_ACCELERATION",
 
-  momentumStrength:
-    macdData?.momentumStrength || 50,
+momentumStrength:
+  Math.min(
+    100,
+    Math.abs(macd) * 10
+  ),
 
   alignmentScore:
     multiTf?.alignmentScore,

@@ -1091,7 +1091,9 @@ momentumStrength:
   overallTrend:
     multiTf?.overallTrend,
 
-  marketState,
+  marketState:
+  phase2Features?.marketState ||
+  "SIDEWAYS",
 
   decision,
 });

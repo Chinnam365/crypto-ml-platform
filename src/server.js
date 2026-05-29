@@ -329,6 +329,69 @@ async function initDB() {
   }
 }
 
+app.get(
+  "/fix-phase2-schema",
+  async (req, res) => {
+
+    try {
+
+      await pool.query(`
+
+      ALTER TABLE reinforcement_memory
+      ADD COLUMN IF NOT EXISTS context_key TEXT;
+
+      ALTER TABLE reinforcement_memory
+      ADD COLUMN IF NOT EXISTS avg_reward NUMERIC DEFAULT 0;
+
+      ALTER TABLE reinforcement_memory
+      ADD COLUMN IF NOT EXISTS sample_size INTEGER DEFAULT 0;
+
+      `);
+
+      await pool.query(`
+
+      CREATE TABLE IF NOT EXISTS regime_memory (
+
+        id SERIAL PRIMARY KEY,
+
+        context_key TEXT,
+
+        current_state TEXT,
+
+        predicted_state TEXT,
+
+        trend TEXT,
+
+        volatility_regime TEXT,
+
+        momentum_state TEXT,
+
+        transition_probability NUMERIC,
+
+        occurrences INTEGER DEFAULT 1,
+
+        avg_probability NUMERIC DEFAULT 0,
+
+        created_at TIMESTAMP DEFAULT NOW(),
+
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+
+      `);
+
+      res.json({
+        success: true
+      });
+
+    } catch (err) {
+
+      res.json({
+        success: false,
+        error: err.message
+      });
+    }
+  }
+);
 /*
 ==================================================
 HOME

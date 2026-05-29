@@ -496,7 +496,7 @@ PROBABILISTIC SCORES
 */
 
 const signalScores =
-  calculateSignalScores({
+  await calculateSignalScores({
 
     rsi,
 
@@ -508,13 +508,23 @@ const signalScores =
     regime,
 
     multiTf,
+
+    volatilityRegime:
+      volatilityData?.volatilityRegime,
+
+    momentumState:
+      macdData?.momentumState,
   });
 
 const buyScore =
-  signalScores.buyScore;
+  Number(
+    signalScores?.buyScore || 0
+  );
 
 const sellScore =
-  signalScores.sellScore;
+  Number(
+    signalScores?.sellScore || 0
+  );
 
 /*
 ==================================================
@@ -676,7 +686,9 @@ REACHED SIGNAL MEMORY SECTION
 
       transitionType,
 
-      marketState,
+      marketState:
+  marketState?.currentState ||
+  "SIDEWAYS",
 
       marketStateTransition,
     });
@@ -749,7 +761,9 @@ REACHED SIGNAL MEMORY SECTION
 
         transitionType,
 
-        marketState,
+       marketState:
+  marketState?.currentState ||
+  "SIDEWAYS",
 
         marketStateTransition,
 
@@ -805,7 +819,9 @@ REACHED SIGNAL MEMORY SECTION
 
       regime,
 
-      marketState,
+      marketState:
+  marketState?.currentState ||
+  "SIDEWAYS",
 
       marketStateTransition,
 

@@ -1280,7 +1280,25 @@ ${adaptiveThresholdValue}
 
 ==================================
 `);
-   
+
+  console.log(`
+==================================
+CONFIDENCE DEBUG
+==================================
+`);
+
+console.log({
+  baseConfidence,
+  mlProbability,
+  symbolWeight,
+  optimization,
+  adaptiveThresholdValue
+});
+
+console.log(`
+==================================
+`);
+  
 console.log(`
 ==================================
 ML PREDICTION

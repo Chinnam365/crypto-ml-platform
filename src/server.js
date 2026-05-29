@@ -336,47 +336,92 @@ app.get(
     try {
 
       await pool.query(`
-
-      ALTER TABLE reinforcement_memory
-      ADD COLUMN IF NOT EXISTS context_key TEXT;
-
-      ALTER TABLE reinforcement_memory
-      ADD COLUMN IF NOT EXISTS avg_reward NUMERIC DEFAULT 0;
-
-      ALTER TABLE reinforcement_memory
-      ADD COLUMN IF NOT EXISTS sample_size INTEGER DEFAULT 0;
-
+        ALTER TABLE reinforcement_memory
+        ADD COLUMN IF NOT EXISTS context_key TEXT;
       `);
 
       await pool.query(`
+        ALTER TABLE reinforcement_memory
+        ADD COLUMN IF NOT EXISTS avg_reward NUMERIC DEFAULT 0;
+      `);
 
-      CREATE TABLE IF NOT EXISTS regime_memory (
+      await pool.query(`
+        ALTER TABLE reinforcement_memory
+        ADD COLUMN IF NOT EXISTS sample_size INTEGER DEFAULT 0;
+      `);
 
-        id SERIAL PRIMARY KEY,
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS regime_memory (
 
-        context_key TEXT,
+          id SERIAL PRIMARY KEY,
 
-        current_state TEXT,
+          context_key TEXT,
 
-        predicted_state TEXT,
+          current_state TEXT,
 
-        trend TEXT,
+          predicted_state TEXT,
 
-        volatility_regime TEXT,
+          trend TEXT,
 
-        momentum_state TEXT,
+          volatility_regime TEXT,
 
-        transition_probability NUMERIC,
+          momentum_state TEXT,
 
-        occurrences INTEGER DEFAULT 1,
+          transition_probability NUMERIC,
 
-        avg_probability NUMERIC DEFAULT 0,
+          occurrences INTEGER DEFAULT 1,
 
-        created_at TIMESTAMP DEFAULT NOW(),
+          avg_probability NUMERIC DEFAULT 0,
 
-        updated_at TIMESTAMP DEFAULT NOW()
-      );
+          created_at TIMESTAMP DEFAULT NOW(),
 
+          updated_at TIMESTAMP DEFAULT NOW()
+        );
+      `);
+
+      await pool.query(`
+        ALTER TABLE regime_memory
+        ADD COLUMN IF NOT EXISTS context_key TEXT;
+      `);
+
+      await pool.query(`
+        ALTER TABLE regime_memory
+        ADD COLUMN IF NOT EXISTS current_state TEXT;
+      `);
+
+      await pool.query(`
+        ALTER TABLE regime_memory
+        ADD COLUMN IF NOT EXISTS predicted_state TEXT;
+      `);
+
+      await pool.query(`
+        ALTER TABLE regime_memory
+        ADD COLUMN IF NOT EXISTS trend TEXT;
+      `);
+
+      await pool.query(`
+        ALTER TABLE regime_memory
+        ADD COLUMN IF NOT EXISTS volatility_regime TEXT;
+      `);
+
+      await pool.query(`
+        ALTER TABLE regime_memory
+        ADD COLUMN IF NOT EXISTS momentum_state TEXT;
+      `);
+
+      await pool.query(`
+        ALTER TABLE regime_memory
+        ADD COLUMN IF NOT EXISTS transition_probability NUMERIC;
+      `);
+
+      await pool.query(`
+        ALTER TABLE regime_memory
+        ADD COLUMN IF NOT EXISTS occurrences INTEGER DEFAULT 1;
+      `);
+
+      await pool.query(`
+        ALTER TABLE regime_memory
+        ADD COLUMN IF NOT EXISTS avg_probability NUMERIC DEFAULT 0;
       `);
 
       res.json({

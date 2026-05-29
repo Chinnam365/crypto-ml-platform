@@ -1130,12 +1130,17 @@ else {
 // SYMBOL WEIGHTING
 // ==========================================
 
-const symbolWeights =
-  await getAdaptiveSymbolWeights(pool) || {};
+const symbolWeightData =
+  await getAdaptiveSymbolWeights();
+
+const symbolEntry =
+  symbolWeightData?.rankings?.find(
+    s => s.symbol === randomSymbol
+  );
 
 const symbolWeight =
   Number(
-    symbolWeights[randomSymbol] || 1
+    symbolEntry?.weight || 1
   );
 
 confidence =
@@ -1205,17 +1210,32 @@ if (
 // ADAPTIVE THRESHOLD
 // ==========================================
 
-const adaptiveThresholdValue =
-  getAdaptiveThreshold({
+const adaptiveThresholdResult =
+  await getAdaptiveThreshold({
 
     regime,
 
-    volatility,
+    volatilityRegime:
+      volatility > 5
+        ? "HIGH"
+        : volatility > 2
+        ? "MEDIUM"
+        : "LOW",
 
-    drawdownState,
+    trend,
 
-    symbolWeight,
+    momentumState:
+      macd > 0
+        ? "BULLISH_ACCELERATION"
+        : "BEARISH_ACCELERATION",
+
+    performanceScore: 0,
   });
+
+const adaptiveThresholdValue =
+  Number(
+    adaptiveThresholdResult?.threshold || 57
+  );
 // ==========================================
 // SELF OPTIMIZATION
 // ==========================================
@@ -1238,7 +1258,9 @@ SELF OPTIMIZER
 ==================================
 
 Avg Reward:
-${optimization.avgReward.toFixed(2)}
+${Number(
+  optimization.avgReward || 0
+).toFixed(2)}
 
 Threshold Adjustment:
 ${optimization.thresholdAdjustment}
@@ -1278,7 +1300,7 @@ ${confidence.toFixed(2)}
 // ==========================================
 
 const signalScores =
-  calculateSignalScores({
+  await calculateSignalScores({
 
     rsi,
 
@@ -1290,7 +1312,6 @@ const signalScores =
 
     multiTf,
   });
-
 let side = "HOLD";
 
 if (

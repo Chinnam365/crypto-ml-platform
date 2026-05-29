@@ -1144,12 +1144,31 @@ const symbolWeight =
   );
 
 confidence =
-  confidence *
+  Number(
+    confidence || 0
+  ) *
   (
     0.5 +
-    (symbolWeight * 0.5)
+    (
+      Number(symbolWeight || 1)
+      * 0.5
+    )
   );
 
+confidence =
+  Number(
+    confidence.toFixed(2)
+  );
+console.log(`
+==================================
+CONFIDENCE BEFORE WEIGHTING
+==================================
+
+Confidence:
+${confidence}
+
+==================================
+`);
 console.log(`
 ==================================
 SYMBOL WEIGHTING

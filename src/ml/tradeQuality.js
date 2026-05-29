@@ -362,6 +362,29 @@ TRADE QUALITY ERROR
   }
 }
 
+/*
+==================================================
+BACKWARD COMPATIBILITY
+==================================================
+*/
+
+function calculateTradeQuality(
+  options = {}
+) {
+
+  const result =
+    evaluateTradeQuality(
+      options
+    );
+
+  return Number(
+    result?.qualityScore || 50
+  );
+}
+
 module.exports = {
+
   evaluateTradeQuality,
+
+  calculateTradeQuality,
 };

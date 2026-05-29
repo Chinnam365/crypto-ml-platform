@@ -1065,9 +1065,7 @@ let confidence =
 
   regime,
 
-    volatility,
-
-    avgSymbolPnL,
+   
     
   volatilityRegime:
     volatilityData?.volatilityRegime,

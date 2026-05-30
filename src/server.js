@@ -51,7 +51,7 @@ const {
 
 const {
   calculatePositionSize,
-} = require("./ml/riskManager");
+} = require("./risk/positionSizing");
 
 const {
   getPortfolioStats,
@@ -1741,18 +1741,33 @@ const {
   confidence,
 });
 
-let positionSize =
+const sizingResult =
   calculatePositionSize({
 
-    equity:
-      account.equity,
+    confidence,
 
-    riskPercent: 1,
+    volatilityRegime:
+      volatility > 5
+        ? "HIGH"
+        : volatility > 2
+        ? "MEDIUM"
+        : "LOW",
 
-    entryPrice,
+    signalQuality:
+      tradeQuality >= 80
+        ? "HIGH"
+        : tradeQuality >= 60
+        ? "MEDIUM"
+        : "LOW",
 
-    stopLoss,
+    explorationTrade: false,
   });
+
+let positionSize =
+  Number(
+    sizingResult
+      ?.recommendedPositionSize || 1
+  );
 
 // ==========================================
 // ADAPTIVE SIZE MULTIPLIER

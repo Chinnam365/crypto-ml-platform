@@ -1776,13 +1776,7 @@ let positionSize =
 // ADAPTIVE SIZE MULTIPLIER
 // ==========================================
 
-const sizeMultiplier =
-  await getAdaptiveSizeMultiplier({
-
-    pool,
-
-    confidence,
-  });
+getAdaptiveSizeMultiplier({
 
 positionSize =
   positionSize *

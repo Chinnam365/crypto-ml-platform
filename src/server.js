@@ -1558,7 +1558,9 @@ Open Positions:
 ${portfolio.openPositions}
 
 Total Exposure:
-${portfolio.totalExposure}
+${portfolio.totalExposure ??
+  portfolio.usedCapital ??
+  0}
 
 Can Trade:
 ${portfolio.canTrade}

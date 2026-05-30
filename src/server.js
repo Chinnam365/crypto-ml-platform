@@ -1776,7 +1776,7 @@ let positionSize =
 // ADAPTIVE SIZE MULTIPLIER
 // ==========================================
 
-getAdaptiveSizeMultiplier({
+const sizeMultiplier = 1;
 
 positionSize =
   positionSize *

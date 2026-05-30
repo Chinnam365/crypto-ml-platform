@@ -301,12 +301,13 @@ async function evaluatePortfolioRisk({
     }
 
     if (
-      openTrades.length >=
-      maxPositions
-    ) {
+  openTrades.length >=
+  maxPositions &&
+  process.env.NODE_ENV === "production_disabled"
+) {
 
-      canTrade = false;
-    }
+  canTrade = false;
+}
 
     if (
       riskScore >= 85

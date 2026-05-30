@@ -1510,7 +1510,55 @@ ${decisionReasons.join("\n")}
 
       continue;
     }
+// ==========================================
+// CONFIDENCE FILTER
+// ==========================================
 
+if (
+  confidence < adaptiveThresholdValue
+) {
+
+  console.log(`
+==================================
+CONFIDENCE FILTER
+==================================
+
+Confidence:
+${confidence.toFixed(2)}
+
+Threshold:
+${adaptiveThresholdValue}
+
+==================================
+`);
+
+  continue;
+}
+
+// ==========================================
+// QUALITY FILTER
+// ==========================================
+
+if (
+  tradeQuality < 60
+) {
+
+  console.log(`
+==================================
+QUALITY FILTER
+==================================
+
+Trade Quality:
+${tradeQuality}
+
+Minimum:
+60
+
+==================================
+`);
+
+  continue;
+}
    // ==========================================
 // ACCOUNT STATUS
 // ==========================================
@@ -1634,6 +1682,30 @@ if (!drawdown.tradingEnabled) {
 
        continue;
     }
+
+  console.log(`
+==================================
+REACHED EXECUTION SECTION
+==================================
+
+Symbol:
+${randomSymbol}
+
+Side:
+${side}
+
+Confidence:
+${confidence}
+
+Threshold:
+${adaptiveThresholdValue}
+
+Quality:
+${tradeQuality}
+
+==================================
+`);
+  
 // ==========================================
 // PHASE 2 RISK ENGINE
 // ==========================================

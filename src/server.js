@@ -1514,8 +1514,11 @@ ${decisionReasons.join("\n")}
 // CONFIDENCE FILTER
 // ==========================================
 
+const executionThreshold =
+  adaptiveThresholdValue - 10;
+
 if (
-  confidence < adaptiveThresholdValue
+  confidence < executionThreshold
 ) {
 
   console.log(`
@@ -1527,7 +1530,7 @@ Confidence:
 ${confidence.toFixed(2)}
 
 Threshold:
-${adaptiveThresholdValue}
+${executionThreshold}
 
 ==================================
 `);

@@ -1056,49 +1056,52 @@ const avgSymbolPnL =
 // AI CONFIDENCE
 // ==========================================
 
-let confidence =
+const confidenceData =
   await calculateConfidence({
 
-  rsi,
+    rsi,
 
-  trend,
+    trend,
 
-  regime,
+    regime,
 
-   
-    
-  volatilityRegime:
-  volatility > 3
-    ? "HIGH"
-    : volatility > 1
-    ? "MEDIUM"
-    : "LOW",
+    volatilityRegime:
+      volatility > 3
+        ? "HIGH"
+        : volatility > 1
+        ? "MEDIUM"
+        : "LOW",
 
- momentumState:
-  macd > 0
-    ? "BULLISH_ACCELERATION"
-    : "BEARISH_ACCELERATION",
+    momentumState:
+      macd > 0
+        ? "BULLISH_ACCELERATION"
+        : "BEARISH_ACCELERATION",
 
-momentumStrength:
-  Math.min(
-    100,
-    Math.abs(macd) * 10
-  ),
+    momentumStrength:
+      Math.min(
+        100,
+        Math.abs(macd) * 10
+      ),
 
-  alignmentScore:
-    multiTf?.alignmentScore,
+    alignmentScore:
+      multiTf?.alignmentScore,
 
-  overallTrend:
-    multiTf?.overallTrend,
+    overallTrend:
+      multiTf?.overallTrend,
 
-  marketState:
-  phase2Features?.marketState ||
-  "SIDEWAYS",
+    marketState:
+      phase2Features?.marketState ||
+      "SIDEWAYS",
 
-  decision:
-  phase2Features?.decision ||
-  "HOLD",
-});
+    decision:
+      phase2Features?.decision ||
+      "HOLD",
+  });
+
+let confidence =
+  Number(
+    confidenceData?.confidence || 50
+  );
   
  
 // ==========================================
@@ -1292,7 +1295,19 @@ const optimization =
   await getOptimizationAdjustments(
     pool
   );
+console.log(`
+==================================
+CONFIDENCE CHECK
+==================================
 
+Confidence Before Optimization:
+${confidence}
+
+ML Confidence:
+${mlConfidence}
+
+==================================
+`);
 confidence *=
   optimization.confidenceMultiplier;
 

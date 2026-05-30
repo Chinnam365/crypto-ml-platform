@@ -1,4 +1,4 @@
-const MAX_DRAWDOWN = 15;
+const MAX_DRAWDOWN = 40;
 
 async function getDrawdownStats(pool) {
 
@@ -51,10 +51,24 @@ async function getDrawdownStats(pool) {
     riskMultiplier = 0.5;
   }
 
-  if (maxDrawdown >= MAX_DRAWDOWN) {
+ if (maxDrawdown >= MAX_DRAWDOWN) {
 
-    tradingEnabled = false;
-  }
+  console.log(`
+==================================
+DRAWDOWN LOCKDOWN
+==================================
+
+Max Drawdown:
+${maxDrawdown}
+
+Limit:
+${MAX_DRAWDOWN}
+
+==================================
+`);
+
+  tradingEnabled = false;
+}
 
   return {
 

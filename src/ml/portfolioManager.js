@@ -39,6 +39,7 @@ async function evaluatePortfolioRisk({
         FROM trade_history
 
         WHERE outcome = 'PENDING'
+AND COALESCE(position_size,0) > 0
         `
       );
 

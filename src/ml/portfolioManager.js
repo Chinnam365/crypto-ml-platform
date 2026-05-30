@@ -124,18 +124,18 @@ async function evaluatePortfolioRisk({
 
     const symbolAllocations = [];
 
-    for (
-      const symbol of
-      Object.keys(
-        symbolData.weights
-      )
-    ) {
+const rankings =
+  symbolData?.rankings || [];
 
-      const symbolWeight =
+for (
+  const item of rankings
+) {
 
-        symbolData.weights[
-          symbol
-        ] || 1;
+  const symbol =
+    item.symbol;
+
+  const symbolWeight =
+    Number(item.weight || 1);
 
       /*
       ================================================

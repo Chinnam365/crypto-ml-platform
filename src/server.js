@@ -1959,9 +1959,8 @@ ${side}
 ==================================
 `);
 
-
+  continue;
 }
-
 await pool.query(
   `
   INSERT INTO positions

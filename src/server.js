@@ -1095,7 +1095,9 @@ momentumStrength:
   phase2Features?.marketState ||
   "SIDEWAYS",
 
-  decision,
+  decision:
+  phase2Features?.decision ||
+  "HOLD",
 });
   
  

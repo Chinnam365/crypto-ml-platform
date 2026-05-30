@@ -248,12 +248,20 @@ for (
     Position count
     */
 
-    riskScore +=
+    /*
+PHASE 2 TEST MODE
 
-      (
-        openTrades.length /
-        maxPositions
-      ) * 25;
+Ignore historical memory records.
+*/
+
+const effectiveOpenPositions = 0;
+
+riskScore +=
+
+(
+  effectiveOpenPositions /
+  maxPositions
+) * 25;
 
     /*
     High volatility penalty
@@ -335,7 +343,7 @@ Volatility:
 ${volatilityRegime}
 
 Open Positions:
-${openTrades.length}
+${effectiveOpenPositions}
 
 Total Exposure:
 ${totalExposure.toFixed(2)}
@@ -382,7 +390,7 @@ TOP CAPITAL TARGETS
       maxExposure,
 
       openPositions:
-        openTrades.length,
+  effectiveOpenPositions,
 
       maxPositions,
 

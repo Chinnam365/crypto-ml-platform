@@ -310,7 +310,36 @@ ${pnl}%
           shouldClose
         ) {
 
-         
+         await pool.query(
+  `
+  UPDATE positions
+  SET ...
+  `,
+  [
+    currentPrice,
+    Number(pnl.toFixed(2)),
+    position.id,
+  ]
+);
+
+const outcome =
+  pnl > 0
+    ? "WIN"
+    : pnl < 0
+    ? "LOSS"
+    : "NEUTRAL";
+
+await pool.query(
+  `
+  UPDATE trade_history
+  ...
+  `,
+  [
+    Number(pnl.toFixed(2)),
+    outcome,
+    position.symbol
+  ]
+);
 
           console.log(`
 ==================================

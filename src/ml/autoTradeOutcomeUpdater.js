@@ -174,25 +174,50 @@ ${trade.entry_price}
 
         let pnl = 0;
 
-        /*
-        ================================================
-        BUY POSITION
-        ================================================
-        */
+       /*
+================================================
+BUY POSITION
+================================================
+*/
 
-        if (
-          trade.decision === "BUY"
-        ) {
+if (
+  trade.decision === "BUY"
+) {
 
-          pnl =
+  pnl =
 
-            (
-              (
-                currentPrice -
-                entryPrice
-              ) / entryPrice
-            ) * 100;
-        }
+    (
+      (
+        currentPrice -
+        entryPrice
+      ) / entryPrice
+    ) * 100;
+}
+
+/*
+================================================
+SELL POSITION
+================================================
+*/
+
+else if (
+  trade.decision === "SELL"
+) {
+
+  pnl =
+
+    (
+      (
+        entryPrice -
+        currentPrice
+      ) / entryPrice
+    ) * 100;
+}
+
+pnl =
+  Number(
+    pnl.toFixed(2)
+  );
 
         /*
         ================================================

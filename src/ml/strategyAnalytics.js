@@ -23,7 +23,8 @@ async function analyzeStrategyPerformance() {
         `
         SELECT *
 
-        FROM trade_history
+        FROM positions
+WHERE status = 'CLOSED'
 
         WHERE
 

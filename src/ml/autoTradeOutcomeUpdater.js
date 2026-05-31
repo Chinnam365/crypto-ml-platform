@@ -57,7 +57,32 @@ NO OPEN TRADES
 
     for (
       const trade of trades
-    ) {
+    ) 
+    if (
+  trade.decision === "HOLD"
+) {
+
+  await pool.query(
+
+    `
+    UPDATE trade_history
+    SET
+
+      pnl = 0,
+
+      outcome = 'NEUTRAL',
+
+      closed_at = NOW()
+
+    WHERE id = $1
+    `,
+
+    [trade.id]
+  );
+
+  continue;
+}
+    {
 
       try {
 
@@ -306,40 +331,58 @@ ${pnl}%
         ================================================
         */
 
-        if (
-          shouldClose
-        ) {
+       if (
+  shouldClose
+) {
 
-         await pool.query(
-  `
-  UPDATE positions
-  SET ...
-  `,
-  [
-    currentPrice,
-    Number(pnl.toFixed(2)),
-    position.id,
-  ]
-);
+  await pool.query(
 
-const outcome =
-  pnl > 0
-    ? "WIN"
-    : pnl < 0
-    ? "LOSS"
-    : "NEUTRAL";
+    `
+    UPDATE trade_history
+    SET
 
-await pool.query(
-  `
-  UPDATE trade_history
-  ...
-  `,
-  [
-    Number(pnl.toFixed(2)),
-    outcome,
-    position.symbol
-  ]
-);
+      pnl = $1,
+
+      outcome = $2,
+
+      closed_at = NOW()
+
+    WHERE id = $3
+    `,
+
+    [
+
+      pnl,
+
+      outcome,
+
+      trade.id,
+    ]
+  );
+
+  console.log(`
+==================================
+TRADE CLOSED
+==================================
+
+Trade ID:
+${trade.id}
+
+Symbol:
+${trade.symbol}
+
+Decision:
+${trade.decision}
+
+PnL:
+${pnl}%
+
+Outcome:
+${outcome}
+
+==================================
+`);
+}
 
           console.log(`
 ==================================

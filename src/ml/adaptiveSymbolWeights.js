@@ -22,20 +22,10 @@ async function getAdaptiveSymbolWeights() {
 
         `
         SELECT *
-
-        FROM trade_history
-
-        WHERE
-
-          outcome IS NOT NULL
-
-          AND
-
-          outcome != 'PENDING'
-
-        ORDER BY id DESC
-
-        LIMIT 2000
+FROM positions
+WHERE status = 'CLOSED'
+ORDER BY id DESC
+LIMIT 2000
         `
       );
 

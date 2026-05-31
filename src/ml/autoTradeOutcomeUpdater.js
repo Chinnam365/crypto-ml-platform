@@ -55,42 +55,42 @@ NO OPEN TRADES
     ==================================================
     */
 
-    for (
-      const trade of trades
-    ) 
-    if (
-  trade.decision === "HOLD"
+   for (
+  const trade of trades
 ) {
 
-  await pool.query(
+  if (
+    trade.decision === "HOLD"
+  ) {
 
-    `
-    UPDATE trade_history
-    SET
+    await pool.query(
 
-      pnl = 0,
+      `
+      UPDATE trade_history
+      SET
 
-      outcome = 'NEUTRAL',
+        pnl = 0,
 
-      closed_at = NOW()
+        outcome = 'NEUTRAL',
 
-    WHERE id = $1
-    `,
+        closed_at = NOW()
 
-    [trade.id]
-  );
+      WHERE id = $1
+      `,
 
-  continue;
-}
-    {
+      [trade.id]
+    );
 
-      try {
+    continue;
+  }
 
-        /*
-        ================================================
-        CURRENT MARKET PRICE
-        ================================================
-        */
+  try {
+
+    /*
+    ================================================
+    CURRENT MARKET PRICE
+    ================================================
+    */
 
         const marketResult =
           await pool.query(

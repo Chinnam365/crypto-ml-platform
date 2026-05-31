@@ -25,7 +25,7 @@ async function updateTradeOutcomes() {
 
         FROM trade_history
 
-        WHERE pnl IS NULL
+        WHERE outcome = 'PENDING'
 
         ORDER BY id ASC
 
@@ -311,30 +311,45 @@ ${pnl}%
         ) {
 
           await pool.query(
+  `
+  UPDATE positions
+  SET
+    status = 'CLOSED',
+    exit_price = $1,
+    pnl = $2,
+    closed_at = NOW()
+  WHERE id = $3
+  `,
+  [
+    currentPrice,
+    Number(pnl.toFixed(2)),
+    position.id,
+  ]
+);
 
-            `
-            UPDATE trade_history
+const outcome =
+  pnl > 0
+    ? "WIN"
+    : pnl < 0
+    ? "LOSS"
+    : "NEUTRAL";
 
-            SET
-
-              pnl = $1,
-
-              outcome = $2,
-
-              closed_at = NOW()
-
-            WHERE id = $3
-            `,
-
-            [
-
-              pnl,
-
-              outcome,
-
-              trade.id,
-            ]
-          );
+await pool.query(
+  `
+  UPDATE trade_history
+  SET
+    pnl = $1,
+    outcome = $2,
+    closed_at = NOW()
+  WHERE symbol = $3
+    AND outcome = 'PENDING'
+  `,
+  [
+    Number(pnl.toFixed(2)),
+    outcome,
+    position.symbol
+  ]
+);
 
           console.log(`
 ==================================

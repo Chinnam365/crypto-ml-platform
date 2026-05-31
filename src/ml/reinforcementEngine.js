@@ -136,52 +136,36 @@ NOT ENOUGH REINFORCEMENT DATA
 
           await pool.query(
 
-            `
-            INSERT INTO reinforcement_memory (
-
-              context_key,
-              trend,
-              regime,
-              volatility_regime,
-              momentum_state,
-              overall_trend,
-              total_reward,
-              sample_size,
-              avg_reward
-
-            )
-
-            VALUES (
-
-              $1,
-              $2,
-              $3,
-              $4,
-              $5,
-              $6,
-              $7,
-              1,
-              $7
-            )
-            `,
-
-            [
-
-              contextKey,
-
-              trade.trend,
-
-              trade.regime,
-
-              trade.volatility_regime,
-
-              trade.momentum_state,
-
-              trade.overall_trend,
-
-              reward,
-            ]
-          );
+  `
+  INSERT INTO reinforcement_memory
+  (
+    context_key,
+    reward,
+    avg_reward,
+    sample_size,
+    confidence,
+    pnl,
+    pattern
+  )
+  VALUES
+  (
+    $1,
+    $2,
+    $2,
+    1,
+    $3,
+    $4,
+    $5
+  )
+  `,
+  [
+    contextKey,
+    reward,
+    Number(trade.confidence || 0),
+    Number(trade.pnl || 0),
+    contextKey
+  ]
+);
         }
 
         /*

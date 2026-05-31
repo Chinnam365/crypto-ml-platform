@@ -21,24 +21,20 @@ async function analyzeStrategyPerformance() {
       await pool.query(
 
         `
-        SELECT *
+        const result =
+  await pool.query(
+    `
+    SELECT *
 
-        FROM positions
-WHERE status = 'CLOSED'
+    FROM positions
 
-        WHERE
+    WHERE status = 'CLOSED'
 
-          outcome IS NOT NULL
+    ORDER BY id DESC
 
-          AND
-
-          outcome != 'PENDING'
-
-        ORDER BY id DESC
-
-        LIMIT 3000
-        `
-      );
+    LIMIT 3000
+    `
+  );
 
     const trades =
       result.rows;
@@ -125,18 +121,18 @@ WHERE status = 'CLOSED'
         );
 
       if (
-        trade.outcome === "WIN"
-      ) {
+  Number(trade.pnl) > 0
+) {
 
-        strategy.wins++;
-      }
+  strategy.wins++;
+}
 
-      else if (
-        trade.outcome === "LOSS"
-      ) {
+else if (
+  Number(trade.pnl) < 0
+) {
 
-        strategy.losses++;
-      }
+  strategy.losses++;
+}
     }
 
     /*

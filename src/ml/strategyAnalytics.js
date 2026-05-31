@@ -25,13 +25,9 @@ async function analyzeStrategyPerformance() {
   await pool.query(
     `
     SELECT *
-
     FROM positions
-
     WHERE status = 'CLOSED'
-
     ORDER BY id DESC
-
     LIMIT 3000
     `
   );

@@ -15,13 +15,10 @@ async function optimizeSystemBehavior() {
       await pool.query(
         `
         SELECT *
-        FROM trade_history
-        WHERE
-          outcome IS NOT NULL
-          AND
-          outcome != 'PENDING'
-        ORDER BY id DESC
-        LIMIT 500
+FROM positions
+WHERE status = 'CLOSED'
+ORDER BY id DESC
+LIMIT 500
         `
       );
 

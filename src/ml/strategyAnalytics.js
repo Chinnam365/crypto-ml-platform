@@ -17,11 +17,7 @@ async function analyzeStrategyPerformance() {
     ==================================================
     */
 
-    const result =
-      await pool.query(
-
-        `
-        const result =
+  const result =
   await pool.query(
     `
     SELECT *

@@ -74,41 +74,39 @@ LIMIT 500
     ) {
 
       const pnl =
-        Number(
-          trade.pnl || 0
-        );
+  Number(
+    trade.pnl || 0
+  );
 
-      totalPnL += pnl;
+totalPnL += pnl;
 
-      if (
-        trade.outcome === "WIN"
-      ) {
+if (
+  pnl > 0
+) {
 
-        wins++;
+  wins++;
 
-        consecutiveLosses = 0;
-      }
+  consecutiveLosses = 0;
+}
 
-      else if (
-        trade.outcome === "LOSS"
-      ) {
+else if (
+  pnl < 0
+) {
 
-        losses++;
+  losses++;
 
-        consecutiveLosses++;
+  consecutiveLosses++;
 
-        if (
+  if (
+    consecutiveLosses >
+    maxConsecutiveLosses
+  ) {
 
-          consecutiveLosses >
-
-          maxConsecutiveLosses
-        ) {
-
-          maxConsecutiveLosses =
-            consecutiveLosses;
-        }
-      }
-    }
+    maxConsecutiveLosses =
+      consecutiveLosses;
+  }
+}
+    
 
     /*
     ==================================================

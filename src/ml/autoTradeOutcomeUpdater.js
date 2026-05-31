@@ -383,7 +383,7 @@ ${outcome}
 ==================================
 `);
 }
-
+} catch (tradeErr) {
         console.log(`
 ==================================
 TRADE PROCESSING ERROR

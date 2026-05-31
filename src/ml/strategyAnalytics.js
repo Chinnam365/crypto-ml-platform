@@ -32,8 +32,8 @@ async function analyzeStrategyPerformance() {
     `
   );
 
-    const trades =
-      result.rows;
+const trades =
+  result.rows;
 
     /*
     ==================================================

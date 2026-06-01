@@ -142,7 +142,16 @@ async function generateSymbolRankings() {
             r.context_key &&
             r.context_key.includes(symbol)
         );
+console.log(
+  "Reinforcement Rows:",
+  reinforcementRows.length,
+  symbol
+);
 
+console.log(
+  "Sample Reinforcement Data:",
+  reinforcementMemory.slice(0, 5)
+);
       const avgReward =
         reinforcementRows.length > 0
           ? reinforcementRows.reduce(

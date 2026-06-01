@@ -40,35 +40,45 @@ LIMIT 2000
 
     const symbolStats = {
 
-      BTCUSDT: {
-        wins: 0,
-        total: 0,
-        pnl: 0,
-      },
+     BTCUSDT: {
+  wins: 0,
+  total: 0,
+  pnl: 0,
+  confidence: 0,
+  recentPnl: [],
+},
 
-      ETHUSDT: {
-        wins: 0,
-        total: 0,
-        pnl: 0,
-      },
+ETHUSDT: {
+  wins: 0,
+  total: 0,
+  pnl: 0,
+  confidence: 0,
+  recentPnl: [],
+},
 
-      SOLUSDT: {
-        wins: 0,
-        total: 0,
-        pnl: 0,
-      },
+SOLUSDT: {
+  wins: 0,
+  total: 0,
+  pnl: 0,
+  confidence: 0,
+  recentPnl: [],
+},
 
-      LINKUSDT: {
-        wins: 0,
-        total: 0,
-        pnl: 0,
-      },
+LINKUSDT: {
+  wins: 0,
+  total: 0,
+  pnl: 0,
+  confidence: 0,
+  recentPnl: [],
+},
 
-      DOGEUSDT: {
-        wins: 0,
-        total: 0,
-        pnl: 0,
-      },
+DOGEUSDT: {
+  wins: 0,
+  total: 0,
+  pnl: 0,
+  confidence: 0,
+  recentPnl: [],
+},
     };
 
     /*
@@ -82,24 +92,22 @@ LIMIT 2000
     ) {
 
       if (
-        !symbolStats[
-          trade.symbol
-        ]
-      ) {
+  !symbolStats[
+    trade.symbol
+  ]
+) {
 
-        symbolStats[trade.symbol] = {
+  symbolStats[
+    trade.symbol
+  ] = {
 
-  wins: 0,
-
-  total: 0,
-
-  pnl: 0,
-
-  confidence: 0,
-
-  recentPnl: [],
-};
-      }
+    wins: 0,
+    total: 0,
+    pnl: 0,
+    confidence: 0,
+    recentPnl: [],
+  };
+}
 
       symbolStats[
         trade.symbol
@@ -117,7 +125,15 @@ symbolStats[
   Number(
     trade.confidence || 0
   );
-
+if (
+  !symbolStats[
+    trade.symbol
+  ].recentPnl
+) {
+  symbolStats[
+    trade.symbol
+  ].recentPnl = [];
+}
 symbolStats[
   trade.symbol
 ].recentPnl.push(

@@ -87,14 +87,18 @@ LIMIT 2000
         ]
       ) {
 
-        symbolStats[
-          trade.symbol
-        ] = {
+        symbolStats[trade.symbol] = {
 
-          wins: 0,
-          total: 0,
-          pnl: 0,
-        };
+  wins: 0,
+
+  total: 0,
+
+  pnl: 0,
+
+  confidence: 0,
+
+  recentPnl: [],
+};
       }
 
       symbolStats[
@@ -107,7 +111,20 @@ LIMIT 2000
         Number(
           trade.pnl || 0
         );
+symbolStats[
+  trade.symbol
+].confidence +=
+  Number(
+    trade.confidence || 0
+  );
 
+symbolStats[
+  trade.symbol
+].recentPnl.push(
+  Number(
+    trade.pnl || 0
+  )
+);
       if (
         trade.outcome === "WIN"
       ) {
@@ -170,20 +187,55 @@ LIMIT 2000
 
         stats.pnl /
         stats.total;
+const avgConfidence =
 
+  stats.confidence /
+  stats.total;
+
+const recentTrades =
+
+  stats.recentPnl.slice(
+    0,
+    20
+  );
+
+const recentPnL =
+
+  recentTrades.length
+
+    ? recentTrades.reduce(
+        (a, b) => a + b,
+        0
+      ) /
+      recentTrades.length
+
+    : 0;
+
+const sampleQuality =
+
+  Math.min(
+    stats.total / 50,
+    1
+  );
       /*
       ================================================
       WEIGHT FORMULA
       ================================================
       */
 
-      let weight =
+     let weight =
 
-        0.5 +
+  0.30 +
 
-        (winRate * 1.2) +
+  (winRate * 1.00) +
 
-        (avgPnL * 0.15);
+  (avgPnL * 0.10) +
+
+  (avgConfidence / 100 * 0.40) +
+
+  (recentPnL * 0.05) +
+
+  (sampleQuality * 0.50);
 
       /*
       ================================================
@@ -227,7 +279,19 @@ LIMIT 2000
           trades:
             symbolStats[symbol]
               .total,
+avgConfidence:
+  Number(
+    (
+      symbolStats[symbol]
+        .confidence /
 
+      Math.max(
+        1,
+        symbolStats[symbol]
+          .total
+      )
+    ).toFixed(2)
+  ),
           avgPnL:
             Number(
 

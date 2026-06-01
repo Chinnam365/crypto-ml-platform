@@ -139,8 +139,8 @@ async function generateSymbolRankings() {
      const reinforcementRows =
   reinforcementMemory.filter(
     (r) =>
-      r.context_key &&
-      r.context_key.includes(symbol)
+      r.pattern &&
+      r.pattern.startsWith(symbol)
   );
 
 console.log(
@@ -180,15 +180,19 @@ console.log(
   reinforcementMemory.slice(0, 5)
 );
       const avgReward =
-        reinforcementRows.length > 0
-          ? reinforcementRows.reduce(
-              (sum, r) =>
-                sum +
-                Number(r.avg_reward || 0),
-              0
-            ) / reinforcementRows.length
-          : 0;
-
+  reinforcementRows.length > 0
+    ? reinforcementRows.reduce(
+        (sum, r) =>
+          sum +
+          Number(
+            r.reward || 0
+          ),
+        0
+      ) / reinforcementRows.length
+    : 0;
+console.log(
+  `${symbol} Reinforcement Rows: ${reinforcementRows.length} Avg Reward: ${avgReward}`
+);
       const winRateScore =
         clamp(winRate, 0, 100);
 

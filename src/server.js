@@ -42,6 +42,10 @@ const {
 } = require("./ml/confidenceEngine");
 
 const {
+  generateSymbolRankings,
+} = require("./ml/symbolRankingEngine");
+
+const {
   calculateStopLoss,
 } = require("./ml/stopLossEngine");
 
@@ -189,6 +193,7 @@ const {
 const {
   analyzeFeatureImportance,
 } = require("./ml/featureImportanceAnalyzer");
+
 
 const app = express();
 
@@ -2953,6 +2958,32 @@ app.get(
         error:
           err.message,
       });
+    }
+  }
+);
+
+  /*
+==================================================
+SYMBOL RANKINGS
+==================================================
+*/
+
+app.get(
+  "/symbol-rankings",
+  async (req, res) => {
+    try {
+
+      const result =
+        await generateSymbolRankings();
+
+      res.json(result);
+
+    } catch (err) {
+
+      res.status(500).json({
+        error: err.message,
+      });
+
     }
   }
 );

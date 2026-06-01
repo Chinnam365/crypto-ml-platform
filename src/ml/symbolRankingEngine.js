@@ -136,12 +136,39 @@ async function generateSymbolRankings() {
           ? (avgPnl / avgVolatility) * 100
           : 0;
 
-      const reinforcementRows =
-        reinforcementMemory.filter(
-          (r) =>
-            r.context_key &&
-            r.context_key.includes(symbol)
-        );
+     const reinforcementRows =
+  reinforcementMemory.filter(
+    (r) =>
+      r.context_key &&
+      r.context_key.includes(symbol)
+  );
+
+console.log(
+  "=================================="
+);
+
+console.log(
+  "REINFORCEMENT DEBUG"
+);
+
+console.log(
+  "Symbol:",
+  symbol
+);
+
+console.log(
+  "Matching Rows:",
+  reinforcementRows.length
+);
+
+console.log(
+  "First Reinforcement Row:",
+  reinforcementMemory[0]
+);
+
+console.log(
+  "=================================="
+);
 console.log(
   "Reinforcement Rows:",
   reinforcementRows.length,

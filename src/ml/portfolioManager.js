@@ -6,6 +6,10 @@ const {
 } = require("./adaptiveSymbolWeights");
 
 const {
+  generateSymbolRankings,
+} = require("./symbolRankingEngine");
+
+const {
   analyzeStrategyPerformance,
 } = require("./strategyAnalytics");
 
@@ -55,6 +59,9 @@ async function evaluatePortfolioRisk({
     const symbolData =
       await getAdaptiveSymbolWeights();
 
+    const rankingData =
+  await generateSymbolRankings();
+    
     /*
     ==================================================
     STRATEGY EVOLUTION
@@ -125,7 +132,7 @@ async function evaluatePortfolioRisk({
     const symbolAllocations = [];
 
 const rankings =
-  symbolData?.rankings || [];
+  rankingData?.rankings || [];
 
 for (
   const item of rankings
@@ -133,9 +140,17 @@ for (
 
   const symbol =
     item.symbol;
+if (
+  item.classification ===
+  "SUPPRESSED"
+) {
 
+  continue;
+}
   const symbolWeight =
-    Number(item.weight || 1);
+  Number(
+    item.allocation || 0
+  );
 
       /*
       ================================================
@@ -182,9 +197,9 @@ for (
 
       const targetCapital =
 
-        (
-          allocationScore / 10
-        ) * maxExposure;
+  (
+    allocationScore / 3
+  ) * maxExposure;
 
       symbolAllocations.push({
 

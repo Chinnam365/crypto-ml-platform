@@ -1,7 +1,9 @@
 const {
   getAdaptiveSymbolWeights,
 } = require("./adaptiveSymbolWeights");
-
+const {
+  generateSymbolRankings,
+} = require("./symbolRankingEngine");
 const pool =
   require("../db/db");
 
@@ -30,7 +32,28 @@ async function selectTradingSymbols(
 
     const rankings =
       symbolData.rankings;
+/*
+==================================
+PHASE 3 SYMBOL RANKINGS
+==================================
+*/
 
+const rankingData =
+  await generateSymbolRankings();
+
+const suppressedSymbols =
+
+  rankingData.rankings
+
+    .filter(
+      item =>
+        item.classification ===
+        "SUPPRESSED"
+    )
+
+    .map(
+      item => item.symbol
+    );
     /*
     ==================================================
     NO DATA YET
@@ -60,8 +83,22 @@ async function selectTradingSymbols(
 
     for (
       const item of rankings
-    ) {
+    ){
+    /*
+==================================
+SYMBOL SUPPRESSION
+==================================
+*/
 
+if (
+  suppressedSymbols.includes(
+    item.symbol
+  )
+) {
+
+  continue;
+}
+   
       try {
 
         /*
@@ -218,7 +255,19 @@ SYMBOL FILTER ERROR
     LOGGING
     ==================================================
     */
+console.log(`
+==================================
+SUPPRESSED SYMBOLS
+==================================
+`);
 
+console.table(
+  suppressedSymbols
+);
+
+console.log(`
+==================================
+`);
     console.log(`
 ==================================
 SYMBOL SELECTION ENGINE

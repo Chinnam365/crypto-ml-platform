@@ -871,7 +871,10 @@ if (
 
   symbols = rankings;
 }
-
+console.log(
+  "DIRECT ASSIGNMENT WORKING:",
+  symbols
+);
 console.log(
   "SYMBOLS DEBUG:",
   JSON.stringify(

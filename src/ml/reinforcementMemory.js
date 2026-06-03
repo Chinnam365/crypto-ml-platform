@@ -9,6 +9,8 @@ REINFORCEMENT MEMORY ENGINE
 
 async function getReinforcementScore({
 
+  symbol,
+
   trend,
 
   momentumState,
@@ -33,20 +35,20 @@ async function getReinforcementScore({
         SELECT *
         FROM trade_history
         WHERE
-          trend = $1
-          AND overall_trend = $2
-          AND volatility_regime = $3
+  symbol = $1
+  AND trend = $2
+  AND overall_trend = $3
+  AND volatility_regime = $4
         ORDER BY id DESC
         LIMIT 100
         `,
 
         [
 
-          trend,
-
-          overallTrend,
-
-          volatilityRegime,
+          symbol,
+  trend,
+  overallTrend,
+  volatilityRegime,
         ]
       );
 

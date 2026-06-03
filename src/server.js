@@ -1958,6 +1958,19 @@ ${side}
 }
 await pool.query(
   `
+  console.log(`
+==================================
+NEW POSITION
+==================================
+Symbol: ${symbol}
+Side: ${action}
+Entry Price: ${currentPrice}
+Stop Loss: ${stopLoss}
+Take Profit: ${takeProfit}
+Volatility: ${volatility}
+Confidence: ${decisionConfidence}
+==================================
+`);
   INSERT INTO positions
   (
   symbol,

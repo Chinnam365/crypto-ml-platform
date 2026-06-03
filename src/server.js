@@ -831,39 +831,27 @@ await monitorPositions(pool);
     const rankings =
       await getBestSymbols();
 
-    let symbols = [
+   let symbols = [];
 
-      "ETHUSDT",
+if (
+  rankings &&
+  rankings.length > 0
+) {
 
-      "BTCUSDT",
+  symbols =
+    rankings.map(
+      s => s.symbol
+    );
+}
 
-      "SOLUSDT",
+if (
+  symbols.length === 0
+) {
 
-      "DOGEUSDT",
-
-      "LINKUSDT",
-    ];
-
-    // ==========================================
-    // USE ONLY PROFITABLE SYMBOLS
-    // ==========================================
-
-    if (rankings.length > 0) {
-
-      const profitable =
-        rankings
-          .filter(
-            s => s.avgPnL > 0
-          )
-          .map(
-            s => s.symbol
-          );
-
-      if (profitable.length > 0) {
-
-        symbols = profitable;
-      }
-    }
+  symbols = [
+    "DOGEUSDT"
+  ];
+}
 
 console.log(
   "Allowed symbols:",

@@ -214,24 +214,24 @@ else if (
       ================================================
       */
 
-      let classification =
-        "NEUTRAL";
+     let classification =
+  "NEUTRAL";
 
-      if (
-        evolutionScore >= 75
-      ) {
+if (
+  evolutionScore >= 45
+) {
 
-        classification =
-          "PROMOTE";
-      }
+  classification =
+    "PROMOTE";
+}
 
-      else if (
-        evolutionScore <= 40
-      ) {
+else if (
+  evolutionScore <= 0
+) {
 
-        classification =
-          "SUPPRESS";
-      }
+  classification =
+    "SUPPRESS";
+}
 
       /*
       ================================================
@@ -332,7 +332,23 @@ ${suppressedStrategies.length}
 
 ==================================
 `);
+const promotedCount =
 
+  evolvedStrategies.filter(
+    s =>
+      s.classification ===
+      "PROMOTE"
+  ).length;
+
+if (
+  promotedCount === 0 &&
+  evolvedStrategies.length > 0
+) {
+
+  evolvedStrategies[0]
+    .classification =
+      "PROMOTE";
+}
     return {
 
       strategies:

@@ -205,6 +205,13 @@ const {
 } = require(
   "./ml/discoveryRanking"
 );
+
+const {
+  getDiscoveryCandidates,
+} = require(
+  "./ml/discoverySelector"
+);
+
 const app = express();
 
 app.use(
@@ -840,6 +847,13 @@ await monitorPositions(pool);
 
 const rankings =
   await getBestSymbols();
+    const discoveries =
+  await getDiscoveryCandidates();
+
+console.log(
+  "DISCOVERY COUNT:",
+  discoveries.length
+);
 console.log(
   "RANKING TYPE:",
   typeof rankings
@@ -3092,7 +3106,20 @@ app.get(
     }
   }
 );
-  
+  app.get(
+  "/discovery-candidates",
+  async (req, res) => {
+
+    const candidates =
+      await getDiscoveryCandidates();
+
+    res.json({
+      count:
+        candidates.length,
+      candidates,
+    });
+  }
+);
 app.listen(PORT, () => {
 
   console.log(

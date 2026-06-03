@@ -307,11 +307,9 @@ async function calculateSignalQuality({
 
     const totalScore =
 
-      bullishScore +
+  bullishScore +
 
-      bearishScore +
-
-      uncertaintyScore;
+  bearishScore;
 
     let confidence = 50;
 
@@ -320,17 +318,30 @@ async function calculateSignalQuality({
     ) {
 
       confidence =
-        (
-          Math.max(
+(
+  Math.max(
+    bullishScore,
+    bearishScore
+  ) /
 
-            bullishScore,
-
-            bearishScore
-
-          ) / totalScore
-        ) * 100;
+  Math.max(
+    1,
+    bullishScore +
+    bearishScore
+  )
+) * 100;
     }
+confidence -=
+  uncertaintyScore * 0.15;
 
+confidence =
+  Math.max(
+    10,
+    Math.min(
+      confidence,
+      95
+    )
+  );
     confidence =
       Number(
         confidence.toFixed(2)

@@ -869,11 +869,7 @@ if (
   rankings.length > 0
 ) {
 
-  symbols =
-    rankings.map(
-      item =>
-        item.symbol
-    );
+  symbols = rankings;
 }
 
 console.log(

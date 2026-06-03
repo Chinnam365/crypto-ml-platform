@@ -531,7 +531,25 @@ const sellScore =
 TRADE DECISION
 ==================================================
 */
+const decisionConfidence =
+  Number(
+    (
+      (
+        (Number(signalQuality?.confidence) || 0)
+        * 0.7
+      )
+      +
+      (
+        (Number(reinforcementData?.reinforcementScore) || 0)
+        * 0.3
+      )
+    ).toFixed(2)
+  );
 
+console.log(
+  "DECISION CONFIDENCE:",
+  decisionConfidence
+);
 const tradeDecision =
   await generateTradeDecision({
 
@@ -539,8 +557,8 @@ const tradeDecision =
 
     rsi,
 
-    confidence:
-      signalQuality.confidence,
+   confidence:
+  decisionConfidence,
 
     signalQuality:
       signalQuality.quality,
@@ -736,7 +754,7 @@ REACHED SIGNAL MEMORY SECTION
   "HOLD",
 
         confidence:
-          signalQuality.confidence,
+  decisionConfidence,
 
         signalQuality:
           signalQuality.quality,

@@ -477,6 +477,8 @@ REINFORCEMENT MEMORY
 const reinforcementData =
   await getReinforcementScore({
 
+    symbol,
+
     trend,
 
     momentumState:

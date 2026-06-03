@@ -14,10 +14,19 @@ function clamp(value, min, max) {
 }
 
 function getClassification(score) {
-  if (score >= 90) return "ELITE";
-  if (score >= 75) return "LEADER";
-  if (score >= 60) return "ACTIVE";
-  if (score >= 40) return "WATCHLIST";
+
+  if (score >= 70)
+    return "ELITE";
+
+  if (score >= 55)
+    return "LEADER";
+
+  if (score >= 45)
+    return "ACTIVE";
+
+  if (score >= 30)
+    return "WATCHLIST";
+
   return "SUPPRESSED";
 }
 
@@ -270,7 +279,37 @@ console.log(
         item.rank = index + 1;
       }
     );
+/*
+==================================
+PORTFOLIO DIVERSIFICATION
+==================================
+*/
 
+const activeCount =
+  rankings.filter(
+    r => r.status === "ACTIVE"
+  ).length;
+
+if (activeCount < 3) {
+
+  rankings
+    .slice(0, 3)
+    .forEach(r => {
+
+      r.status = "ACTIVE";
+
+      if (
+        r.classification ===
+        "SUPPRESSED"
+      ) {
+
+        r.classification =
+          "WATCHLIST";
+
+        r.allocation = 0.5;
+      }
+    });
+}
     return {
       rankings,
       generatedAt: new Date(),

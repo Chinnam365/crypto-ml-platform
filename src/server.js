@@ -829,22 +829,21 @@ await monitorPositions(pool);
     // ==========================================
 
     const rankings =
-      await getBestSymbols();
+  await getBestSymbols();
+
 console.log(
   "RANKINGS DEBUG:",
   JSON.stringify(rankings, null, 2)
 );
-   let symbols = [];
+
+let symbols = [];
 
 if (
   rankings &&
   rankings.length > 0
 ) {
 
-  symbols =
-    rankings.map(
-      s => s.symbol
-    );
+  symbols = rankings;
 }
 
 if (

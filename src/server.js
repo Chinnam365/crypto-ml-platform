@@ -1956,9 +1956,7 @@ ${side}
 
   continue;
 }
-await pool.query(
-  `
-  console.log(`
+   console.log(`
 ==================================
 NEW POSITION
 ==================================
@@ -1971,7 +1969,9 @@ Volatility: ${volatility}
 Confidence: ${decisionConfidence}
 ==================================
 `);
-  INSERT INTO positions
+await pool.query(
+  `
+   INSERT INTO positions
   (
   symbol,
   side,

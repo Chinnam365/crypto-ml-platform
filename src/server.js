@@ -853,10 +853,7 @@ if (
   rankings.length > 0
 ) {
 
-  symbols =
-  rankings.map(
-    s => s.symbol
-  );
+  symbols = rankings;
 }
 
 if (

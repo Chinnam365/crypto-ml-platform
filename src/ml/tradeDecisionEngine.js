@@ -89,7 +89,7 @@ async function generateTradeDecision({
 
       adjustedConfidence >=
         (
-          55 +
+          45 +
           optimizer.thresholdAdjustment
         ),
 
@@ -118,7 +118,7 @@ async function generateTradeDecision({
 
       adjustedConfidence >=
         (
-          55 +
+          45 +
           optimizer.thresholdAdjustment
         ),
 
@@ -272,7 +272,7 @@ async function generateTradeDecision({
 
       &&
 
-      adjustedConfidence < 60
+      adjustedConfidence < 50
     ) {
 
       action = "HOLD";

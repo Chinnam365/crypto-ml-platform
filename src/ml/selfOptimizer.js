@@ -18,7 +18,7 @@ async function optimizeSystemBehavior() {
 FROM positions
 WHERE status = 'CLOSED'
 ORDER BY id DESC
-LIMIT 500
+LIMIT 100
         `
       );
 
@@ -148,22 +148,22 @@ else if (
     let degradationScore = 0;
 
     if (
-      winRate < 45
+      winRate < 35
     ) {
 
-      degradationScore += 25;
+      degradationScore += 20;
     }
 
     if (
-      avgPnL < 0
+      avgPnL < -2
     ) {
 
-      degradationScore += 25;
+      degradationScore += 15;
     }
 
     degradationScore +=
 
-      maxConsecutiveLosses * 4;
+      maxConsecutiveLosses * 2;
 
     degradationScore =
 
@@ -188,7 +188,7 @@ else if (
 
     const healingMode =
 
-      degradationScore >= 60;
+      degradationScore >= 75;
 
     /*
     ==================================================
@@ -299,7 +299,7 @@ else if (
     let tradingAllowed = true;
 
     if (
-      degradationScore >= 85
+      degradationScore >= 95
     ) {
 
       tradingAllowed = false;

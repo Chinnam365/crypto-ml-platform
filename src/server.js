@@ -194,6 +194,17 @@ const {
   analyzeFeatureImportance,
 } = require("./ml/featureImportanceAnalyzer");
 
+const {
+  getMarketScanner,
+} = require(
+  "./src/ml/marketScanner"
+);
+
+const {
+  rankDiscoveries,
+} = require(
+  "./src/ml/discoveryRanking"
+);
 
 const app = express();
 
@@ -3024,6 +3035,59 @@ app.get(
 
       });
     }
+  }
+);
+
+  app.get(
+  "/portfolio-status",
+  async (req, res) => {
+    ...
+  }
+);
+
+/*
+==========================================
+DISCOVERY ENGINE
+==========================================
+*/
+
+app.get(
+  "/discovery",
+  async (req, res) => {
+
+    try {
+
+      const marketData =
+        await getMarketScanner();
+
+      const discoveries =
+        rankDiscoveries(
+          marketData
+        );
+
+      res.json({
+
+        count:
+          discoveries.length,
+
+        discoveries,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
+
+app.listen(
+  PORT,
+  () => {
+    ...
   }
 );
   

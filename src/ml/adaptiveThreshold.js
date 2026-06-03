@@ -10,7 +10,7 @@ ADAPTIVE THRESHOLD ENGINE
 
 async function calculateAdaptiveThreshold({
 
-  baseThreshold = 57,
+  baseThreshold = 52,
 
   regime,
 
@@ -101,18 +101,17 @@ async function calculateAdaptiveThreshold({
     */
 
     if (
+  momentumState ===
+  "BULLISH_ACCELERATION"
 
-      momentumState ===
-      "BULLISH_ACCELERATION"
+  ||
 
-      ||
+  momentumState ===
+  "BEARISH_ACCELERATION"
+) {
 
-      momentumState ===
-      "BEARISH_ACCELERATION"
-    ) {
-
-      threshold -= 3;
-    }
+  threshold -= 5;
+}
 
     /*
     ==================================================
@@ -137,7 +136,7 @@ async function calculateAdaptiveThreshold({
       regime === "SIDEWAYS"
     ) {
 
-      threshold += 4;
+      threshold += 2;
     }
 
     /*
@@ -149,12 +148,12 @@ async function calculateAdaptiveThreshold({
     threshold =
 
       Math.max(
-        35,
-        Math.min(
-          threshold,
-          85
-        )
-      );
+  45,
+  Math.min(
+    threshold,
+    80
+  )
+);
 
     threshold =
       Number(

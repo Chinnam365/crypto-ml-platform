@@ -835,15 +835,31 @@ async function runEngine() {
 await monitorPositions(pool);
     
     // ==========================================
-    // AI SYMBOL SELECTION
-    // ==========================================
+// AI SYMBOL SELECTION
+// ==========================================
 
-   const rankings =
+const rankings =
   await getBestSymbols();
+console.log(
+  "RANKING TYPE:",
+  typeof rankings
+);
 
 console.log(
+  "FIRST RANKING:",
+  JSON.stringify(
+    rankings?.[0],
+    null,
+    2
+  )
+);
+console.log(
   "RANKINGS DEBUG:",
-  JSON.stringify(rankings, null, 2)
+  JSON.stringify(
+    rankings,
+    null,
+    2
+  )
 );
 
 let symbols = [];
@@ -868,6 +884,7 @@ console.log(
     2
   )
 );
+
 if (
   symbols.length === 0
 ) {
@@ -885,6 +902,11 @@ console.log(
 for (
   const randomSymbol of symbols
 ) {
+
+  console.log(
+    "PROCESSING SYMBOL:",
+    randomSymbol
+  );
 
   await new Promise(
     resolve =>

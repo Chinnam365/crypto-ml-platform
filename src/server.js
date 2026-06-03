@@ -1078,17 +1078,7 @@ ${multiTf.overallTrend}
 // SYMBOL PERFORMANCE
 // ==========================================
 
-const symbolRanking =
-  rankings.find(
-    s =>
-      s.symbol ===
-      randomSymbol
-  );
-
-const avgSymbolPnL =
-  symbolRanking
-    ? symbolRanking.avgPnL
-    : 0;
+const avgSymbolPnL = 0;
    
 // ==========================================
 // AI CONFIDENCE

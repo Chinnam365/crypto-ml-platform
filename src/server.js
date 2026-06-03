@@ -1571,7 +1571,7 @@ ${executionThreshold}
 // ==========================================
 
 if (
-  tradeQuality < 60
+  tradeQuality < 50
 ) {
 
   console.log(`

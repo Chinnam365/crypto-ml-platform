@@ -65,15 +65,17 @@ NOT ENOUGH REINFORCEMENT DATA
 
         const contextKey =
 
-          `${trade.trend}_` +
+  `${trade.symbol}_` +
 
-          `${trade.regime}_` +
+  `${trade.trend}_` +
 
-          `${trade.volatility_regime}_` +
+  `${trade.regime}_` +
 
-          `${trade.momentum_state}_` +
+  `${trade.volatility_regime}_` +
 
-          `${trade.overall_trend}`;
+  `${trade.momentum_state}_` +
+
+  `${trade.overall_trend}`;
 
         /*
         ================================================
@@ -180,10 +182,9 @@ NOT ENOUGH REINFORCEMENT DATA
             existingResult.rows[0];
 
           const newTotalReward =
-
-            Number(
-              existing.total_reward
-            ) + reward;
+  Number(
+    existing.total_reward || 0
+  ) + reward;
 
           const newSampleSize =
 

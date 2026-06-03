@@ -2987,6 +2987,42 @@ app.get(
     }
   }
 );
+
+  /*
+==================================================
+PORTFOLIO STATUS V2
+==================================================
+*/
+
+app.get(
+  "/portfolio-status",
+  async (req, res) => {
+
+    try {
+
+      const portfolio =
+        await getPortfolioStats(pool);
+
+      res.json({
+
+        success: true,
+
+        portfolio,
+
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        success: false,
+
+        error: err.message,
+
+      });
+    }
+  }
+);
   
 app.listen(PORT, () => {
 

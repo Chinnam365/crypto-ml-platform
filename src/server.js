@@ -838,7 +838,7 @@ await monitorPositions(pool);
     // AI SYMBOL SELECTION
     // ==========================================
 
-    const rankings =
+   const rankings =
   await getBestSymbols();
 
 console.log(
@@ -853,9 +853,21 @@ if (
   rankings.length > 0
 ) {
 
-  symbols = rankings;
+  symbols =
+    rankings.map(
+      item =>
+        item.symbol
+    );
 }
 
+console.log(
+  "SYMBOLS DEBUG:",
+  JSON.stringify(
+    symbols,
+    null,
+    2
+  )
+);
 if (
   symbols.length === 0
 ) {

@@ -203,23 +203,20 @@ async function predictTrade(features) {
     let ensembleConfidence =
 
       (
-        mlProbability * 0.35
-      )
+  mlProbability * 0.20
+)
 
-      +
++
 
-      (
-        probabilistic.buyScore
-        * 0.25
-      )
+(
+  probabilistic.buyScore * 0.30
+)
 
-      +
++
 
-      (
-        adaptive.adjustedConfidence
-        * 0.30
-      )
-
+(
+  adaptive.adjustedConfidence * 0.50
+)
       +
 
       (
@@ -240,7 +237,7 @@ async function predictTrade(features) {
     const thresholdData =
       await calculateAdaptiveThreshold({
 
-        baseThreshold: 57,
+        baseThreshold: 52,
 
         regime:
           features.regime,

@@ -3038,20 +3038,7 @@ app.get(
   }
 );
 
-  app.get(
-  "/portfolio-status",
-  async (req, res) => {
-    ...
-  }
-);
-
-/*
-==========================================
-DISCOVERY ENGINE
-==========================================
-*/
-
-app.get(
+ app.get(
   "/discovery",
   async (req, res) => {
 
@@ -3081,13 +3068,6 @@ app.get(
           err.message,
       });
     }
-  }
-);
-
-app.listen(
-  PORT,
-  () => {
-    ...
   }
 );
   

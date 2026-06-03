@@ -830,7 +830,10 @@ await monitorPositions(pool);
 
     const rankings =
       await getBestSymbols();
-
+console.log(
+  "RANKINGS DEBUG:",
+  JSON.stringify(rankings, null, 2)
+);
    let symbols = [];
 
 if (

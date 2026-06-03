@@ -197,15 +197,14 @@ const {
 const {
   getMarketScanner,
 } = require(
-  "./src/ml/marketScanner"
+  "./ml/marketScanner"
 );
 
 const {
   rankDiscoveries,
 } = require(
-  "./src/ml/discoveryRanking"
+  "./ml/discoveryRanking"
 );
-
 const app = express();
 
 app.use(
@@ -1971,13 +1970,13 @@ ${side}
 ==================================
 NEW POSITION
 ==================================
-Symbol: ${symbol}
-Side: ${action}
-Entry Price: ${currentPrice}
+Symbol: ${randomSymbol}
+Side: ${side}
+Entry Price: ${entryPrice}
 Stop Loss: ${stopLoss}
 Take Profit: ${takeProfit}
 Volatility: ${volatility}
-Confidence: ${decisionConfidence}
+Confidence: ${confidence}
 ==================================
 `);
 await pool.query(

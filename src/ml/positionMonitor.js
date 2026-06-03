@@ -177,7 +177,18 @@ async function monitorPositions(pool) {
       // ==========================================
 
       if (shouldClose) {
-
+console.log(`
+==================================
+STOP LOSS DEBUG
+==================================
+Symbol: ${position.symbol}
+Entry Price: ${position.entry_price}
+Current Price: ${currentPrice}
+Stored Stop Loss: ${position.stop_loss}
+Stored Take Profit: ${position.take_profit}
+Close Reason: ${closeReason}
+==================================
+`);
         await pool.query(
           `
           UPDATE positions

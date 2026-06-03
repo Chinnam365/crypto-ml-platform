@@ -601,13 +601,13 @@ console.log(`
     */
 
     const positionSizing =
-      calculatePositionSize({
+  calculatePositionSize({
 
-        explorationTrade:
-          tradeDecision.explorationTrade,
+    explorationTrade:
+      tradeDecision.explorationTrade,
 
-        confidence:
-          signalQuality.confidence,
+    confidence:
+      decisionConfidence,
 
         volatilityRegime:
           volatilityData?.volatilityRegime,

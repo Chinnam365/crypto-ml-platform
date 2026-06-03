@@ -280,7 +280,7 @@ else if (
       winRate < 40
     ) {
 
-      thresholdAdjustment = 9;
+      thresholdAdjustment = 4;
     }
 
     if (

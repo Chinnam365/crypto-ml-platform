@@ -246,7 +246,7 @@ else if (
       avgPnL < -0.5
     ) {
 
-      confidenceMultiplier = 0.8;
+      confidenceMultiplier = 0.9;
     }
 
     if (
@@ -280,7 +280,7 @@ else if (
       winRate < 40
     ) {
 
-      thresholdAdjustment = 8;
+      thresholdAdjustment = 9;
     }
 
     if (

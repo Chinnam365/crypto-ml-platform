@@ -183,11 +183,11 @@ async function getAdaptiveWeights(
     const evolutionBoost =
 
       Math.max(
-        0.5,
-        Number(
-          strategy.evolutionScore || 100
-        ) / 100
-      );
+  0.75,
+  Number(
+    strategy.evolutionScore || 100
+  ) / 100
+);
 
     weights.rsi *= evolutionBoost;
 

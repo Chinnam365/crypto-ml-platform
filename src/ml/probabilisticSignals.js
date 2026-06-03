@@ -291,7 +291,7 @@ async function calculateSignalScores({
 
     if (
 
-      buyScore >= 45
+      buyScore >= 35
 
       &&
 
@@ -305,7 +305,7 @@ async function calculateSignalScores({
 
     else if (
 
-      sellScore >= 45
+      sellScore >= 35
 
       &&
 

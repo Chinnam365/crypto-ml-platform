@@ -211,6 +211,12 @@ const {
 } = require(
   "./ml/discoverySelector"
 );
+const {
+  evaluateDiscoveryCandidates,
+} = require(
+  "./ml/discoveryEvaluator"
+);
+
 
 const app = express();
 
@@ -3120,6 +3126,39 @@ app.get(
     });
   }
 );
+  app.get(
+  "/discovery-ai",
+  async (req, res) => {
+
+    try {
+
+      const candidates =
+        await getDiscoveryCandidates();
+
+      const evaluated =
+        await evaluateDiscoveryCandidates(
+          candidates
+        );
+
+      res.json({
+
+        count:
+          evaluated.length,
+
+        evaluated,
+      });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        error:
+          err.message,
+      });
+    }
+  }
+);
+  
 app.listen(PORT, () => {
 
   console.log(

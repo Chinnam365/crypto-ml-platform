@@ -30,6 +30,7 @@ REINFORCEMENT ENGINE STARTED
         SELECT *
 FROM positions
 WHERE status = 'CLOSED'
+AND reinforcement_processed = FALSE
 ORDER BY id DESC
 LIMIT 500
         `

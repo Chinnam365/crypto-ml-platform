@@ -1397,25 +1397,6 @@ ${mlConfidence}
 
 confidence *=
   optimization.confidenceMultiplier;
-// ==========================================
-// REINFORCEMENT LOOKUP
-// ==========================================
-
-const reinforcementContextKey =
-
-  `${randomSymbol}_` +
-
-  `${trend}_` +
-
-  `${regime}_` +
-
-  `${volatilityRegime || "NORMAL"}_` +
-
-  `${momentumState || "NEUTRAL"}_` +
-
-  `${multiTf?.overallTrend || trend}`;
-
-
 
 console.log(`
 ==================================

@@ -165,6 +165,8 @@ else if (
 
            await pool.query(
   `
+  await pool.query(
+  `
   INSERT INTO reinforcement_memory
   (
     context_key,
@@ -180,23 +182,25 @@ else if (
   (
     $1,
     $2,
-    $2,
-    $2,
-    1,
     $3,
     $4,
-    $5
+    1,
+    $5,
+    $6,
+    $7
   )
   `,
   [
     contextKey,
-    reward,
+    Number(reward),
+    Number(reward),
+    Number(reward),
     Number(trade.confidence || 0),
     Number(trade.pnl || 0),
     contextKey
   ]
 );
-          console.log(`
+            console.log(`
 ==================================
 REINFORCEMENT INSERTED
 ==================================

@@ -1457,13 +1457,14 @@ ${mlConfidence}
 
 ==================================
 `);
+
+// ==========================================
+// SELF OPTIMIZER
+// ==========================================
+
 confidence *=
   optimization.confidenceMultiplier;
-confidence =
-  Math.max(
-    confidence,
-    55
-  );
+
 const optimizedThreshold =
   adaptiveThresholdValue +
   optimization.thresholdAdjustment;
@@ -1486,13 +1487,14 @@ ${optimization.confidenceMultiplier.toFixed(2)}
 
 ==================================
 `);
+
 console.log(`
 ==================================
 ADAPTIVE THRESHOLD
 ==================================
 
 Threshold:
-${adaptiveThresholdValue}
+${optimizedThreshold}
 
 ==================================
 `);
@@ -1503,17 +1505,17 @@ ${adaptiveThresholdValue}
 
 const contextKey =
 
-`${randomSymbol}_` +
+  `${randomSymbol}_` +
 
-`${trend}_` +
+  `${trend}_` +
 
-`${regime}_` +
+  `${regime}_` +
 
-`${volatilityRegime || "NORMAL"}_` +
+  `${volatilityRegime || "NORMAL"}_` +
 
-`${momentumState || "NEUTRAL"}_` +
+  `${momentumState || "NEUTRAL"}_` +
 
-`${multiTf?.overallTrend || trend}`;
+  `${multiTf?.overallTrend || trend}`;
 
 const reinforcementResult =
   await pool.query(
@@ -1526,6 +1528,20 @@ const reinforcementResult =
     [contextKey]
   );
 
+console.log(`
+==================================
+REINFORCEMENT LOOKUP
+==================================
+
+Context:
+${contextKey}
+
+Matches:
+${reinforcementResult.rows.length}
+
+==================================
+`);
+
 if (
   reinforcementResult.rows.length > 0
 ) {
@@ -1534,7 +1550,7 @@ if (
 
     Number(
       reinforcementResult.rows[0]
-      .avg_reward || 0
+        .avg_reward || 0
     );
 
   confidence +=
@@ -1551,7 +1567,7 @@ ${contextKey}
 Avg Reward:
 ${reinforcementReward}
 
-Confidence:
+Confidence After RL:
 ${confidence}
 
 ==================================
@@ -1559,16 +1575,41 @@ ${confidence}
 }
 
 // ==========================================
-// CLAMP CONFIDENCE
+// FINAL CONFIDENCE FLOOR
 // ==========================================
 
-confidence = Math.max(
-  20,
-  Math.min(
+confidence =
+  Math.max(
     confidence,
-    95
-  )
-);
+    55
+  );
+
+// ==========================================
+// FINAL CLAMP
+// ==========================================
+
+confidence =
+  Math.max(
+    20,
+    Math.min(
+      confidence,
+      95
+    )
+  );
+
+console.log(`
+==================================
+FINAL CONFIDENCE
+==================================
+
+Confidence:
+${confidence}
+
+Threshold:
+${optimizedThreshold}
+
+==================================
+`);
 
 console.log(`
 ==================================

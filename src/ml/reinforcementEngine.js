@@ -95,17 +95,17 @@ ${trade.pnl}
 
         const contextKey =
 
-  `${trade.symbol}_` +
+`${trade.symbol || "UNKNOWN"}_` +
 
-  `${trade.trend}_` +
+`${trade.trend || "UNKNOWN"}_` +
 
-  `${trade.regime}_` +
+`${trade.regime || "UNKNOWN"}_` +
 
-  `${trade.volatility_regime}_` +
+`${trade.volatility_regime || "NORMAL"}_` +
 
-  `${trade.momentum_state}_` +
+`${trade.momentum_state || "NEUTRAL"}_` +
 
-  `${trade.overall_trend}`;
+`${trade.overall_trend || trade.trend || "SIDEWAYS"}`;
 
         /*
         ================================================

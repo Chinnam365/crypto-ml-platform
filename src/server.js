@@ -1393,7 +1393,11 @@ ${mlConfidence}
 `);
 confidence *=
   optimization.confidenceMultiplier;
-
+confidence =
+  Math.max(
+    confidence,
+    55
+  );
 const optimizedThreshold =
   adaptiveThresholdValue +
   optimization.thresholdAdjustment;

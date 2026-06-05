@@ -2122,7 +2122,10 @@ await pool.query(
   stop_loss,
   take_profit,
   position_size,
-  pnl
+  pnl,
+  volatility_regime,
+momentum_state,
+overall_trend
 )
   VALUES
   ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)

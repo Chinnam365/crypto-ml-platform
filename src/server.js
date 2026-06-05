@@ -846,7 +846,7 @@ async function runEngine() {
 // ==========================================
 
 await monitorPositions(pool);
-    
+    await updateReinforcementMemory();
     // ==========================================
 // AI SYMBOL SELECTION
 // ==========================================

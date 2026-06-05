@@ -218,7 +218,7 @@ else if (
   "NEUTRAL";
 
 if (
-  evolutionScore >= 45
+  evolutionScore >= 20
 ) {
 
   classification =
@@ -226,7 +226,7 @@ if (
 }
 
 else if (
-  evolutionScore <= 0
+  evolutionScore <= -20
 ) {
 
   classification =

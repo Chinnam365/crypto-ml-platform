@@ -85,19 +85,16 @@ NOT ENOUGH REINFORCEMENT DATA
 
         let reward = 0;
 
-        if (
-          trade.outcome === "WIN"
-        ) {
-
-          reward = 1;
-        }
-
-        else if (
-          trade.outcome === "LOSS"
-        ) {
-
-          reward = -1;
-        }
+if (
+  Number(trade.pnl || 0) > 0
+) {
+  reward = 1;
+}
+else if (
+  Number(trade.pnl || 0) < 0
+) {
+  reward = -1;
+}
 
         else {
 

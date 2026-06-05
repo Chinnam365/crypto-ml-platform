@@ -269,7 +269,8 @@ PHASE 2 TEST MODE
 Ignore historical memory records.
 */
 
-const effectiveOpenPositions = 0;
+const effectiveOpenPositions =
+  openTrades.length;
 
 riskScore +=
 

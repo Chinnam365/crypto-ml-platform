@@ -882,15 +882,50 @@ console.log(
   )
 );
 
+const evaluatedDiscoveries =
+  await evaluateDiscoveryCandidates(
+    discoveries
+  );
+
 let symbols = [];
 
-if (
-  rankings &&
-  rankings.length > 0
-) {
+const rankingSymbols =
+  rankings || [];
 
-  symbols = rankings;
-}
+const discoverySymbols =
+  evaluatedDiscoveries.map(
+    item => item.symbol
+  );
+
+symbols = [
+
+  ...new Set([
+
+    ...rankingSymbols,
+
+    ...discoverySymbols
+
+  ])
+
+].slice(0, 25);
+
+    console.log(`
+==================================
+DISCOVERY INTEGRATION
+==================================
+
+Rankings:
+${rankingSymbols.length}
+
+Discoveries:
+${discoverySymbols.length}
+
+Final Symbols:
+${symbols.length}
+
+==================================
+`);
+    
 console.log(
   "DIRECT ASSIGNMENT WORKING:",
   symbols

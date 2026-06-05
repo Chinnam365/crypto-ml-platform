@@ -284,6 +284,14 @@ ${reward}
 
 ==================================
 `);
+          await pool.query(
+  `
+  UPDATE positions
+  SET reinforcement_processed = TRUE
+  WHERE id = $1
+  `,
+  [trade.id]
+);
         }
 
       } catch (tradeErr) {

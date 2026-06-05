@@ -52,46 +52,46 @@ async function calculateSignalScores({
     let sellScore = 0;
 
     /*
-    ==================================================
-    RSI
-    ==================================================
-    */
+==================================================
+RSI
+==================================================
+*/
 
-    if (rsi < 25) {
+if (rsi < 30) {
 
-      buyScore +=
-        35 * weights.rsi;
-    }
+  buyScore +=
+    35 * weights.rsi;
+}
 
-    else if (rsi < 35) {
+else if (rsi < 40) {
 
-      buyScore +=
-        25 * weights.rsi;
-    }
+  buyScore +=
+    25 * weights.rsi;
+}
 
-    else if (rsi < 45) {
+else if (rsi < 50) {
 
-      buyScore +=
-        15 * weights.rsi;
-    }
+  buyScore +=
+    15 * weights.rsi;
+}
 
-    if (rsi > 75) {
+if (rsi > 70) {
 
-      sellScore +=
-        35 * weights.rsi;
-    }
+  sellScore +=
+    35 * weights.rsi;
+}
 
-    else if (rsi > 65) {
+else if (rsi > 60) {
 
-      sellScore +=
-        25 * weights.rsi;
-    }
+  sellScore +=
+    25 * weights.rsi;
+}
 
-    else if (rsi > 55) {
+else if (rsi > 50) {
 
-      sellScore +=
-        15 * weights.rsi;
-    }
+  sellScore +=
+    15 * weights.rsi;
+}
 
     /*
     ==================================================

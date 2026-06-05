@@ -214,17 +214,17 @@ async function getAdaptiveWeights(
 
       weights[key] =
 
-        Math.max(
-          0.3,
+  Math.max(
+    0.8,
 
-          Math.min(
-            Number(
-              weights[key].toFixed(2)
-            ),
+    Math.min(
+      Number(
+        weights[key].toFixed(2)
+      ),
 
-            3
-          )
-        );
+      3
+    )
+  );
     }
 
     /*
@@ -253,8 +253,21 @@ ${JSON.stringify(weights)}
 ==================================
 `);
 
-    return weights;
+console.log(`
+==================================
+WEIGHT FLOOR ACTIVE
+==================================
 
+Minimum Weight:
+0.8
+
+Weights:
+${JSON.stringify(weights)}
+
+==================================
+`);
+
+return weights;
   } catch (err) {
 
     console.log(`

@@ -216,7 +216,8 @@ const {
 } = require(
   "./ml/discoveryEvaluator"
 );
-
+const momentumState =
+  "NEUTRAL";
 
 const app = express();
 
@@ -1463,7 +1464,11 @@ const reinforcementLookupResult =
     `,
     [reinforcementContextKey]
   );
+const volatilityRegime =
 
+  volatility > 6
+    ? "HIGH"
+    : "NORMAL";
 console.log(`
 ==================================
 REINFORCEMENT LOOKUP

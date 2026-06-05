@@ -11,6 +11,12 @@ async function updateReinforcementMemory() {
 
   try {
 
+    console.log(`
+==================================
+REINFORCEMENT ENGINE STARTED
+==================================
+`);
+
     /*
     ==================================================
     LOAD CLOSED TRADES
@@ -30,8 +36,17 @@ LIMIT 500
       );
 
     const trades =
-      result.rows;
+  result.rows;
 
+console.log(`
+==================================
+CLOSED TRADES FOUND
+==================================
+
+${trades.length}
+
+==================================
+`);
     if (
       trades.length < 20
     ) {
@@ -54,7 +69,22 @@ NOT ENOUGH REINFORCEMENT DATA
     for (
       const trade of trades
     ) {
+console.log(`
+==================================
+PROCESSING CLOSED TRADE
+==================================
 
+ID:
+${trade.id}
+
+Symbol:
+${trade.symbol}
+
+PnL:
+${trade.pnl}
+
+==================================
+`);
       try {
 
         /*
@@ -136,10 +166,13 @@ else if (
           await pool.query(
 
   `
+ await pool.query(
+  `
   INSERT INTO reinforcement_memory
   (
     context_key,
     reward,
+    total_reward,
     avg_reward,
     sample_size,
     confidence,
@@ -149,6 +182,7 @@ else if (
   VALUES
   (
     $1,
+    $2,
     $2,
     $2,
     1,
@@ -165,6 +199,19 @@ else if (
     contextKey
   ]
 );
+          console.log(`
+==================================
+REINFORCEMENT INSERTED
+==================================
+
+Context:
+${contextKey}
+
+Reward:
+${reward}
+
+==================================
+`);
         }
 
         /*
@@ -223,6 +270,19 @@ else if (
               contextKey,
             ]
           );
+          console.log(`
+==================================
+REINFORCEMENT UPDATED
+==================================
+
+Context:
+${contextKey}
+
+Reward:
+${reward}
+
+==================================
+`);
         }
 
       } catch (tradeErr) {

@@ -163,10 +163,7 @@ else if (
           existingResult.rows.length === 0
         ) {
 
-          await pool.query(
-
-  `
- await pool.query(
+           await pool.query(
   `
   INSERT INTO reinforcement_memory
   (

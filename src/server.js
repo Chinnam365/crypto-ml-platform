@@ -1494,7 +1494,7 @@ if (
   signalScores.buyScore >
     signalScores.sellScore &&
 
-  signalScores.buyScore >= 35
+  signalScores.buyScore >= 30
 ) {
 
   side = "BUY";
@@ -1505,7 +1505,7 @@ else if (
   signalScores.sellScore >
     signalScores.buyScore &&
 
-  signalScores.sellScore >= 35
+  signalScores.sellScore >= 30
 ) {
 
   side = "SELL";

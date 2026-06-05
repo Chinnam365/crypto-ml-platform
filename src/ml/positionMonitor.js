@@ -13,14 +13,25 @@ const {
 async function monitorPositions(pool) {
 
   const result =
-    await pool.query(`
+  await pool.query(`
       SELECT *
       FROM positions
       WHERE status = 'OPEN'
     `);
 
-  const positions =
-    result.rows;
+const positions =
+  result.rows;
+
+console.log(`
+==================================
+MONITOR DEBUG
+==================================
+
+Open Positions Found:
+${positions.length}
+
+==================================
+`);
 console.log(`
 ==================================
 MONITOR DEBUG

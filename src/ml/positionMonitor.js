@@ -89,6 +89,17 @@ ${currentPrice}
 Stored Stop:
 ${position.stop_loss}
 
+Difference To Stop:
+${(
+(
+currentPrice -
+position.stop_loss
+)
+/
+position.stop_loss
+* 100
+).toFixed(2)}%
+
 ==================================
 `);
           shouldClose = true;
@@ -191,10 +202,38 @@ ${position.stop_loss}
 
       // LOSS LIMIT
 
-      if (
-        pnl < -25 &&
-        !shouldClose
-      ) {
+      const pnlPercent =
+
+position.side === "BUY"
+
+? (
+(
+currentPrice -
+position.entry_price
+)
+/
+position.entry_price
+) * 100
+
+: (
+(
+position.entry_price -
+currentPrice
+)
+/
+position.entry_price
+) * 100;
+
+if (
+  pnlPercent < -8 &&
+  !shouldClose
+)
+{
+  shouldClose = true;
+
+  closeReason =
+    "EARLY_EXIT_LOSS";
+} {
 
         shouldClose = true;
 
@@ -244,13 +283,30 @@ Stored Stop Loss: ${position.stop_loss}
 Stored Take Profit: ${position.take_profit}
 Close Reason: ${closeReason}
 PnL Percent:
-${(
+${
+position.side === "BUY"
+
+? (
 (
-(currentPrice - position.entry_price)
+currentPrice -
+position.entry_price
+)
 /
 position.entry_price
-) * 100
-).toFixed(2)}%
+* 100
+).toFixed(2)
+
+: (
+(
+position.entry_price -
+currentPrice
+)
+/
+position.entry_price
+* 100
+).toFixed(2)
+
+}%
 ==================================
 `);
         await pool.query(

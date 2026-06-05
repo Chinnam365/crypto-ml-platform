@@ -216,8 +216,7 @@ const {
 } = require(
   "./ml/discoveryEvaluator"
 );
-const momentumState =
-  "NEUTRAL";
+
 
 const app = express();
 
@@ -1116,7 +1115,17 @@ ${multiTf.overallTrend}
           closes.length - 1
         ]
       ) * 100;
+const volatilityRegime =
+  volatility > 5
+    ? "HIGH"
+    : volatility > 2
+    ? "MEDIUM"
+    : "LOW";
 
+const momentumState =
+  macd > 0
+    ? "BULLISH_ACCELERATION"
+    : "BEARISH_ACCELERATION";
     // ==========================================
     // SKIP LOW VOLATILITY
     // ==========================================
@@ -1149,17 +1158,9 @@ const confidenceData =
 
     regime,
 
-    volatilityRegime:
-      volatility > 3
-        ? "HIGH"
-        : volatility > 1
-        ? "MEDIUM"
-        : "LOW",
+    volatilityRegime,
 
-    momentumState:
-      macd > 0
-        ? "BULLISH_ACCELERATION"
-        : "BEARISH_ACCELERATION",
+    momentumState,
 
     momentumStrength:
       Math.min(
@@ -1349,19 +1350,11 @@ const adaptiveThresholdResult =
 
     regime,
 
-    volatilityRegime:
-      volatility > 5
-        ? "HIGH"
-        : volatility > 2
-        ? "MEDIUM"
-        : "LOW",
+    volatilityRegime,
 
     trend,
 
-    momentumState:
-      macd > 0
-        ? "BULLISH_ACCELERATION"
-        : "BEARISH_ACCELERATION",
+    momentumState,
 
     performanceScore: 0,
   });
@@ -1435,11 +1428,7 @@ ${optimizedThreshold}
 
 ==================================
 `);
-const volatilityRegime =
 
-  volatility > 6
-    ? "HIGH"
-    : "NORMAL";
 // ==========================================
 // REINFORCEMENT MEMORY
 // ==========================================

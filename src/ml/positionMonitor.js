@@ -21,7 +21,16 @@ async function monitorPositions(pool) {
 
   const positions =
     result.rows;
+console.log(`
+==================================
+MONITOR DEBUG
+==================================
 
+Open Positions Found:
+${positions.length}
+
+==================================
+`);
   for (const position of positions) {
 
     try {
@@ -187,6 +196,14 @@ Current Price: ${currentPrice}
 Stored Stop Loss: ${position.stop_loss}
 Stored Take Profit: ${position.take_profit}
 Close Reason: ${closeReason}
+PnL Percent:
+${(
+(
+(currentPrice - position.entry_price)
+/
+position.entry_price
+) * 100
+).toFixed(2)}%
 ==================================
 `);
         await pool.query(

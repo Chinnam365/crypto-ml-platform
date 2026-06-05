@@ -1,6 +1,7 @@
 const pool =
   require("../db/db");
 
+
 /*
 ==================================================
 AUTONOMOUS STRATEGY EVOLUTION

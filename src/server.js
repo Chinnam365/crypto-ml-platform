@@ -1186,7 +1186,73 @@ let confidence =
     confidenceData?.confidence || 50
   );
   
- 
+ // ==========================================
+// REINFORCEMENT MEMORY ADJUSTMENT
+// ==========================================
+
+const contextKey =
+
+`${randomSymbol}_` +
+
+`${trend}_` +
+
+`${regime}_` +
+
+`${volatilityRegime || "NORMAL"}_` +
+
+`${momentumState || "NEUTRAL"}_` +
+
+`${multiTf?.overallTrend || trend}`;
+
+const reinforcementResult =
+  await pool.query(
+    `
+    SELECT avg_reward
+    FROM reinforcement_memory
+    WHERE context_key = $1
+    LIMIT 1
+    `,
+    [contextKey]
+  );
+
+if (
+  reinforcementResult.rows.length
+)
+{
+  const reinforcementBoost =
+
+    Number(
+      reinforcementResult.rows[0]
+      .avg_reward || 0
+    ) * 10;
+
+  confidence +=
+    reinforcementBoost;
+
+  console.log(`
+==================================
+REINFORCEMENT ADJUSTMENT
+==================================
+
+Context:
+${contextKey}
+
+Boost:
+${reinforcementBoost.toFixed(2)}
+
+Confidence:
+${confidence.toFixed(2)}
+
+==================================
+`);
+}
+  confidence = Math.max(
+  20,
+  Math.min(
+    confidence,
+    95
+  )
+);
 // ==========================================
 // ML PREDICTION
 // ==========================================
@@ -2128,32 +2194,26 @@ momentum_state,
 overall_trend
 )
   VALUES
-  ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+  ($1,$2,$3,$4,$5,
+  $6,$7,$8,$9,$10,
+  $11,$12,$13,$14,$15)
   `,
  [
   randomSymbol,
-
   side,
-
   confidence,
-
   volatility,
-
   macd,
-
   trend,
-
   regime,
-
   entryPrice,
-
   stopLoss,
-
   takeProfit,
-
   adjustedPositionSize,
-
   0,
+  volatilityRegime,
+  momentumState,
+  multiTf?.overallTrend || trend
 ]
 );
     await pool.query(

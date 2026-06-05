@@ -1459,6 +1459,30 @@ const signalScores =
 
     multiTf,
   });
+
+  console.log(`
+==================================
+SIGNAL THRESHOLD DEBUG
+==================================
+
+Buy Score:
+${signalScores.buyScore}
+
+Sell Score:
+${signalScores.sellScore}
+
+Required:
+35
+
+Buy Pass:
+${signalScores.buyScore >= 35}
+
+Sell Pass:
+${signalScores.sellScore >= 35}
+
+==================================
+`);
+  
 let side = "HOLD";
 
 if (

@@ -192,29 +192,7 @@ ${position.stop_loss}
 
       // LOSS LIMIT
 
-      const pnlPercent =
-
-position.side === "BUY"
-
-? (
-(
-currentPrice -
-position.entry_price
-)
-/
-position.entry_price
-) * 100
-
-: (
-(
-position.entry_price -
-currentPrice
-)
-/
-position.entry_price
-) * 100;
-
-const pnlPercent =
+     const pnlPercent =
 
   position.side === "BUY"
 

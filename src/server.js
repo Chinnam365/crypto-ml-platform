@@ -1497,7 +1497,79 @@ ${adaptiveThresholdValue}
 ==================================
 `);
 
-    
+// ==========================================
+// REINFORCEMENT MEMORY
+// ==========================================
+
+const contextKey =
+
+`${randomSymbol}_` +
+
+`${trend}_` +
+
+`${regime}_` +
+
+`${volatilityRegime || "NORMAL"}_` +
+
+`${momentumState || "NEUTRAL"}_` +
+
+`${multiTf?.overallTrend || trend}`;
+
+const reinforcementResult =
+  await pool.query(
+    `
+    SELECT avg_reward
+    FROM reinforcement_memory
+    WHERE context_key = $1
+    LIMIT 1
+    `,
+    [contextKey]
+  );
+
+if (
+  reinforcementResult.rows.length > 0
+) {
+
+  const reinforcementReward =
+
+    Number(
+      reinforcementResult.rows[0]
+      .avg_reward || 0
+    );
+
+  confidence +=
+    reinforcementReward * 10;
+
+  console.log(`
+==================================
+REINFORCEMENT ADJUSTMENT
+==================================
+
+Context:
+${contextKey}
+
+Avg Reward:
+${reinforcementReward}
+
+Confidence:
+${confidence}
+
+==================================
+`);
+}
+
+// ==========================================
+// CLAMP CONFIDENCE
+// ==========================================
+
+confidence = Math.max(
+  20,
+  Math.min(
+    confidence,
+    95
+  )
+);
+
 console.log(`
 ==================================
 ML PREDICTION

@@ -32,16 +32,6 @@ ${positions.length}
 
 ==================================
 `);
-console.log(`
-==================================
-MONITOR DEBUG
-==================================
-
-Open Positions Found:
-${positions.length}
-
-==================================
-`);
   for (const position of positions) {
 
     try {
@@ -224,23 +214,38 @@ currentPrice
 position.entry_price
 ) * 100;
 
+const pnlPercent =
+
+  position.side === "BUY"
+
+  ? (
+      (
+        currentPrice -
+        position.entry_price
+      )
+      /
+      position.entry_price
+    ) * 100
+
+  : (
+      (
+        position.entry_price -
+        currentPrice
+      )
+      /
+      position.entry_price
+    ) * 100;
+
 if (
   pnlPercent < -8 &&
   !shouldClose
-)
-{
+) {
+
   shouldClose = true;
 
   closeReason =
     "EARLY_EXIT_LOSS";
-} {
-
-        shouldClose = true;
-
-        closeReason =
-          "EARLY_EXIT_LOSS";
-      }
-
+}
       // TRADE TOO OLD
 
       if (

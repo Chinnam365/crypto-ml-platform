@@ -72,7 +72,25 @@ ${positions.length}
           currentPrice <=
           position.stop_loss
         ) {
+console.log(`
+==================================
+STOP LOSS TRIGGER
+==================================
 
+Symbol:
+${position.symbol}
+
+Entry:
+${position.entry_price}
+
+Current:
+${currentPrice}
+
+Stored Stop:
+${position.stop_loss}
+
+==================================
+`);
           shouldClose = true;
 
           closeReason =
@@ -108,7 +126,25 @@ ${positions.length}
           currentPrice >=
           position.stop_loss
         ) {
+console.log(`
+==================================
+STOP LOSS TRIGGER
+==================================
 
+Symbol:
+${position.symbol}
+
+Entry:
+${position.entry_price}
+
+Current:
+${currentPrice}
+
+Stored Stop:
+${position.stop_loss}
+
+==================================
+`);
           shouldClose = true;
 
           closeReason =

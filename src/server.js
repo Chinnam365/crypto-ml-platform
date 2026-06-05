@@ -1415,59 +1415,7 @@ const reinforcementContextKey =
 
   `${multiTf?.overallTrend || trend}`;
 
-console.log(`
-==================================
-REINFORCEMENT LOOKUP
-==================================
 
-Context:
-${reinforcementContextKey}
-
-==================================
-`);
-
-const reinforcementResult =
-  await pool.query(
-    `
-    SELECT avg_reward
-    FROM reinforcement_memory
-    WHERE context_key = $1
-    LIMIT 1
-    `,
-    [reinforcementContextKey]
-  );
-
-if (
-  reinforcementResult.rows.length > 0
-) {
-
-  const reinforcementReward =
-
-    Number(
-      reinforcementResult.rows[0]
-        .avg_reward || 0
-    );
-
-  confidence +=
-    reinforcementReward * 10;
-
-  console.log(`
-==================================
-REINFORCEMENT ADJUSTMENT
-==================================
-
-Avg Reward:
-${reinforcementReward}
-
-Adjusted Confidence:
-${confidence}
-
-==================================
-`);
-}
-const optimizedThreshold =
-  adaptiveThresholdValue +
-  optimization.thresholdAdjustment;
 
 console.log(`
 ==================================
@@ -1503,7 +1451,7 @@ ${optimizedThreshold}
 // REINFORCEMENT MEMORY
 // ==========================================
 
-const contextKey =
+const reinforcementContextKey =
 
   `${randomSymbol}_` +
 
@@ -1517,7 +1465,7 @@ const contextKey =
 
   `${multiTf?.overallTrend || trend}`;
 
-const reinforcementResult =
+const reinforcementLookupResult =
   await pool.query(
     `
     SELECT avg_reward
@@ -1525,7 +1473,7 @@ const reinforcementResult =
     WHERE context_key = $1
     LIMIT 1
     `,
-    [contextKey]
+    [reinforcementContextKey]
   );
 
 console.log(`
@@ -1534,22 +1482,21 @@ REINFORCEMENT LOOKUP
 ==================================
 
 Context:
-${contextKey}
+${reinforcementContextKey}
 
 Matches:
-${reinforcementResult.rows.length}
+${reinforcementLookupResult.rows.length}
 
 ==================================
 `);
 
 if (
-  reinforcementResult.rows.length > 0
+  reinforcementLookupResult.rows.length > 0
 ) {
 
   const reinforcementReward =
-
     Number(
-      reinforcementResult.rows[0]
+      reinforcementLookupResult.rows[0]
         .avg_reward || 0
     );
 
@@ -1562,7 +1509,7 @@ REINFORCEMENT ADJUSTMENT
 ==================================
 
 Context:
-${contextKey}
+${reinforcementContextKey}
 
 Avg Reward:
 ${reinforcementReward}

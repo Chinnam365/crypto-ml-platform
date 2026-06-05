@@ -2051,7 +2051,29 @@ PHASE 2 LEARNING MODE
 ALLOW DUPLICATE EXPLORATION POSITIONS
 ==================================================
 */
+console.log(`
+==================================
+DUPLICATE CHECK DEBUG
+==================================
 
+Symbol:
+${randomSymbol}
+
+Side:
+${side}
+
+Matches:
+${existingPosition.rows.length}
+
+Rows:
+${JSON.stringify(
+  existingPosition.rows,
+  null,
+  2
+)}
+
+==================================
+`);
 if (
   existingPosition.rows.length > 0
 ) {

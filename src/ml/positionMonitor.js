@@ -144,6 +144,17 @@ ${currentPrice}
 Stored Stop:
 ${position.stop_loss}
 
+Difference To Stop:
+${(
+(
+currentPrice -
+position.stop_loss
+)
+/
+position.stop_loss
+* 100
+).toFixed(2)}%
+
 ==================================
 `);
           shouldClose = true;
@@ -266,30 +277,7 @@ Stored Stop Loss: ${position.stop_loss}
 Stored Take Profit: ${position.take_profit}
 Close Reason: ${closeReason}
 PnL Percent:
-${
-position.side === "BUY"
-
-? (
-(
-currentPrice -
-position.entry_price
-)
-/
-position.entry_price
-* 100
-).toFixed(2)
-
-: (
-(
-position.entry_price -
-currentPrice
-)
-/
-position.entry_price
-* 100
-).toFixed(2)
-
-}%
+${pnlPercent.toFixed(2)}%
 ==================================
 `);
         await pool.query(

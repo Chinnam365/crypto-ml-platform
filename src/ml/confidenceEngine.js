@@ -523,7 +523,34 @@ CONSENSUS ENGINE ERROR
     console.log(`
 ==================================
 `);
+const pool =
+  require("../db/db");
 
+async function getReinforcementBoost(
+  contextKey
+) {
+
+  const result =
+    await pool.query(
+      `
+      SELECT avg_reward
+      FROM reinforcement_memory
+      WHERE context_key = $1
+      LIMIT 1
+      `,
+      [contextKey]
+    );
+
+  if (
+    result.rows.length === 0
+  ) {
+    return 0;
+  }
+
+  return Number(
+    result.rows[0].avg_reward || 0
+  );
+}
     return {
 
       confidence: 50,

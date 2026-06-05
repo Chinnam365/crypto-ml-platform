@@ -1397,6 +1397,13 @@ ${mlConfidence}
 
 confidence *=
   optimization.confidenceMultiplier;
+// ==========================================
+// OPTIMIZED THRESHOLD
+// ==========================================
+
+const optimizedThreshold =
+  adaptiveThresholdValue +
+  optimization.thresholdAdjustment;
 
 console.log(`
 ==================================

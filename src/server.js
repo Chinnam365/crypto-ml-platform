@@ -1435,7 +1435,11 @@ ${optimizedThreshold}
 
 ==================================
 `);
+const volatilityRegime =
 
+  volatility > 6
+    ? "HIGH"
+    : "NORMAL";
 // ==========================================
 // REINFORCEMENT MEMORY
 // ==========================================
@@ -1464,11 +1468,7 @@ const reinforcementLookupResult =
     `,
     [reinforcementContextKey]
   );
-const volatilityRegime =
 
-  volatility > 6
-    ? "HIGH"
-    : "NORMAL";
 console.log(`
 ==================================
 REINFORCEMENT LOOKUP

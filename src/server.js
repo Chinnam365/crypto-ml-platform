@@ -1570,9 +1570,13 @@ const signalScores =
     regime,
 
     multiTf,
+
+    volatilityRegime,
+
+    momentumState,
   });
 
-  console.log(`
+console.log(`
 ==================================
 SIGNAL THRESHOLD DEBUG
 ==================================

@@ -89,7 +89,7 @@ async function generateTradeDecision({
 
       adjustedConfidence >=
         (
-          45 +
+          40 +
           optimizer.thresholdAdjustment
         ),
 
@@ -118,7 +118,7 @@ async function generateTradeDecision({
 
       adjustedConfidence >=
         (
-          45 +
+          40 +
           optimizer.thresholdAdjustment
         ),
 
@@ -248,17 +248,16 @@ async function generateTradeDecision({
     ==================================================
     */
 
-    if (
+if (
+  volatilityRegime === "HIGH"
 
-      volatilityRegime === "HIGH"
+  &&
 
-      &&
+  adjustedConfidence < 55
+) {
 
-      adjustedConfidence < 65
-    ) {
-
-      action = "HOLD";
-    }
+  action = "HOLD";
+}
 
     /*
     ==================================================

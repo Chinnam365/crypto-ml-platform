@@ -2356,11 +2356,20 @@ overall_trend
     }
   } catch (err) {
 
-    console.error(
-      "ENGINE ERROR:",
-      err.message
-    );
-  }
+  console.log(`
+==================================
+FULL ENGINE ERROR
+==================================
+`);
+
+  console.log(err);
+
+  console.log(err.stack);
+
+  console.log(`
+==================================
+`);
+}
 }
 
 /*

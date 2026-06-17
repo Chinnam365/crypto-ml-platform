@@ -158,7 +158,7 @@ symbolStats[
           trade.symbol
         ].wins++;
       }
-    }
+    
     console.log(
   trade.symbol,
   trade.pnl,
@@ -166,7 +166,7 @@ symbolStats[
     ? "WIN"
     : "LOSS"
 );
-
+}
     /*
     ==================================================
     CALCULATE WEIGHTS

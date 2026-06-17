@@ -151,7 +151,7 @@ symbolStats[
   )
 );
       if (
-        trade.outcome === "WIN"
+        Number(trade.pnl || 0) > 0
       ) {
 
         symbolStats[

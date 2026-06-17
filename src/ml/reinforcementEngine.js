@@ -30,7 +30,10 @@ REINFORCEMENT ENGINE STARTED
         SELECT *
 FROM positions
 WHERE status = 'CLOSED'
-AND reinforcement_processed = FALSE
+AND COALESCE(
+  reinforcement_processed,
+  FALSE
+) = FALSE
 ORDER BY id DESC
 LIMIT 500
         `

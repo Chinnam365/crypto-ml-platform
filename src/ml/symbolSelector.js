@@ -82,9 +82,9 @@ const suppressedSymbols =
     const activeSymbols = [];
 
     for (
-      const item of rankings
-    ){
-    /*
+  const item of rankings
+){
+/*
 ==================================
 SYMBOL SUPPRESSION
 ==================================
@@ -98,8 +98,35 @@ if (
 
   continue;
 }
-   
-      try {
+
+/*
+==================================
+WEIGHT-BASED DISABLE
+==================================
+*/
+
+if (
+  item.weight <= 0.05
+) {
+
+  console.log(`
+==================================
+SYMBOL DISABLED
+==================================
+
+Symbol:
+${item.symbol}
+
+Weight:
+${item.weight}
+
+==================================
+`);
+
+  continue;
+}
+
+try {
 
         /*
         ================================================

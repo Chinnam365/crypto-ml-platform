@@ -31,7 +31,16 @@ LIMIT 2000
 
     const trades =
       result.rows;
+console.log(`
+==================================
+SYMBOL WEIGHT DEBUG
+==================================
 
+Trades Loaded:
+${trades.length}
+
+==================================
+`);
     /*
     ==================================================
     DEFAULT SYMBOLS
@@ -359,7 +368,16 @@ ADAPTIVE SYMBOL WEIGHTS
     console.log(`
 ==================================
 `);
+console.log(`
+==================================
+SYMBOL WEIGHT RESULT
+==================================
 
+Rankings:
+${rankings.length}
+
+==================================
+`);
     return {
 
       weights,

@@ -52,17 +52,17 @@ ${trades.length}
 ==================================
 `);
     if (
-      trades.length < 20
-    ) {
+  trades.length === 0
+) {
 
-      console.log(`
+  console.log(`
 ==================================
-NOT ENOUGH REINFORCEMENT DATA
+NO CLOSED TRADES FOUND
 ==================================
 `);
 
-      return;
-    }
+  return;
+}
 
     /*
     ==================================================
@@ -216,6 +216,14 @@ ${reward}
 
 ==================================
 `);
+          await pool.query(
+`
+UPDATE positions
+SET reinforcement_processed = TRUE
+WHERE id = $1
+`,
+[trade.id]
+);
         }
 
         /*

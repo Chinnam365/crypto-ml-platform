@@ -1484,7 +1484,7 @@ if (
     );
 
   confidence +=
-    reinforcementReward * 15;
+    reinforcementReward * 25;
 
   console.log(`
 ==================================
@@ -1502,6 +1502,31 @@ ${confidence}
 
 ==================================
 `);
+
+  // ==========================================
+  // REINFORCEMENT TRADE FILTER
+  // ==========================================
+
+  if (
+    reinforcementReward < -0.40
+  ) {
+
+    console.log(`
+==================================
+RL BLOCKED TRADE
+==================================
+
+Context:
+${reinforcementContextKey}
+
+Avg Reward:
+${reinforcementReward}
+
+==================================
+`);
+
+    confidence = 0;
+  }
 }
 
 // ==========================================

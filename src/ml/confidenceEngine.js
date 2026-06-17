@@ -47,7 +47,7 @@ async function calculateConfidence({
     ==================================================
     */
 
-    let confidence = 50;
+    let confidence = 30;
 
     /*
     ==================================================
@@ -302,7 +302,10 @@ async function calculateConfidence({
       ) {
 
         strategyBoost =
-          strategy.evolutionScore * 0.08;
+  Math.min(
+    strategy.evolutionScore * 0.02,
+    3
+  );
       }
 
       else if (
@@ -312,10 +315,10 @@ async function calculateConfidence({
       ) {
 
         strategyBoost =
-          -(
-            strategy.evolutionScore
-            * 0.05
-          );
+  Math.max(
+    -(strategy.evolutionScore * 0.03),
+    -5
+  );
       }
     }
 
@@ -424,15 +427,22 @@ async function calculateConfidence({
     ==================================================
     */
 
-    consensusConfidence =
+   consensusConfidence =
 
-      Math.max(
-        1,
-        Math.min(
-          consensusConfidence,
-          99
-        )
-      );
+  Math.max(
+    1,
+    Math.min(
+      consensusConfidence,
+      99
+    )
+  );
+
+if (
+  consensusConfidence > 85
+) {
+
+  consensusConfidence = 85;
+}
 
     consensusStrength =
 
@@ -523,34 +533,8 @@ CONSENSUS ENGINE ERROR
     console.log(`
 ==================================
 `);
-const pool =
-  require("../db/db");
 
-async function getReinforcementBoost(
-  contextKey
-) {
-
-  const result =
-    await pool.query(
-      `
-      SELECT avg_reward
-      FROM reinforcement_memory
-      WHERE context_key = $1
-      LIMIT 1
-      `,
-      [contextKey]
-    );
-
-  if (
-    result.rows.length === 0
-  ) {
-    return 0;
-  }
-
-  return Number(
-    result.rows[0].avg_reward || 0
-  );
-}
+   
     return {
 
       confidence: 50,

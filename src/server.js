@@ -1511,7 +1511,7 @@ ${confidence}
 confidence =
   Math.max(
     confidence,
-    55
+    35
   );
 
 // ==========================================

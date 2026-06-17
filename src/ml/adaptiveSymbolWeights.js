@@ -242,6 +242,12 @@ const sampleQuality =
     stats.total / 50,
     1
   );
+      console.log(
+  symbol,
+  stats.total,
+  stats.wins,
+  stats.pnl
+);
       /*
       ================================================
       WEIGHT FORMULA
@@ -291,7 +297,12 @@ weight =
       2.5
     )
   );
-    }
+
+weights[symbol] =
+  Number(
+    weight.toFixed(2)
+  );
+}
 
     /*
     ==================================================

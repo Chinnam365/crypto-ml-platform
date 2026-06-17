@@ -908,7 +908,11 @@ symbols = [
   ])
 
 ].slice(0, 25);
-
+symbols = symbols.filter(
+  symbol =>
+    symbol !== "BTCUSDT" &&
+    symbol !== "SOLUSDT"
+);
     console.log(`
 ==================================
 DISCOVERY INTEGRATION
@@ -948,10 +952,35 @@ if (
   ];
 }
 
-console.log(
-  "Allowed symbols:",
-  symbols
-);
+console.log(`
+==================================
+FINAL SYMBOL LIST
+==================================
+
+${JSON.stringify(symbols, null, 2)}
+
+==================================
+`);
+
+console.log(`
+==================================
+RANKING SYMBOLS
+==================================
+
+${JSON.stringify(rankingSymbols, null, 2)}
+
+==================================
+`);
+
+console.log(`
+==================================
+DISCOVERY SYMBOLS
+==================================
+
+${JSON.stringify(discoverySymbols, null, 2)}
+
+==================================
+`);
 
 for (
   const randomSymbol of symbols

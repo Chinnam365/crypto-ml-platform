@@ -159,6 +159,13 @@ symbolStats[
         ].wins++;
       }
     }
+    console.log(
+  trade.symbol,
+  trade.pnl,
+  Number(trade.pnl || 0) > 0
+    ? "WIN"
+    : "LOSS"
+);
 
     /*
     ==================================================

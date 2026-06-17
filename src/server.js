@@ -1258,7 +1258,30 @@ const symbolWeight =
   Number(
     symbolEntry?.weight || 1
   );
+// ==========================================
+// SYMBOL SUPPRESSION
+// ==========================================
 
+if (
+  symbolWeight <= 0.10
+) {
+
+  console.log(`
+==================================
+SYMBOL SUPPRESSED
+==================================
+
+Symbol:
+${randomSymbol}
+
+Weight:
+${symbolWeight}
+
+==================================
+`);
+
+  continue;
+}
 confidence =
   Number(
     confidence || 0
@@ -1482,7 +1505,26 @@ if (
       reinforcementLookupResult.rows[0]
         .avg_reward || 0
     );
+if (
+  reinforcementReward < -0.40
+) {
 
+  console.log(`
+==================================
+RL SUPPRESSED
+==================================
+
+Context:
+${reinforcementContextKey}
+
+Reward:
+${reinforcementReward}
+
+==================================
+`);
+
+  continue;
+}
   confidence +=
     reinforcementReward * 25;
 

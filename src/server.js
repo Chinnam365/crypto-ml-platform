@@ -1344,7 +1344,8 @@ if (
    // ==========================================
 // ADAPTIVE THRESHOLD
 // ==========================================
-
+console.log("DEBUG VOL REG:", volatilityRegime);
+console.log("DEBUG MOMENTUM:", momentumState);
 const adaptiveThresholdResult =
   await getAdaptiveThreshold({
 

@@ -151,13 +151,21 @@ symbolStats[
   )
 );
       if (
-        Number(trade.pnl || 0) > 0
-      ) {
+  Number(trade.pnl || 0) > 0
+) {
 
-        symbolStats[
-          trade.symbol
-        ].wins++;
-      }
+  symbolStats[
+    trade.symbol
+  ].wins++;
+}
+else if (
+  Number(trade.pnl || 0) === 0
+) {
+
+  symbolStats[
+    trade.symbol
+  ].wins += 0.5;
+}
     
     console.log(
   trade.symbol,

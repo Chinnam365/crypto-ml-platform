@@ -1484,7 +1484,7 @@ if (
     );
 
   confidence +=
-    reinforcementReward * 10;
+    reinforcementReward * 15;
 
   console.log(`
 ==================================

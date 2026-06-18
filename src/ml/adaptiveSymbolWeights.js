@@ -150,13 +150,18 @@ symbolStats[
     trade.pnl || 0
   )
 );
-      if (
-  Number(trade.pnl || 0) > 0
-) {
+     const pnl =
+  Number(trade.pnl || 0);
+
+if (pnl > 0) {
 
   symbolStats[
     trade.symbol
   ].wins++;
+}
+else if (pnl === 0) {
+
+  continue;
 }
 else if (
   Number(trade.pnl || 0) === 0

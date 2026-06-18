@@ -110,11 +110,14 @@ position.stop_loss
         }
 
         pnl =
-          (
-            currentPrice -
-            position.entry_price
-          ) *
-          position.position_size;
+  (
+    (
+      currentPrice -
+      position.entry_price
+    )
+    /
+    position.entry_price
+  ) * 100;
       }
 
       // ==========================================
@@ -175,13 +178,19 @@ position.stop_loss
         }
 
         pnl =
-          (
-            position.entry_price -
-            currentPrice
-          ) *
-          position.position_size;
+  (
+    (
+      position.entry_price -
+      currentPrice
+    )
+    /
+    position.entry_price
+  ) * 100;
       }
-
+pnl =
+  Number(
+    pnl.toFixed(2)
+  );
       // ==========================================
       // TRADE DURATION
       // ==========================================

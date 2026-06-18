@@ -220,7 +220,7 @@ async function generateTradeDecision({
 
       &&
 
-      adjustedConfidence >= 45
+      adjustedConfidence >= 60
 
       &&
 

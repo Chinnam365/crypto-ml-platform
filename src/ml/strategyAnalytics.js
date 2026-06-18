@@ -186,28 +186,28 @@ else if (
       ================================================
       */
 
-      let evolutionScore =
+     let evolutionScore =
 
-        (
-          winRate * 0.5
-        )
+(
+  winRate * 0.7
+)
 
-        +
++
 
-        (
-          avgPnL * 15
-        )
+(
+  avgPnL * 5
+)
 
-        +
++
 
-        (
-          avgConfidence * 0.2
-        );
+(
+  avgConfidence * 0.1
+);
 
-      evolutionScore =
-        Number(
-          evolutionScore.toFixed(2)
-        );
+evolutionScore =
+  Number(
+    evolutionScore.toFixed(2)
+  );
 
       /*
       ================================================
@@ -219,7 +219,8 @@ else if (
   "NEUTRAL";
 
 if (
-  evolutionScore >= 20
+  winRate >= 55 &&
+  avgPnL > 0
 ) {
 
   classification =
@@ -227,7 +228,8 @@ if (
 }
 
 else if (
-  evolutionScore <= -20
+  winRate <= 40 ||
+  avgPnL < 0
 ) {
 
   classification =

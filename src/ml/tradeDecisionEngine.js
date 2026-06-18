@@ -89,7 +89,7 @@ async function generateTradeDecision({
 
       adjustedConfidence >=
         (
-          40 +
+          65 +
           optimizer.thresholdAdjustment
         ),
 

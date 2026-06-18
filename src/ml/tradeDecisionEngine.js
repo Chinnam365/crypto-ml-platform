@@ -171,7 +171,25 @@ const finalBearishScore =
     DECISION LOGIC
     ==================================================
     */
+console.log(`
+==================================
+DECISION DEBUG
+==================================
 
+Bullish Conditions:
+${JSON.stringify(bullishConditions)}
+
+Bearish Conditions:
+${JSON.stringify(bearishConditions)}
+
+Bullish Score:
+${bullishScore}
+
+Bearish Score:
+${bearishScore}
+
+==================================
+`);
     if (
   finalBullishScore >= 5 &&
   finalBullishScore > finalBearishScore
@@ -268,10 +286,28 @@ if (
     ==================================================
     */
 
-    console.log(`
+console.log(`
 ==================================
 TRADE DECISION ENGINE
 ==================================
+
+Trend:
+${trend}
+
+RSI:
+${rsi}
+
+Signal Quality:
+${signalQuality}
+
+Overall Trend:
+${overallTrend}
+
+Momentum:
+${momentumState}
+
+Alignment:
+${alignmentScore}
 
 Action:
 ${action}

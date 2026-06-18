@@ -41,15 +41,25 @@ async function getDrawdownStats(pool) {
 
   let tradingEnabled = true;
 
-  if (maxDrawdown >= 5) {
+ if (maxDrawdown >= 5) {
 
-    riskMultiplier = 0.75;
-  }
+  riskMultiplier = 0.75;
+}
 
-  if (maxDrawdown >= 10) {
+if (maxDrawdown >= 10) {
 
-    riskMultiplier = 0.5;
-  }
+  riskMultiplier = 0.50;
+}
+
+if (maxDrawdown >= 20) {
+
+  riskMultiplier = 0.25;
+}
+
+if (maxDrawdown >= 30) {
+
+  riskMultiplier = 0.10;
+}
 
  if (maxDrawdown >= MAX_DRAWDOWN) {
 

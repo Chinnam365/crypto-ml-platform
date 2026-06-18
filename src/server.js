@@ -1992,21 +1992,52 @@ if (!drawdown.tradingEnabled) {
     // LIVE PRICE
     // ==========================================
 
-    const livePrice =
-      await getPrice(
-        randomSymbol
-      );
+   const livePrice =
+  await getPrice(
+    randomSymbol
+  );
 
-    if (!livePrice) {
+if (!livePrice) {
+  continue;
+}
 
-      console.log(
-        `Price unavailable for ${randomSymbol}`
-      );
+// ==========================================
+// OPEN POSITION PROTECTION
+// ==========================================
 
-       continue;
-    }
+const existingPosition =
+  await pool.query(
+    `
+    SELECT id
+    FROM positions
+    WHERE symbol = $1
+    AND status = 'OPEN'
+    LIMIT 1
+    `,
+    [randomSymbol]
+  );
+
+if (
+  existingPosition.rows.length > 0
+) {
 
   console.log(`
+==================================
+OPEN POSITION EXISTS
+==================================
+
+Symbol:
+${randomSymbol}
+
+Skipping New Trade
+
+==================================
+`);
+
+  continue;
+}
+
+console.log(`
 ==================================
 REACHED EXECUTION SECTION
 ==================================

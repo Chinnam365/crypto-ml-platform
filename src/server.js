@@ -2214,20 +2214,16 @@ await saveDecisionMemory({
 // ==========================================
 
 const existingPosition =
-  await pool.query(
-    `
-    SELECT id
-    FROM positions
-    WHERE symbol = $1
-    AND side = $2
-    AND status = 'OPEN'
-    LIMIT 1
-    `,
-    [
-      randomSymbol,
-      side,
-    ]
-  );
+await pool.query(
+`
+SELECT id
+FROM positions
+WHERE symbol = $1
+AND status = 'OPEN'
+LIMIT 1
+`,
+[randomSymbol]
+);
 // ==========================================
 // TRADE VALIDATION
 // ==========================================

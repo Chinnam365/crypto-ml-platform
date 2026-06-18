@@ -2001,25 +2001,41 @@ if (!livePrice) {
   continue;
 }
 
-// ==========================================
-// OPEN POSITION PROTECTION
-// ==========================================
-
 const openPositionCheck =
-  await pool.query(
-    `
-    SELECT id
-    FROM positions
-    WHERE symbol = $1
-    AND status = 'OPEN'
-    LIMIT 1
-    `,
-    [randomSymbol]
-  );
+await pool.query(
+`
+SELECT id, side
+FROM positions
+WHERE symbol = $1
+AND status = 'OPEN'
+LIMIT 1
+`,
+[randomSymbol]
+);
 
 if (
   openPositionCheck.rows.length > 0
 ) {
+
+  console.log(`
+==================================
+POSITION ALREADY OPEN
+==================================
+
+Symbol:
+${randomSymbol}
+
+Existing Side:
+${openPositionCheck.rows[0].side}
+
+Requested Side:
+${side}
+
+==================================
+`);
+
+  continue;
+}{
 
   console.log(`
 ==================================
@@ -2209,21 +2225,7 @@ await saveDecisionMemory({
   pnl: 0,
 });
 
-// ==========================================
-// DUPLICATE POSITION CHECK
-// ==========================================
 
-const existingPosition =
-await pool.query(
-`
-SELECT id
-FROM positions
-WHERE symbol = $1
-AND status = 'OPEN'
-LIMIT 1
-`,
-[randomSymbol]
-);
 // ==========================================
 // TRADE VALIDATION
 // ==========================================
@@ -2287,49 +2289,7 @@ PHASE 2 LEARNING MODE
 ALLOW DUPLICATE EXPLORATION POSITIONS
 ==================================================
 */
-console.log(`
-==================================
-DUPLICATE CHECK DEBUG
-==================================
 
-Symbol:
-${randomSymbol}
-
-Side:
-${side}
-
-Matches:
-${existingPosition.rows.length}
-
-Rows:
-${JSON.stringify(
-  existingPosition.rows,
-  null,
-  2
-)}
-
-==================================
-`);
-if (
-  existingPosition.rows.length > 0
-) {
-
-  console.log(`
-==================================
-DUPLICATE POSITION BLOCKED
-==================================
-
-Symbol:
-${randomSymbol}
-
-Side:
-${side}
-
-==================================
-`);
-
-  continue;
-}
    console.log(`
 ==================================
 NEW POSITION

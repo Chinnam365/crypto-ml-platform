@@ -2035,22 +2035,6 @@ ${side}
 `);
 
   continue;
-}{
-
-  console.log(`
-==================================
-OPEN POSITION EXISTS
-==================================
-
-Symbol:
-${randomSymbol}
-
-Skipping New Trade
-
-==================================
-`);
-
-  continue;
 }
 
 console.log(`

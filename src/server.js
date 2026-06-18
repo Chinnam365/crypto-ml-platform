@@ -1835,7 +1835,7 @@ ${decisionReasons.join("\n")}
 // ==========================================
 
 const executionThreshold =
-  adaptiveThresholdValue - 10;
+  adaptiveThresholdValue;
 
 if (
   confidence < executionThreshold

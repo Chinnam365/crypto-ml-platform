@@ -2005,7 +2005,7 @@ if (!livePrice) {
 // OPEN POSITION PROTECTION
 // ==========================================
 
-const existingPosition =
+const openPositionCheck =
   await pool.query(
     `
     SELECT id
@@ -2018,7 +2018,7 @@ const existingPosition =
   );
 
 if (
-  existingPosition.rows.length > 0
+  openPositionCheck.rows.length > 0
 ) {
 
   console.log(`

@@ -139,54 +139,32 @@ async function generateTradeDecision({
     ==================================================
     */
 
-    let momentumBonus = 0;
+   let bullishMomentumBonus = 0;
+let bearishMomentumBonus = 0;
 
-    if (
+if (
+  momentumState ===
+  "BULLISH_ACCELERATION"
+) {
+  bullishMomentumBonus = 1;
+}
 
-      momentumState ===
-      "BULLISH_ACCELERATION"
+if (
+  momentumState ===
+  "BEARISH_ACCELERATION"
+) {
+  bearishMomentumBonus = 1;
+}
 
-      ||
+const finalBullishScore =
+  bullishScore +
+  bullishMomentumBonus +
+  alignmentBonus;
 
-      momentumState ===
-      "BEARISH_ACCELERATION"
-    ) {
-
-      momentumBonus = 1;
-    }
-
-    /*
-    ==================================================
-    ALIGNMENT BONUS
-    ==================================================
-    */
-
-    let alignmentBonus = 0;
-
-    if (
-      alignmentScore >= 70
-    ) {
-
-      alignmentBonus = 1;
-    }
-
-    /*
-    ==================================================
-    FINAL SCORES
-    ==================================================
-    */
-
-    const finalBullishScore =
-
-      bullishScore +
-      momentumBonus +
-      alignmentBonus;
-
-    const finalBearishScore =
-
-      bearishScore +
-      momentumBonus +
-      alignmentBonus;
+const finalBearishScore =
+  bearishScore +
+  bearishMomentumBonus +
+  alignmentBonus;
 
     /*
     ==================================================
@@ -227,7 +205,7 @@ else {
 
       &&
 
-      adjustedConfidence >= 60
+      adjustedConfidence >= 75
 
       &&
 

@@ -195,18 +195,25 @@ async function generateTradeDecision({
     */
 
     if (
-      finalBullishScore >= 5
-    ) {
+  finalBullishScore >= 5 &&
+  finalBullishScore > finalBearishScore
+) {
 
-      action = "BUY";
-    }
+  action = "BUY";
+}
 
-    else if (
-      finalBearishScore >= 5
-    ) {
+else if (
+  finalBearishScore >= 5 &&
+  finalBearishScore > finalBullishScore
+) {
 
-      action = "SELL";
-    }
+  action = "SELL";
+}
+
+else {
+
+  action = "HOLD";
+}
 
     /*
     ==================================================

@@ -26,10 +26,28 @@ console.log(
 );
     try {
 
-      const features =
-        await generateFeatures(
-          candidate.symbol
-        );
+      console.log(
+  "BEFORE FEATURES:",
+  candidate.symbol
+);
+
+const features =
+  await generateFeatures(
+    candidate.symbol
+  );
+
+console.log(
+  "AFTER FEATURES:",
+  candidate.symbol
+);
+
+console.log(
+  JSON.stringify(
+    features,
+    null,
+    2
+  )
+);
 
       if (!features) {
 

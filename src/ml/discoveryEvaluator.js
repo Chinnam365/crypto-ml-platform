@@ -42,7 +42,7 @@ console.log(
   "./discoveryHistoryLoader"
 );
       
-clet features =
+let features =
   await generateFeatures(
     candidate.symbol
   );

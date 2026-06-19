@@ -151,7 +151,7 @@ else if (
       */
 
       if (
-        stats.trades < 10
+        stats.trades < 20
       ) {
 
         continue;

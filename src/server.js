@@ -99,6 +99,10 @@ const {
 } = require("./ml/adaptiveSymbolWeights");
 
 const {
+  getAdaptiveWeights,
+} = require("./ml/adaptiveWeights");
+
+const {
   getConfidenceCalibration,
 } = require("./ml/confidenceCalibration");
 
@@ -1695,6 +1699,24 @@ ${signalScores.sellScore >= 35}
 
 ==================================
 `);
+
+  const strategyResult =
+  await getAdaptiveWeights({
+
+    regime,
+
+    trend,
+
+    volatilityRegime,
+
+    momentumState,
+
+    decision: "HOLD",
+  });
+
+const classification =
+  strategyResult.classification ||
+  "NEUTRAL";
   
 let side = "HOLD";
 
@@ -1736,7 +1758,23 @@ ${side}
 
 ==================================
 `);
+const strategyResult =
+  await getAdaptiveWeights({
 
+    regime,
+
+    trend,
+
+    volatilityRegime,
+
+    momentumState,
+
+    decision: side,
+  });
+
+const classification =
+  strategyResult.classification ||
+  "NEUTRAL";
    // ==========================================
 // TRADE QUALITY
 // ==========================================

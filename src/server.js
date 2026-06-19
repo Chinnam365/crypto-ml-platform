@@ -3518,7 +3518,35 @@ app.get(
     }
   }
 );
-  
+  app.get(
+  "/debug-candles/:symbol",
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await pool.query(
+          `
+          SELECT COUNT(*) AS count
+          FROM market_candles
+          WHERE symbol = $1
+          `,
+          [req.params.symbol]
+        );
+
+      res.json({
+        symbol: req.params.symbol,
+        candles: result.rows[0].count
+      });
+
+    } catch (err) {
+
+      res.json({
+        error: err.message
+      });
+    }
+  }
+);
 app.listen(PORT, () => {
 
   console.log(

@@ -151,7 +151,7 @@ try {
         [symbol]
       );
 
-    const candles =
+    let candles =
       result.rows;
     console.log(
   "CANDLE COUNT:",
@@ -180,9 +180,6 @@ ${symbol}
 Existing Candles:
 ${candles.length}
 
-Downloading:
-240
-
 ==================================
 `);
 
@@ -197,39 +194,36 @@ Downloading:
       240
     );
 
-  console.log(
-    "BINANCE RETURNED:",
-    historical.length
-  );
-
   if (
+    !historical ||
     historical.length < 35
   ) {
 
-    console.log(`
+    return null;
+  }
+
+  candles =
+    historical.map(
+      candle => ({
+        close:
+          candle.close
+      })
+    );
+
+  console.log(`
 ==================================
-BACKFILL FAILED
+DISCOVERY USING LIVE CANDLES
 ==================================
 
 Symbol:
 ${symbol}
 
-Downloaded:
-${historical.length}
+Candles:
+${candles.length}
 
 ==================================
 `);
-
-    return null;
-  }
-
-  return {
-    confidence: 50,
-    decision: "HOLD",
-    marketState: "DISCOVERY"
-  };
 }
-
     /*
     ==================================================
     CLOSE PRICES

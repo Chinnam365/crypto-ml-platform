@@ -26,37 +26,7 @@ async function getAdaptiveWeights(
 
   try {
 
-    /*
-    ==================================================
-    BASE WEIGHTS
-    ==================================================
-    */
-
-    return {
-
-  weights: {
-
-    rsi: 1,
-
-    macd: 1,
-
-    trend: 1,
-
-    volatility: 1,
-
-    alignment: 1,
-
-    momentum: 1,
-  },
-
-  classification: "NEUTRAL",
-
-  strategyKey: null,
-
-  evolutionScore: 0
-};
-
-    /*
+        /*
     ==================================================
     LOAD STRATEGY EVOLUTION
     ==================================================
@@ -321,18 +291,27 @@ ADAPTIVE WEIGHT ERROR
 
     return {
 
-      rsi: 1,
+  weights: {
 
-      macd: 1,
+    rsi: 1,
 
-      trend: 1,
+    macd: 1,
 
-      volatility: 1,
+    trend: 1,
 
-      alignment: 1,
+    volatility: 1,
 
-      momentum: 1,
-    };
+    alignment: 1,
+
+    momentum: 1
+  },
+
+  classification: "NEUTRAL",
+
+  strategyKey: null,
+
+  evolutionScore: 0
+};
   }
 }
 

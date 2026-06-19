@@ -2094,15 +2094,14 @@ ${tradeQuality}
 
 ==================================
 `);
- if (
+
+if (
   classification === "SUPPRESS"
 ) {
 
-  confidence -= 10;
-
   console.log(`
 ==================================
-SUPPRESSED STRATEGY PENALTY
+STRATEGY SUPPRESSED
 ==================================
 
 Symbol:
@@ -2111,16 +2110,14 @@ ${randomSymbol}
 Classification:
 ${classification}
 
-Confidence Reduced:
-10
-
-New Confidence:
-${confidence}
+Skipping Trade
 
 ==================================
 `);
+
+  continue;
 }
-// ==========================================
+  // ==========================================
 // PHASE 2 RISK ENGINE
 // ==========================================
 

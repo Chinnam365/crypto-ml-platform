@@ -7,13 +7,23 @@ const {
 async function evaluateDiscoveryCandidates(
   candidates
 ) {
-
+console.log(`
+==================================
+DISCOVERY EVALUATOR STARTED
+==================================
+Candidates:
+${candidates.length}
+==================================
+`);
   const evaluated = [];
 
   for (
     const candidate of candidates
   ) {
-
+console.log(
+  "Evaluating:",
+  candidate.symbol
+);
     try {
 
       const features =

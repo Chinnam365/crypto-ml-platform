@@ -28,7 +28,18 @@ async function getRegimeStrategy({
     */
 
     const adaptiveWeightResult =
-  await getAdaptiveWeights();
+  await getAdaptiveWeights({
+
+    regime,
+
+    trend,
+
+    volatilityRegime,
+
+    momentumState,
+
+    decision: "HOLD"
+  });
 
 const weights =
   adaptiveWeightResult.weights ||

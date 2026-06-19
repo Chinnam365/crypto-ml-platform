@@ -27,8 +27,12 @@ async function getRegimeStrategy({
     ==================================================
     */
 
-    const weights =
-      await getAdaptiveWeights();
+    const adaptiveWeightResult =
+  await getAdaptiveWeights();
+
+const weights =
+  adaptiveWeightResult.weights ||
+  adaptiveWeightResult;
 
     /*
     ==================================================

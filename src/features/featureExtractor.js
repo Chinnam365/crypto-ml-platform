@@ -171,22 +171,63 @@ console.log(
 
   console.log(`
 ==================================
-INSUFFICIENT CANDLES
+DISCOVERY BACKFILL
 ==================================
 
 Symbol:
 ${symbol}
 
-Candles:
+Existing Candles:
 ${candles.length}
 
-Required:
-35
+Downloading:
+240
 
 ==================================
 `);
 
-  return null;
+  const {
+    getCandles,
+  } = require("../market/binance");
+
+  const historical =
+    await getCandles(
+      symbol,
+      "5m",
+      240
+    );
+
+  console.log(
+    "BINANCE RETURNED:",
+    historical.length
+  );
+
+  if (
+    historical.length < 35
+  ) {
+
+    console.log(`
+==================================
+BACKFILL FAILED
+==================================
+
+Symbol:
+${symbol}
+
+Downloaded:
+${historical.length}
+
+==================================
+`);
+
+    return null;
+  }
+
+  return {
+    confidence: 50,
+    decision: "HOLD",
+    marketState: "DISCOVERY"
+  };
 }
 
     /*

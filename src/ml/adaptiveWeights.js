@@ -223,14 +223,35 @@ ADAPTIVE WEIGHTS VERSION 2
     ==================================================
     */
 
-    const evolutionBoost =
+    let evolutionBoost = 1;
 
-      Math.max(
-  0.75,
-  Number(
-    strategy.evolutionScore || 100
-  ) / 100
-);
+if (
+  strategy.classification ===
+  "PROMOTE"
+) {
+
+  evolutionBoost =
+    Math.max(
+      1,
+      Number(
+        strategy.evolutionScore || 100
+      ) / 100
+    );
+}
+
+else if (
+  strategy.classification ===
+  "SUPPRESS"
+) {
+
+  evolutionBoost =
+    Math.max(
+      0.8,
+      Number(
+        strategy.evolutionScore || 100
+      ) / 100
+    );
+}
 
     weights.rsi *= evolutionBoost;
 
@@ -355,7 +376,7 @@ ADAPTIVE WEIGHT ERROR
 
   classification: "NEUTRAL",
 
-  strategyKey: null,
+  strategyKey,
 
   evolutionScore: 0
 };

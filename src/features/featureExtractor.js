@@ -194,6 +194,20 @@ ${candles.length}
       240
     );
 
+      console.log(`
+==================================
+BINANCE BACKFILL RESULT
+==================================
+
+Symbol:
+${symbol}
+
+Returned:
+${historical?.length || 0}
+
+==================================
+`);
+      
   if (
     !historical ||
     historical.length < 35

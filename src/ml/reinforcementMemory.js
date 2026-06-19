@@ -62,7 +62,7 @@ async function getReinforcementScore({
     */
 
     if (
-      trades.length < 5
+      trades.length < 20
     ) {
 
       return {

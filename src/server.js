@@ -2059,7 +2059,28 @@ ${tradeQuality}
 
 ==================================
 `);
-  
+  if (
+  classification === "SUPPRESS"
+) {
+
+  console.log(`
+==================================
+STRATEGY SUPPRESSED
+==================================
+
+Symbol:
+${randomSymbol}
+
+Classification:
+${classification}
+
+Skipping Trade
+
+==================================
+`);
+
+  continue;
+}
 // ==========================================
 // PHASE 2 RISK ENGINE
 // ==========================================

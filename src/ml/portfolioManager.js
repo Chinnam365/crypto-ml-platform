@@ -325,12 +325,11 @@ riskScore +=
       canTrade = false;
     }
 
-    if (
+   if (
   openTrades.length >=
-  maxPositions &&
-  process.env.NODE_ENV === "production_disabled"
-) {
-
+  maxPositions
+)
+{
   canTrade = false;
 }
 

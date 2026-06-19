@@ -1758,24 +1758,43 @@ ${side}
 
 ==================================
 `);
+
 const strategyResult =
   await getAdaptiveWeights({
 
     regime,
-
     trend,
-
     volatilityRegime,
-
     momentumState,
-
     decision: side,
   });
 
+console.log(`
+==================================
+ADAPTIVE WEIGHT RESULT
+==================================
+
+${JSON.stringify(strategyResult, null, 2)}
+
+==================================
+`);
+
 const classification =
-  strategyResult.classification ||
+  strategyResult?.classification ||
   "NEUTRAL";
-   // ==========================================
+
+console.log(`
+==================================
+STRATEGY CLASSIFICATION
+==================================
+
+Classification:
+${classification}
+
+==================================
+`);
+
+// ==========================================
 // TRADE QUALITY
 // ==========================================
 
@@ -1783,16 +1802,11 @@ const tradeQuality =
   calculateTradeQuality({
 
     confidence,
-
     regime,
-
     trend,
-
     volatility,
-
     multiTf,
   });
-
 console.log(`
 ==================================
 TRADE QUALITY

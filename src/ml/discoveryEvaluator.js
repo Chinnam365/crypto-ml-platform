@@ -36,10 +36,32 @@ console.log(
   candidate.symbol
 );
 
-const features =
+      const {
+  loadDiscoveryHistory,
+} = require(
+  "./discoveryHistoryLoader"
+);
+      
+clet features =
   await generateFeatures(
     candidate.symbol
   );
+
+if (!features) {
+
+  console.log(
+    `Loading history for ${candidate.symbol}`
+  );
+
+  await loadDiscoveryHistory(
+    candidate.symbol
+  );
+
+  features =
+    await generateFeatures(
+      candidate.symbol
+    );
+}
 
 console.log(
   "AFTER FEATURES:",

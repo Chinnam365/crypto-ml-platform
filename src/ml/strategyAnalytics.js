@@ -219,18 +219,16 @@ evolutionScore =
   "NEUTRAL";
 
 if (
-  winRate >= 55 &&
+  winRate >= 52 &&
   avgPnL > 0
 ) {
-
   classification = "PROMOTE";
 }
 
 else if (
-  winRate <= 35 &&
-  avgPnL < 0
+  winRate <= 30 &&
+  avgPnL < -1
 ) {
-
   classification = "SUPPRESS";
 }
 

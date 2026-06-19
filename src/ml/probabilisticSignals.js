@@ -33,19 +33,23 @@ async function calculateSignalScores({
     ==================================================
     */
 
-    const weights =
-      await getAdaptiveWeights({
+    const adaptiveWeightResult =
+  await getAdaptiveWeights({
 
-        regime,
+    regime,
 
-        trend,
+    trend,
 
-        volatilityRegime,
+    volatilityRegime,
 
-        momentumState,
+    momentumState,
 
-        decision: "HOLD",
-      });
+    decision: "HOLD",
+  });
+
+const weights =
+  adaptiveWeightResult.weights ||
+  adaptiveWeightResult;
 
     let buyScore = 0;
 

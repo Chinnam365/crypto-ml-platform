@@ -1700,24 +1700,7 @@ ${signalScores.sellScore >= 35}
 ==================================
 `);
 
-  const strategyResult =
-  await getAdaptiveWeights({
-
-    regime,
-
-    trend,
-
-    volatilityRegime,
-
-    momentumState,
-
-    decision: "HOLD",
-  });
-
-const classification =
-  strategyResult.classification ||
-  "NEUTRAL";
-  
+ 
 let side = "HOLD";
 
 if (

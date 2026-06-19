@@ -1781,7 +1781,7 @@ const strategyResult =
     trend,
     volatilityRegime,
     momentumState,
-    decision: side,
+    decision: "HOLD",
   });
 
 console.log(`

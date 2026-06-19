@@ -71,9 +71,16 @@ MAIN FEATURE ENGINE
 ==================================================
 */
 
-async function generateFeatures(
-  symbol = "BTCUSDT"
-) {
+console.log(`
+==================================
+FEATURE ENGINE START
+==================================
+
+Symbol:
+${symbol}
+
+==================================
+`);
 
   try {
 
@@ -142,6 +149,12 @@ async function generateFeatures(
 
     const candles =
       result.rows;
+    console.log(
+  "CANDLE COUNT:",
+  symbol,
+  candles.length
+);
+    
 console.log(
   "FEATURE DATA:",
   symbol,

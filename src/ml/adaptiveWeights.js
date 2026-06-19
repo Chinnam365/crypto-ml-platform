@@ -70,7 +70,18 @@ async function getAdaptiveWeights(
       )
     ) {
 
-      return weights;
+      return {
+
+  weights,
+
+  classification:
+    strategy.classification,
+
+  strategyKey,
+
+  evolutionScore:
+    strategy.evolutionScore
+};
     }
 
     /*

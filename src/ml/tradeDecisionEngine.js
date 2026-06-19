@@ -155,7 +155,19 @@ if (
 ) {
   bearishMomentumBonus = 1;
 }
+/*
+==================================================
+ALIGNMENT BONUS
+==================================================
+*/
 
+let alignmentBonus = 0;
+
+if (
+  alignmentScore >= 70
+) {
+  alignmentBonus = 1;
+}
 const finalBullishScore =
   bullishScore +
   bullishMomentumBonus +

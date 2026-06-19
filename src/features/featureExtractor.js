@@ -142,13 +142,35 @@ async function generateFeatures(
 
     const candles =
       result.rows;
-
+console.log(
+  "FEATURE DATA:",
+  symbol,
+  "Candles:",
+  candles.length
+);
     if (
-      candles.length < 35
-    ) {
+  candles.length < 35
+) {
 
-      return null;
-    }
+  console.log(`
+==================================
+INSUFFICIENT CANDLES
+==================================
+
+Symbol:
+${symbol}
+
+Candles:
+${candles.length}
+
+Required:
+35
+
+==================================
+`);
+
+  return null;
+}
 
     /*
     ==================================================

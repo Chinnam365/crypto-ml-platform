@@ -223,17 +223,15 @@ if (
   avgPnL > 0
 ) {
 
-  classification =
-    "PROMOTE";
+  classification = "PROMOTE";
 }
 
 else if (
-  winRate <= 40 ||
+  winRate <= 35 &&
   avgPnL < 0
 ) {
 
-  classification =
-    "SUPPRESS";
+  classification = "SUPPRESS";
 }
 
       /*

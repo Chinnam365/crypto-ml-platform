@@ -38,11 +38,12 @@ async function evaluatePortfolioRisk({
       await pool.query(
 
         `
-        SELECT *
-
-        FROM trade_history
-
-        WHERE outcome = 'PENDING'
+        SELECT
+  symbol,
+  position_size,
+  entry_price
+FROM positions
+WHERE status = 'OPEN'
 
         `
       );
@@ -84,9 +85,8 @@ async function evaluatePortfolioRisk({
     ) {
 
       totalExposure +=
-        Number(
-          trade.position_size || 0
-        );
+  Number(trade.position_size || 0) *
+  Number(trade.entry_price || 0);
     }
 
     /*

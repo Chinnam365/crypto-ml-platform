@@ -71,6 +71,10 @@ MAIN FEATURE ENGINE
 ==================================================
 */
 
+async function generateFeatures(
+  symbol = "BTCUSDT"
+) {
+
 console.log(`
 ==================================
 FEATURE ENGINE START
@@ -82,7 +86,7 @@ ${symbol}
 ==================================
 `);
 
-  try {
+try {
 
     /*
     ==================================================
@@ -1025,7 +1029,7 @@ historicalSampleSize:
         multiTf?.overallTrend,
     };
 
-  } catch (err) {
+ } catch (err) {
 
   console.log(`
 ==================================

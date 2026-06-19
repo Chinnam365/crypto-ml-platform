@@ -62,7 +62,7 @@ async function getAdaptiveWeights(
     ==================================================
     */
 
-    if (
+   if (
   !analytics ||
   !analytics.strategies ||
   !Array.isArray(

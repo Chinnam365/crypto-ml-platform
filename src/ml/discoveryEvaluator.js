@@ -21,12 +21,24 @@ async function evaluateDiscoveryCandidates(
           candidate.symbol
         );
 
-      if (
-        !features
-      ) {
+      if (!features) {
 
-        continue;
-      }
+  console.log(`
+==================================
+DISCOVERY FEATURE FAILURE
+==================================
+
+Symbol:
+${candidate.symbol}
+
+Features:
+${features}
+
+==================================
+`);
+
+  continue;
+}
 
       evaluated.push({
 
@@ -56,10 +68,23 @@ async function evaluateDiscoveryCandidates(
 
     } catch (err) {
 
-      console.log(
-        `Discovery evaluation failed: ${candidate.symbol}`
-      );
-    }
+  console.log(`
+==================================
+DISCOVERY EVALUATION ERROR
+==================================
+
+Symbol:
+${candidate.symbol}
+
+Error:
+${err.message}
+
+Stack:
+${err.stack}
+
+==================================
+`);
+}
   }
 
   return evaluated.sort(

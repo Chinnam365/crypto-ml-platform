@@ -83,6 +83,26 @@ ${features}
   continue;
 }
 
+      console.log(`
+==================================
+DISCOVERY AI RESULT
+==================================
+
+Symbol:
+${candidate.symbol}
+
+Decision:
+${features.decision}
+
+Confidence:
+${features.confidence}
+
+Market State:
+${features.marketState}
+
+==================================
+`);
+      
       evaluated.push({
 
         symbol:

@@ -63,26 +63,24 @@ async function getAdaptiveWeights(
     */
 
     if (
-      !analytics ||
-      !analytics.strategies ||
-      !Array.isArray(
-        analytics.strategies
-      )
-    ) {
+  !analytics ||
+  !analytics.strategies ||
+  !Array.isArray(
+    analytics.strategies
+  )
+) {
 
-      return {
+  return {
 
-  weights,
+    weights,
 
-  classification:
-    strategy.classification,
+    classification: "NEUTRAL",
 
-  strategyKey,
+    strategyKey: null,
 
-  evolutionScore:
-    strategy.evolutionScore
-};
-    }
+    evolutionScore: 0
+  };
+}
 
     /*
     ==================================================
@@ -126,9 +124,17 @@ async function getAdaptiveWeights(
 
     if (!strategy) {
 
-      return weights;
-    }
+  return {
 
+    weights,
+
+    classification: "NEUTRAL",
+
+    strategyKey,
+
+    evolutionScore: 0
+  };
+}
     /*
     ==================================================
     PROMOTED STRATEGY
@@ -278,7 +284,18 @@ ${JSON.stringify(weights)}
 ==================================
 `);
 
-return weights;
+return {
+
+  weights,
+
+  classification:
+    strategy.classification,
+
+  strategyKey,
+
+  evolutionScore:
+    strategy.evolutionScore
+};
   } catch (err) {
 
     console.log(`

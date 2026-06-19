@@ -226,9 +226,16 @@ if (
 }
 
 else if (
-  winRate <= 30 &&
-  avgPnL < -1
+
+  avgPnL < -1 ||
+
+  (
+    winRate < 40 &&
+    avgPnL < 0
+  )
+
 ) {
+
   classification = "SUPPRESS";
 }
 

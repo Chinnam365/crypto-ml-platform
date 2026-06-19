@@ -860,6 +860,20 @@ const rankings =
     const discoveries =
   await getDiscoveryCandidates();
 
+console.log(`
+==================================
+RAW DISCOVERIES
+==================================
+
+Count:
+${discoveries.length}
+
+Data:
+${JSON.stringify(discoveries, null, 2)}
+
+==================================
+`);
+
 console.log(
   "DISCOVERY COUNT:",
   discoveries.length
@@ -890,6 +904,24 @@ const evaluatedDiscoveries =
   await evaluateDiscoveryCandidates(
     discoveries
   );
+
+console.log(`
+==================================
+EVALUATED DISCOVERIES
+==================================
+
+Count:
+${evaluatedDiscoveries.length}
+
+Data:
+${JSON.stringify(
+  evaluatedDiscoveries,
+  null,
+  2
+)}
+
+==================================
+`);
 
 let symbols = [];
 

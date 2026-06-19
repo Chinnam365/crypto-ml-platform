@@ -10,19 +10,19 @@ STRATEGY-AWARE ADAPTIVE WEIGHTS
 
 async function getAdaptiveWeights(
   {
-
     regime = "SIDEWAYS",
-
     trend = "SIDEWAYS",
-
     volatilityRegime = "NORMAL",
-
     momentumState = "NEUTRAL",
-
     decision = "HOLD",
-
   } = {}
 ) {
+
+  console.log(`
+==================================
+ADAPTIVE WEIGHTS VERSION 2
+==================================
+`);
 
   try {
 

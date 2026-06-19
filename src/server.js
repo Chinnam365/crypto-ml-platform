@@ -3547,6 +3547,22 @@ app.get(
     }
   }
 );
+
+  app.get("/candles-count", async (req, res) => {
+
+  const result =
+    await pool.query(`
+      SELECT
+        symbol,
+        COUNT(*) as candles
+      FROM market_candles
+      GROUP BY symbol
+      ORDER BY candles DESC
+    `);
+
+  res.json(result.rows);
+});
+  
 app.listen(PORT, () => {
 
   console.log(

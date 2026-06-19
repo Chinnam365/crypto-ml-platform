@@ -72,7 +72,20 @@ async function getAdaptiveWeights(
 
   return {
 
-  weights: { ...weights },
+  weights: {
+
+    rsi: 1,
+
+    macd: 1,
+
+    trend: 1,
+
+    volatility: 1,
+
+    alignment: 1,
+
+    momentum: 1
+  },
 
   classification: "NEUTRAL",
 
@@ -126,11 +139,24 @@ async function getAdaptiveWeights(
 
   return {
 
-  weights: { ...weights },
+  weights: {
+
+    rsi: 1,
+
+    macd: 1,
+
+    trend: 1,
+
+    volatility: 1,
+
+    alignment: 1,
+
+    momentum: 1
+  },
 
   classification: "NEUTRAL",
 
-  strategyKey,
+  strategyKey: null,
 
   evolutionScore: 0
 };

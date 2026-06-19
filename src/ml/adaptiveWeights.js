@@ -26,7 +26,28 @@ async function getAdaptiveWeights(
 
   try {
 
-        /*
+    /*
+    ==================================================
+    BASE WEIGHTS
+    ==================================================
+    */
+
+    let weights = {
+
+      rsi: 1,
+
+      macd: 1,
+
+      trend: 1,
+
+      volatility: 1,
+
+      alignment: 1,
+
+      momentum: 1,
+    };
+
+    /*
     ==================================================
     LOAD STRATEGY EVOLUTION
     ==================================================
@@ -51,14 +72,14 @@ async function getAdaptiveWeights(
 
   return {
 
-    weights,
+  weights: { ...weights },
 
-    classification: "NEUTRAL",
+  classification: "NEUTRAL",
 
-    strategyKey: null,
+  strategyKey: null,
 
-    evolutionScore: 0
-  };
+  evolutionScore: 0
+};
 }
 
     /*
@@ -105,14 +126,14 @@ async function getAdaptiveWeights(
 
   return {
 
-    weights,
+  weights: { ...weights },
 
-    classification: "NEUTRAL",
+  classification: "NEUTRAL",
 
-    strategyKey,
+  strategyKey,
 
-    evolutionScore: 0
-  };
+  evolutionScore: 0
+};
 }
     /*
     ==================================================

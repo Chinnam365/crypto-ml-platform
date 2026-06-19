@@ -944,6 +944,18 @@ symbols = [
   ])
 
 ].slice(0, 25);
+
+    console.log(`
+==================================
+FINAL TRADING UNIVERSE
+==================================
+
+${JSON.stringify(symbols, null, 2)}
+
+==================================
+`);
+
+    
 symbols = symbols.filter(
   symbol =>
     symbol !== "BTCUSDT" &&

@@ -31,10 +31,25 @@ console.log(
   candidate.symbol
 );
 
+console.log(
+  "BEFORE FEATURES:",
+  candidate.symbol
+);
+
 const features =
   await generateFeatures(
     candidate.symbol
   );
+
+console.log(
+  "AFTER FEATURES:",
+  candidate.symbol
+);
+
+console.log(
+  "FEATURE RESULT:",
+  JSON.stringify(features)
+);
 
 console.log(
   "AFTER FEATURES:",

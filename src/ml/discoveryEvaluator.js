@@ -54,13 +54,21 @@ if (!features) {
   );
 
   await loadDiscoveryHistory(
+  candidate.symbol
+);
+
+await new Promise(
+  resolve =>
+    setTimeout(
+      resolve,
+      1000
+    )
+);
+
+features =
+  await generateFeatures(
     candidate.symbol
   );
-
-  features =
-    await generateFeatures(
-      candidate.symbol
-    );
 }
 
 console.log(

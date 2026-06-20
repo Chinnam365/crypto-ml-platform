@@ -91,7 +91,6 @@ Risk Mode:
 ${riskMode}
 ==================================
 `);
-
    return {
 
   drawdownPercent,

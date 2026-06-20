@@ -20,9 +20,9 @@ async function getMultiTimeframeAnalysis(symbol) {
     );
 
   const closes15m =
-    candles15m.map(
-      c => Number(c.close)
-    );
+  candles15m.map(
+    c => Number(c[4])
+  );
 
   const trend15m =
     detectTrend(closes15m);
@@ -39,9 +39,9 @@ async function getMultiTimeframeAnalysis(symbol) {
     );
 
   const closes1h =
-    candles1h.map(
-      c => Number(c.close)
-    );
+  candles1h.map(
+    c => Number(c[4])
+  );
 
   const trend1h =
     detectTrend(closes1h);
@@ -58,9 +58,9 @@ async function getMultiTimeframeAnalysis(symbol) {
     );
 
   const closes4h =
-    candles4h.map(
-      c => Number(c.close)
-    );
+  candles4h.map(
+    c => Number(c[4])
+  );
 
   const trend4h =
     detectTrend(closes4h);
@@ -109,16 +109,34 @@ async function getMultiTimeframeAnalysis(symbol) {
       "BEARISH";
   }
 
+  let alignmentScore = 30;
+
+if (
+  trend15m === trend1h &&
+  trend1h === trend4h
+) {
+  alignmentScore = 100;
+}
+else if (
+  trend15m === trend1h ||
+  trend15m === trend4h ||
+  trend1h === trend4h
+) {
+  alignmentScore = 65;
+}
+  
   return {
 
-    trend15m,
+  trend15m,
 
-    trend1h,
+  trend1h,
 
-    trend4h,
+  trend4h,
 
-    overallTrend,
-  };
+  overallTrend,
+
+  alignmentScore,
+};
 }
 
 module.exports = {

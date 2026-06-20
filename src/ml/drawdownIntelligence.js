@@ -3,7 +3,6 @@
 DRAWDOWN INTELLIGENCE
 ==================================================
 */
-
 function getDrawdownState({
 
   currentEquity = 10000,

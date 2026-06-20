@@ -1479,7 +1479,7 @@ const adaptiveThresholdResult =
 
 const adaptiveThresholdValue =
   Number(
-    adaptiveThresholdResult?.threshold || 57
+    adaptiveThresholdResult?.threshold || 65
   );
 // ==========================================
 // SELF OPTIMIZATION

@@ -99,8 +99,16 @@ ${riskMode}
 
       riskMode,
 
-      allowTrading:
-        drawdownPercent < 40,
+      if (
+  !drawdownState.allowTrading
+) {
+
+  console.log(
+    "DRAWDOWN LOCKDOWN"
+  );
+
+  continue;
+}
     };
 
   } catch (err) {

@@ -1432,30 +1432,26 @@ const drawdownState =
 
 if (
   drawdownState.riskMode ===
+  "CAUTION"
+) {
+
+  confidence -= 5;
+}
+
+if (
+  drawdownState.riskMode ===
   "DEFENSIVE"
 ) {
 
-  confidence += 5;
+  confidence -= 10;
 }
 
 if (
   drawdownState.riskMode ===
-  "PROTECTIVE"
+  "CAPITAL_PRESERVATION"
 ) {
 
-  confidence += 10;
-}
-
-if (
-  drawdownState.riskMode ===
-  "LOCKDOWN"
-) {
-
-  console.log(
-    "LOCKDOWN MODE ACTIVE"
-  );
-
-  continue;
+  confidence -= 20;
 }
 
    // ==========================================

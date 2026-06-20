@@ -92,23 +92,15 @@ ${riskMode}
 ==================================
 `);
 
-    return {
+   return {
 
-      drawdownPercent,
+  drawdownPercent,
 
-      riskMode,
+  riskMode,
 
-      if (
-  !drawdownState.allowTrading
-) {
-
-  console.log(
-    "DRAWDOWN LOCKDOWN"
-  );
-
-  continue;
-}
-    };
+  allowTrading:
+    drawdownPercent < 40,
+};
 
   } catch (err) {
 

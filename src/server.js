@@ -306,15 +306,23 @@ async function initDB() {
     macd FLOAT,
     trend TEXT,
     regime TEXT,
+
+    volatility_regime TEXT,
+    momentum_state TEXT,
+    overall_trend TEXT,
+    reinforcement_processed BOOLEAN DEFAULT FALSE,
+
     entry_price FLOAT,
     stop_loss FLOAT,
     take_profit FLOAT,
     position_size FLOAT,
+
     pnl FLOAT DEFAULT 0,
     status TEXT DEFAULT 'OPEN',
+
     opened_at TIMESTAMP DEFAULT NOW(),
     closed_at TIMESTAMP
-  );
+);
 `);
    
     await pool.query(`
@@ -688,19 +696,19 @@ app.get(
       const result =
         await pool.query(`
           SELECT
-            id,
-            symbol,
-            side,
-            confidence,
-            entry_price,
-            stop_loss,
-            take_profit,
-            position_size,
-            pnl,
-            trend,
-            regime,
-            created_at
-          FROM positions
+  id,
+  symbol,
+  side,
+  confidence,
+  entry_price,
+  stop_loss,
+  take_profit,
+  position_size,
+  pnl,
+  trend,
+  regime,
+  opened_at
+FROM positions
           ORDER BY id DESC
           LIMIT 50
         `);
@@ -1406,8 +1414,17 @@ ${confidence.toFixed(2)}
 // DRAWDOWN STATE
 // ==========================================
 
+const drawdownStats =
+  await getDrawdownStats(pool);
+
 const drawdownState =
-  await getDrawdownState(pool);
+  getDrawdownState({
+    currentEquity:
+      drawdownStats.equity,
+
+    peakEquity:
+      drawdownStats.peakEquity,
+  });
 
 // ==========================================
 // DRAWDOWN RISK MODES

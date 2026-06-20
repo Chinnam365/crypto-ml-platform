@@ -115,6 +115,10 @@ const {
 } = require("./ml/drawdownIntelligence");
 
 const {
+  getDrawdownStats,
+} = require("./ml/accountManager");
+
+const {
   getTrainingData,
 } = require("./ml/trainingData");
 
@@ -1414,17 +1418,8 @@ ${confidence.toFixed(2)}
 // DRAWDOWN STATE
 // ==========================================
 
-const drawdownStats =
-  await getDrawdownStats(pool);
-
 const drawdownState =
-  getDrawdownState({
-    currentEquity:
-      drawdownStats.equity,
-
-    peakEquity:
-      drawdownStats.peakEquity,
-  });
+  getDrawdownState();
 
 // ==========================================
 // DRAWDOWN RISK MODES

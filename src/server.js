@@ -1416,6 +1416,23 @@ ${confidence.toFixed(2)}
 
 const drawdownState =
   getDrawdownState();
+  
+if (
+  !drawdownState.allowTrading
+) {
+
+  console.log(`
+==================================
+DRAWDOWN LOCKDOWN
+==================================
+
+Trading Disabled
+
+==================================
+`);
+
+  continue;
+}
 
 // ==========================================
 // DRAWDOWN RISK MODES

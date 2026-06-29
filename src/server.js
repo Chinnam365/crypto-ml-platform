@@ -2018,7 +2018,10 @@ ${decisionReasons.join("\n")}
 // ==========================================
 
 const executionThreshold =
-  adaptiveThresholdValue;
+  Math.max(
+    adaptiveThresholdValue,
+    75
+  );
 
 if (
   confidence < executionThreshold
@@ -2046,7 +2049,7 @@ ${executionThreshold}
 // ==========================================
 
 if (
-  tradeQuality < 50
+  tradeQuality < 70
 ) {
 
   console.log(`

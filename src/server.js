@@ -1492,7 +1492,28 @@ let confidence =
   Number(
     confidenceData?.confidence || 50
   );
- 
+ // ==========================================
+// CONFIDENCE VALIDATION
+// ==========================================
+
+if (
+  !Number.isFinite(confidence)
+) {
+
+  console.log(`
+==================================
+INVALID CONFIDENCE
+==================================
+
+Symbol:
+${randomSymbol}
+
+==================================
+`);
+
+  continue;
+
+}
 // ==========================================
 // ML PREDICTION
 // ==========================================

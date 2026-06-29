@@ -51,7 +51,10 @@ ATTEMPTING TRADE MEMORY SAVE
           trade_quality,
           overall_trend,
           buy_score,
-          sell_score
+          sell_score,
+strategy_key,
+strategy_classification,
+opportunity_score
 
         )
 
@@ -85,7 +88,10 @@ ATTEMPTING TRADE MEMORY SAVE
           $26,
           $27,
           $28,
-          $29
+         $29,
+$30,
+$31,
+$32
         )
 
         RETURNING id
@@ -122,6 +128,12 @@ ATTEMPTING TRADE MEMORY SAVE
           data.overallTrend,
           data.buyScore,
           data.sellScore,
+
+data.strategyKey,
+
+data.strategyClassification,
+
+data.opportunityScore,
         ]
       );
 

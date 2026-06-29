@@ -438,10 +438,39 @@ async function calculateConfidence({
   );
 
 if (
-  consensusConfidence > 85
+  strategy &&
+  strategy.classification === "PROMOTE"
 ) {
 
-  consensusConfidence = 85;
+  consensusConfidence =
+    Math.min(
+      consensusConfidence,
+      92
+    );
+
+}
+
+else if (
+  strategy &&
+  strategy.classification === "FAVOR"
+) {
+
+  consensusConfidence =
+    Math.min(
+      consensusConfidence,
+      88
+    );
+
+}
+
+else {
+
+  consensusConfidence =
+    Math.min(
+      consensusConfidence,
+      85
+    );
+
 }
 
     consensusStrength =

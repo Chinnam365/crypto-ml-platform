@@ -745,52 +745,52 @@ app.get(
         await pool.query(`
           SELECT
 
-            symbol,
+symbol,
 
-            side,
+side,
 
-            regime,
+trend,
 
-            COUNT(*) AS trades,
+regime,
 
-            COALESCE(
-              ROUND(
-                AVG(
-  NULLIF(pnl::text, 'NaN')::numeric
+COUNT(*) AS trades,
+
+ROUND(
+AVG(
+NULLIF(pnl::text,'NaN')::numeric
 ),
-                2
-              ),
-              0
-            ) AS avg_pnl,
+2
+) AS avg_pnl,
 
-            ROUND(
-              (
-                SUM(
-                  CASE
-                    WHEN pnl > 0
-                    THEN 1
-                    ELSE 0
-                  END
-                )::numeric
+ROUND(
+100.0 *
+SUM(
+CASE
+WHEN pnl > 0 THEN 1
+ELSE 0
+END
+)
+/COUNT(*),
+2
+) AS win_rate
 
-                /
+FROM positions
 
-                COUNT(*)::numeric
-              ) * 100,
-              2
-            ) AS win_rate
+WHERE status = 'CLOSED'
 
-          FROM positions
+GROUP BY
 
-          WHERE status = 'CLOSED'
+symbol,
+side,
+trend,
+regime
 
-          GROUP BY
-            symbol,
-            side,
-            regime
+HAVING COUNT(*) >= 5
 
-          ORDER BY
-            avg_pnl DESC
+ORDER BY
+
+win_rate DESC,
+avg_pnl DESC;
         `);
 
       res.json({

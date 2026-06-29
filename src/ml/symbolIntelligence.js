@@ -1,15 +1,3 @@
-[
-  {
-    "symbol":"BTCUSDT",
-    "score":22,
-    "classification":"DISABLE"
-  },
-  {
-    "symbol":"LINKUSDT",
-    "score":91,
-    "classification":"PROMOTE"
-  }
-]
 /*
 ==================================================
 SYMBOL INTELLIGENCE

@@ -743,7 +743,7 @@ app.get(
 
       const result =
         await pool.query(`
-          SELECT
+         SELECT
 
 symbol,
 
@@ -755,6 +755,22 @@ regime,
 
 COUNT(*) AS trades,
 
+SUM(
+CASE
+WHEN pnl > 0
+THEN 1
+ELSE 0
+END
+) AS wins,
+
+SUM(
+CASE
+WHEN pnl <= 0
+THEN 1
+ELSE 0
+END
+) AS losses,
+
 ROUND(
 AVG(
 NULLIF(pnl::text,'NaN')::numeric
@@ -763,10 +779,25 @@ NULLIF(pnl::text,'NaN')::numeric
 ) AS avg_pnl,
 
 ROUND(
+MAX(
+NULLIF(pnl::text,'NaN')::numeric
+),
+2
+) AS best_trade,
+
+ROUND(
+MIN(
+NULLIF(pnl::text,'NaN')::numeric
+),
+2
+) AS worst_trade,
+
+ROUND(
 100.0 *
 SUM(
 CASE
-WHEN pnl > 0 THEN 1
+WHEN pnl > 0
+THEN 1
 ELSE 0
 END
 )

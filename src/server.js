@@ -207,6 +207,10 @@ const {
 );
 
 const {
+    getSymbolIntelligence
+} = require("./ml/symbolIntelligence");
+
+const {
   getDiscoveryCandidates,
 } = require(
   "./ml/discoverySelector"
@@ -845,6 +849,47 @@ avg_pnl DESC;
     }
   }
 );
+
+// ==========================================
+// SYMBOL INTELLIGENCE
+// ==========================================
+
+app.get(
+    "/symbol-intelligence",
+    async (req, res) => {
+
+        try {
+
+            const symbols =
+                await getSymbolIntelligence(pool);
+
+            res.json({
+
+                success: true,
+
+                symbols
+
+            });
+
+        }
+
+        catch (err) {
+
+            console.error(err);
+
+            res.status(500).json({
+
+                success: false,
+
+                error: err.message
+
+            });
+
+        }
+
+    }
+);
+
 /*
 ==================================================
 RESET

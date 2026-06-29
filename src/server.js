@@ -2085,12 +2085,59 @@ ${decisionReasons.join("\n")}
 // CONFIDENCE FILTER
 // ==========================================
 
-const executionThreshold =
+let executionThreshold =
   Math.max(
     adaptiveThresholdValue,
     75
   );
 
+// ==========================================
+// HIGH QUALITY SETUPS
+// ==========================================
+
+if (
+
+  multiTf.alignmentScore >= 100 &&
+
+  tradeQuality >= 90 &&
+
+  confidence >= 85
+
+) {
+
+  executionThreshold =
+
+    Math.max(
+
+      70,
+
+      executionThreshold - 5
+
+    );
+
+}
+console.log(`
+==================================
+FINAL TRADE GATE
+==================================
+
+Symbol:
+${randomSymbol}
+
+Confidence:
+${confidence}
+
+Execution Threshold:
+${executionThreshold}
+
+Trade Quality:
+${tradeQuality}
+
+Alignment:
+${multiTf.alignmentScore}
+
+==================================
+`);
 if (
   confidence < executionThreshold
 ) {

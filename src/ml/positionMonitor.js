@@ -387,6 +387,38 @@ ${pnlPercent.toFixed(2)}%
           pnl,
         });
 
+        // ==========================================
+// SAVE TRADE HISTORY
+// ==========================================
+
+await pool.query(
+`
+INSERT INTO trade_history
+(
+symbol,
+decision,
+entry_price,
+exit_price,
+pnl,
+outcome,
+created_at,
+closed_at
+)
+VALUES
+(
+$1,$2,$3,$4,$5,$6,$7,NOW()
+)
+`,
+[
+position.symbol,
+position.side,
+position.entry_price,
+currentPrice,
+pnl,
+pnl > 0 ? "WIN" : "LOSS",
+position.opened_at
+]
+);
         console.log(`
 ==================================
 POSITION CLOSED

@@ -602,7 +602,55 @@ app.get("/status", async (req, res) => {
     });
   }
 });
+// ==========================================
+// HEALTH
+// ==========================================
 
+app.get(
+  "/health",
+  async (req, res) => {
+
+    try {
+
+      const db =
+        await pool.query(
+          "SELECT NOW()"
+        );
+
+      res.json({
+
+        success: true,
+
+        status: "RUNNING",
+
+        serverTime:
+          db.rows[0].now,
+
+        uptime:
+          process.uptime(),
+
+        memory:
+          process.memoryUsage(),
+
+      });
+
+    }
+
+    catch (err) {
+
+      res.status(500).json({
+
+        success: false,
+
+        error:
+          err.message
+
+      });
+
+    }
+
+  }
+);
 /*
 ==================================================
 MODEL

@@ -944,6 +944,39 @@ const rankings =
     const discoveries =
   await getDiscoveryCandidates();
 
+    // ==========================================
+// DISCOVERY SCORE FILTER
+// ==========================================
+
+const qualifiedDiscoveries =
+  (discoveries || []).filter(
+
+    coin =>
+
+      coin.symbolScore >= 60 &&
+
+      coin.classification !==
+      "SUPPRESS" &&
+
+      coin.classification !==
+      "DISABLE"
+
+  );
+
+console.log(`
+==================================
+DISCOVERY SUMMARY
+==================================
+
+Total:
+${discoveries.length}
+
+Qualified:
+${qualifiedDiscoveries.length}
+
+==================================
+`);
+    
 console.log(`
 ==================================
 RAW DISCOVERIES
@@ -986,7 +1019,7 @@ console.log(
 
 const evaluatedDiscoveries =
   await evaluateDiscoveryCandidates(
-    discoveries
+    qualifiedDiscoveries
   );
 
 console.log(`
@@ -1041,9 +1074,22 @@ ${JSON.stringify(symbols, null, 2)}
 
     
 symbols = symbols.filter(
-  symbol =>
-    symbol !== "BTCUSDT" &&
-    symbol !== "SOLUSDT"
+  symbol => {
+
+    if (
+      [
+        "BTCUSDT",
+        "SOLUSDT"
+      ].includes(symbol)
+    ) {
+
+      return false;
+
+    }
+
+    return true;
+
+  }
 );
     console.log(`
 ==================================
@@ -3735,8 +3781,10 @@ app.get(
   "/discovery-candidates",
   async (req, res) => {
 
-    const candidates =
-      await getDiscoveryCandidates();
+    const discoveries =
+  await getDiscoveryCandidates(
+    pool
+  );
 
     res.json({
       count:

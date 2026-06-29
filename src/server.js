@@ -863,18 +863,18 @@ app.get(
         try {
 
             const symbols = [
-  ...new Set(
-    [
-      ...rankings
-        .slice(0, 25)
-        .map(item => item.symbol),
 
-      ...qualifiedDiscoveries
-        .slice(0, 15)
-        .map(item => item.symbol)
-    ]
-  )
-];
+  ...new Set([
+
+    ...(rankingSymbols || []),
+
+    ...(discoverySymbols || [])
+
+  ])
+
+]
+.filter(symbol => !!symbol)
+.slice(0, 40);
 
         }
 
@@ -2197,7 +2197,39 @@ Minimum Required:
   continue;
 
 }
-   
+// ==========================================
+// FINAL SAFETY CHECK
+// ==========================================
+
+if (
+
+  confidence < 75 &&
+
+  tradeQuality < 80
+
+) {
+
+  console.log(`
+==================================
+LOW QUALITY SETUP
+==================================
+
+Symbol:
+${randomSymbol}
+
+Confidence:
+${confidence}
+
+Trade Quality:
+${tradeQuality}
+
+==================================
+`);
+
+  continue;
+
+}
+  
    // ==========================================
 // DECISION EXPLANATION
 // ==========================================
@@ -2319,7 +2351,32 @@ ${multiTf.alignmentScore}
 ==================================
 `);
 if (
-  confidence < executionThreshold
+
+  !drawdownState.allowTrading
+
+) {
+
+  console.log(`
+==================================
+TRADING PAUSED
+==================================
+
+Risk Mode:
+${drawdownState.riskMode}
+
+==================================
+`);
+
+  continue;
+
+}
+
+if (
+
+  confidence <
+
+  executionThreshold
+
 ) {
 
   console.log(`
@@ -2327,8 +2384,11 @@ if (
 CONFIDENCE FILTER
 ==================================
 
+Symbol:
+${randomSymbol}
+
 Confidence:
-${confidence.toFixed(2)}
+${confidence}
 
 Threshold:
 ${executionThreshold}
@@ -2337,7 +2397,8 @@ ${executionThreshold}
 `);
 
   continue;
-}
+
+} 
 
 // ==========================================
 // QUALITY FILTER

@@ -856,28 +856,6 @@ avg_pnl DESC;
 // SYMBOL INTELLIGENCE
 // ==========================================
 
-app.get(
-    "/symbol-intelligence",
-    async (req, res) => {
-
-        try {
-
-            const symbols = [
-
-  ...new Set([
-
-    ...(rankingSymbols || []),
-
-    ...(discoverySymbols || [])
-
-  ])
-
-]
-.filter(symbol => !!symbol)
-.slice(0, 40);
-
-        }
-
         catch (err) {
 
             console.error(err);

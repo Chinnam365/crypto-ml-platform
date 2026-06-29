@@ -5,9 +5,15 @@ async function getMarketScanner() {
   try {
 
     const response =
-      await axios.get(
-        "https://api.binance.com/api/v3/ticker/24hr"
-      );
+  await axios.get(
+    "https://api.binance.com/api/v3/ticker/24hr",
+    {
+      timeout: 15000,
+      headers: {
+        "User-Agent": "CryptoMLPlatform/1.0"
+      }
+    }
+  );
 
     const pairs =
   response.data
@@ -74,7 +80,17 @@ async function getMarketScanner() {
         Number(coin.bidPrice)
 
     }));
-    return pairs;
+    return pairs.sort((a, b) => {
+
+  if (b.quoteVolume !== a.quoteVolume) {
+
+    return b.quoteVolume - a.quoteVolume;
+
+  }
+
+  return b.trades - a.trades;
+
+});
 
   } catch (err) {
 

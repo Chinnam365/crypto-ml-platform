@@ -3045,36 +3045,38 @@ TRADE MEMORY
 */
 
 app.get(
-  "/trade-memory",
+  "/trade-history",
   async (req, res) => {
 
     try {
 
       const result =
-        await pool.query(
-
-          `
-          SELECT *
+        await pool.query(`
+          SELECT
+            id,
+            symbol,
+            decision,
+            entry_price,
+            exit_price,
+            pnl,
+            outcome,
+            created_at,
+            closed_at
           FROM trade_history
           ORDER BY id DESC
-          LIMIT 20
-          `
-        );
+          LIMIT 100
+        `);
 
       res.json({
-
         success: true,
-
-        trades:
-          result.rows,
+        trades: result.rows,
       });
 
     } catch (err) {
 
       res.status(500).json({
-
-        error:
-          err.message,
+        success: false,
+        error: err.message,
       });
     }
   }

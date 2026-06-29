@@ -1122,7 +1122,40 @@ for (
     "PROCESSING SYMBOL:",
     randomSymbol
   );
+// ==========================================
+// DUPLICATE POSITION CHECK
+// ==========================================
 
+const existingPosition =
+  await pool.query(
+    `
+    SELECT id
+    FROM positions
+    WHERE symbol = $1
+      AND status = 'OPEN'
+    LIMIT 1
+    `,
+    [randomSymbol]
+  );
+
+if (
+  existingPosition.rows.length > 0
+) {
+
+  console.log(`
+==================================
+POSITION ALREADY OPEN
+==================================
+
+Symbol:
+${randomSymbol}
+
+==================================
+`);
+
+  continue;
+
+}
   await new Promise(
     resolve =>
       setTimeout(

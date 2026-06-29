@@ -862,16 +862,19 @@ app.get(
 
         try {
 
-            const symbols =
-                await getSymbolIntelligence(pool);
+            const symbols = [
+  ...new Set(
+    [
+      ...rankings
+        .slice(0, 25)
+        .map(item => item.symbol),
 
-            res.json({
-
-                success: true,
-
-                symbols
-
-            });
+      ...qualifiedDiscoveries
+        .slice(0, 15)
+        .map(item => item.symbol)
+    ]
+  )
+];
 
         }
 
@@ -1163,7 +1166,22 @@ ${JSON.stringify(discoverySymbols, null, 2)}
 for (
   const randomSymbol of symbols
 ) {
+console.log(`
+==================================
+SYMBOL SELECTION
+==================================
 
+Ranked Symbols:
+${rankings.length}
+
+Qualified Discoveries:
+${qualifiedDiscoveries.length}
+
+Trading Symbols:
+${symbols.length}
+
+==================================
+`);
   console.log(
     "PROCESSING SYMBOL:",
     randomSymbol

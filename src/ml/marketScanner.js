@@ -10,42 +10,70 @@ async function getMarketScanner() {
       );
 
     const pairs =
-      response.data
-        .filter(
-          coin =>
-            coin.symbol.endsWith("USDT")
-        )
-        .map(coin => ({
+  response.data
+    .filter(coin =>
 
-          symbol:
-            coin.symbol,
+      coin.symbol.endsWith("USDT") &&
 
-          price:
-            Number(
-              coin.lastPrice
-            ),
+      Number(coin.quoteVolume) >= 1000000 &&
 
-          volume:
-            Number(
-              coin.volume
-            ),
+      Number(coin.count) >= 5000 &&
 
-          quoteVolume:
-            Number(
-              coin.quoteVolume
-            ),
+      coin.symbol.indexOf("UP") === -1 &&
 
-          priceChange:
-            Number(
-              coin.priceChangePercent
-            ),
+      coin.symbol.indexOf("DOWN") === -1 &&
 
-          trades:
-            Number(
-              coin.count
-            ),
-        }));
+      coin.symbol.indexOf("BULL") === -1 &&
 
+      coin.symbol.indexOf("BEAR") === -1
+
+    )
+    .map(coin => ({
+
+      symbol:
+        coin.symbol,
+
+      price:
+        Number(coin.lastPrice),
+
+      volume:
+        Number(coin.volume),
+
+      quoteVolume:
+        Number(coin.quoteVolume),
+
+      priceChange:
+        Number(coin.priceChangePercent),
+
+      trades:
+        Number(coin.count),
+
+      weightedPrice:
+        Number(coin.weightedAvgPrice),
+
+      highPrice:
+        Number(coin.highPrice),
+
+      lowPrice:
+        Number(coin.lowPrice),
+
+      openPrice:
+        Number(coin.openPrice),
+
+      lastPrice:
+        Number(coin.lastPrice),
+
+      bidPrice:
+        Number(coin.bidPrice),
+
+      askPrice:
+        Number(coin.askPrice),
+
+      spread:
+        Number(coin.askPrice) -
+        Number(coin.bidPrice)
+
+    }));
     return pairs;
 
   } catch (err) {

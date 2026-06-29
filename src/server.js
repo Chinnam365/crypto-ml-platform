@@ -2107,6 +2107,52 @@ const tradeQuality =
     volatility,
     multiTf,
   });
+
+  // ==========================================
+// FINAL TRADE VALIDATION
+// ==========================================
+
+if (
+  !Number.isFinite(tradeQuality)
+) {
+
+  console.log(`
+==================================
+INVALID TRADE QUALITY
+==================================
+
+Symbol:
+${randomSymbol}
+
+==================================
+`);
+
+  continue;
+
+}
+
+if (
+  tradeQuality < 75
+) {
+
+  console.log(`
+==================================
+TRADE REJECTED
+==================================
+
+Symbol:
+${randomSymbol}
+
+Trade Quality:
+${tradeQuality}
+
+==================================
+`);
+
+  continue;
+
+}
+  
 console.log(`
 ==================================
 TRADE QUALITY

@@ -1234,6 +1234,37 @@ const multiTf =
     randomSymbol
   );
 
+  // ==========================================
+// OPPORTUNITY FILTER
+// ==========================================
+
+if (
+
+  multiTf.alignmentScore < 65
+
+) {
+
+  console.log(`
+==================================
+SYMBOL FILTERED
+==================================
+
+Symbol:
+${randomSymbol}
+
+Reason:
+Weak Multi-Timeframe Alignment
+
+Alignment:
+${multiTf.alignmentScore}
+
+==================================
+`);
+
+  continue;
+
+}
+  
 console.log(`
 ==================================
 MULTI TIMEFRAME ANALYSIS
@@ -1952,7 +1983,40 @@ ${tradeQuality}
 
 ==================================
 `);
+});
 
+Paste:
+
+// ==========================================
+// FINAL QUALITY FILTER
+// ==========================================
+
+if (
+
+  tradeQuality < 75
+
+) {
+
+  console.log(`
+==================================
+TRADE REJECTED
+==================================
+
+Symbol:
+${randomSymbol}
+
+Trade Quality:
+${tradeQuality}
+
+Minimum Required:
+75
+
+==================================
+`);
+
+  continue;
+
+}
    
    // ==========================================
 // DECISION EXPLANATION

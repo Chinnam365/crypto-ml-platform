@@ -159,13 +159,13 @@ profitScore * 0.25
 
 (
 
-experienceScore * 0.15
+experienceScore * 0.10
 
 )+
 
 (
 
-consistencyScore * 0.15
+consistencyScore * 0.20
 
 )+
 
@@ -173,7 +173,7 @@ consistencyScore * 0.15
 
 Math.min(
 100,
-trades * 2
+trades
 ) * 0.15
 
 )

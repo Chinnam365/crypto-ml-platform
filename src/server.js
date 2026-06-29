@@ -852,29 +852,6 @@ avg_pnl DESC;
   }
 );
 
-// ==========================================
-// SYMBOL INTELLIGENCE
-// ==========================================
-
-        catch (err) {
-
-            console.error(err);
-
-            res.status(500).json({
-
-                success: false,
-
-                error: err.message
-
-            });
-
-        }
-
-    }
-);
-
-
-
 /*
 ==================================================
 RESET

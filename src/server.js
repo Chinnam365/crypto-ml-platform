@@ -211,9 +211,6 @@ const {
     getSymbolIntelligence
 } = require("./ml/symbolIntelligence");
 
-const {
-  getOpportunityIntelligence
-} = require("./ml/opportunityIntelligence");
 
 const {
   getDiscoveryCandidates,
@@ -895,43 +892,7 @@ app.get(
     }
 );
 
-// ==========================================
-// OPPORTUNITY INTELLIGENCE
-// ==========================================
 
-app.get(
-  "/opportunity-intelligence",
-  async (req, res) => {
-
-    try {
-
-      const result =
-        await getOpportunityIntelligence(pool);
-
-      res.json(result);
-
-    }
-
-    catch (err) {
-
-      console.error(
-        "Opportunity Intelligence Error:",
-        err
-      );
-
-      res.status(500).json({
-
-        success: false,
-
-        error:
-          err.message,
-
-      });
-
-    }
-
-  }
-);
 
 /*
 ==================================================

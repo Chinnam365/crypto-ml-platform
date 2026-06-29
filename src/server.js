@@ -1063,7 +1063,9 @@ symbols = [
 
   ])
 
-].slice(0, 25);
+]
+.filter(Boolean)
+.slice(0, 40);
 
     console.log(`
 ==================================
@@ -1076,24 +1078,38 @@ ${JSON.stringify(symbols, null, 2)}
 `);
 
     
-symbols = symbols.filter(
-  symbol => {
+symbols = symbols.filter(symbol => {
 
-    if (
-      [
-        "BTCUSDT",
-        "SOLUSDT"
-      ].includes(symbol)
-    ) {
-
-      return false;
-
-    }
-
-    return true;
-
+  if (!symbol) {
+    return false;
   }
-);
+
+  if (
+    [
+      "BTCUSDT",
+      "SOLUSDT"
+    ].includes(symbol)
+  ) {
+    return false;
+  }
+
+  return true;
+
+});
+
+    console.log(`
+==================================
+FINAL TRADING UNIVERSE
+==================================
+
+Total Symbols:
+${symbols.length}
+
+${symbols.join(", ")}
+
+==================================
+`);
+    
     console.log(`
 ==================================
 DISCOVERY INTEGRATION
@@ -3322,7 +3338,60 @@ app.get(
   await generateFeatures(
     symbol
   );
+// ==========================================
+// FEATURE VALIDATION
+// ==========================================
 
+if (
+  !features ||
+  Object.keys(features).length === 0
+) {
+
+  console.log(`
+==================================
+FEATURE GENERATION FAILED
+==================================
+
+Symbol:
+${randomSymbol}
+
+==================================
+`);
+
+  continue;
+
+}
+
+if (
+
+  !Number.isFinite(
+    features.rsi
+  ) ||
+
+  !Number.isFinite(
+    features.emaFast
+  ) ||
+
+  !Number.isFinite(
+    features.emaSlow
+  )
+
+) {
+
+  console.log(`
+==================================
+INVALID FEATURES
+==================================
+
+Symbol:
+${randomSymbol}
+
+==================================
+`);
+
+  continue;
+
+}
       res.json({
 
         success: true,

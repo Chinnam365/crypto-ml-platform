@@ -3051,21 +3051,11 @@ app.get(
     try {
 
       const result =
-        await pool.query(`
-          SELECT
-            id,
-            symbol,
-            decision,
-            entry_price,
-            exit_price,
-            pnl,
-            outcome,
-            created_at,
-            closed_at
-          FROM trade_history
-          ORDER BY id DESC
-          LIMIT 100
-        `);
+  await pool.query(`
+    SELECT *
+    FROM trade_history
+    LIMIT 5
+  `);
 
       res.json({
         success: true,

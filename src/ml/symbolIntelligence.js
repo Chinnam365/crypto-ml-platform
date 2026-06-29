@@ -143,43 +143,78 @@ if (wins + losses > 0) {
 // ==========================================
 
 const score =
-    Math.round(
+Math.round(
 
-        (
-            winRateScore * 0.35
-        ) +
+(
 
-        (
-            profitScore * 0.35
-        ) +
+winRateScore * 0.30
 
-        (
-            experienceScore * 0.15
-        ) +
+)+
 
-        (
-            consistencyScore * 0.15
-        )
+(
 
-    );
+profitScore * 0.25
+
+)+
+
+(
+
+experienceScore * 0.15
+
+)+
+
+(
+
+consistencyScore * 0.15
+
+)+
+
+(
+
+Math.min(
+100,
+trades * 2
+) * 0.15
+
+)
+
+);
 
 let classification =
-    "NEUTRAL";
+"NEUTRAL";
 
-if (score >= 80)
-    classification = "PROMOTE";
+if (
+score >= 85
+)
 
-else if (score >= 65)
-    classification = "FAVOR";
+classification =
+"PROMOTE";
 
-else if (score >= 45)
-    classification = "NEUTRAL";
+else if (
+score >= 70
+)
 
-else if (score >= 20)
-    classification = "SUPPRESS";
+classification =
+"FAVOR";
+
+else if (
+score >= 50
+)
+
+classification =
+"NEUTRAL";
+
+else if (
+score >= 30
+)
+
+classification =
+"SUPPRESS";
 
 else
-    classification = "DISABLE";
+
+classification =
+"DISABLE";
 
 return {
 

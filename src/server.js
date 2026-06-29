@@ -3443,49 +3443,33 @@ if (
   Object.keys(features).length === 0
 ) {
 
-  console.log(`
-==================================
-FEATURE GENERATION FAILED
-==================================
+  return res.status(400).json({
 
-Symbol:
-${randomSymbol}
+    success: false,
 
-==================================
-`);
+    error: "Feature generation failed"
 
-  continue;
+  });
 
 }
 
 if (
 
-  !Number.isFinite(
-    features.rsi
-  ) ||
+  !Number.isFinite(features.rsi) ||
 
-  !Number.isFinite(
-    features.emaFast
-  ) ||
+  !Number.isFinite(features.emaFast) ||
 
-  !Number.isFinite(
-    features.emaSlow
-  )
+  !Number.isFinite(features.emaSlow)
 
 ) {
 
-  console.log(`
-==================================
-INVALID FEATURES
-==================================
+  return res.status(400).json({
 
-Symbol:
-${randomSymbol}
+    success: false,
 
-==================================
-`);
+    error: "Invalid feature data"
 
-  continue;
+  });
 
 }
       res.json({

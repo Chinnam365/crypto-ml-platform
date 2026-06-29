@@ -1486,8 +1486,19 @@ ${confidence.toFixed(2)}
 // DRAWDOWN STATE
 // ==========================================
 
+const drawdownStats =
+  await getDrawdownStats(pool);
+
 const drawdownState =
-  getDrawdownState();
+  getDrawdownState({
+
+    currentEquity:
+      drawdownStats.equity,
+
+    peakEquity:
+      drawdownStats.peakEquity,
+
+});
   
 if (
   !drawdownState.allowTrading

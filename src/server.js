@@ -651,6 +651,90 @@ app.get(
 
   }
 );
+// ==========================================
+// LEARNING STATUS
+// ==========================================
+
+app.get(
+  "/learning-status",
+  async (req, res) => {
+
+    try {
+
+      const tradeHistory =
+        await pool.query(
+          `
+          SELECT COUNT(*) AS count
+          FROM trade_history
+          `
+        );
+
+      const positions =
+        await pool.query(
+          `
+          SELECT COUNT(*) AS count
+          FROM positions
+          WHERE status='OPEN'
+          `
+        );
+
+      const closed =
+        await pool.query(
+          `
+          SELECT COUNT(*) AS count
+          FROM positions
+          WHERE status='CLOSED'
+          `
+        );
+
+      res.json({
+
+        success: true,
+
+        learning: {
+
+          totalTrades:
+            Number(
+              tradeHistory.rows[0].count
+            ),
+
+          openPositions:
+            Number(
+              positions.rows[0].count
+            ),
+
+          closedPositions:
+            Number(
+              closed.rows[0].count
+            ),
+
+          uptime:
+            process.uptime(),
+
+          learningActive: true
+
+        }
+
+      });
+
+    }
+
+    catch (err) {
+
+      res.status(500).json({
+
+        success: false,
+
+        error:
+          err.message
+
+      });
+
+    }
+
+  }
+);
+
 /*
 ==================================================
 MODEL

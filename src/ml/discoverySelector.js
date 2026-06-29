@@ -6,25 +6,72 @@ const {
   rankDiscoveries,
 } = require("./discoveryRanking");
 
+const {
+  getSymbolIntelligence,
+} = require("./symbolIntelligence");
+
 async function getDiscoveryCandidates() {
 
   try {
 
     const marketData =
-      await getMarketScanner();
+  await getMarketScanner();
 
-    const discoveries =
-      rankDiscoveries(
-        marketData
-      );
+const symbolScores =
+  await getSymbolIntelligence(pool);
+
+const scoreMap =
+  {};
+
+for (
+  const symbol of symbolScores
+) {
+
+  scoreMap[
+    symbol.symbol
+  ] = symbol;
+
+}
+
+   const discoveries =
+  rankDiscoveries(
+    marketData
+  ).map(coin => ({
+
+    ...coin,
+
+    symbolScore:
+
+      scoreMap[
+        coin.symbol
+      ]?.score || 50,
+
+    classification:
+
+      scoreMap[
+        coin.symbol
+      ]?.classification ||
+
+      "NEUTRAL"
+
+  }));
 
     const candidates =
       discoveries
         .filter(
-          coin =>
-            coin.quoteVolume >
-            1000000
-        )
+
+  coin =>
+
+    coin.quoteVolume >
+      1000000 &&
+
+    coin.symbolScore >=
+      45 &&
+
+    coin.classification !==
+      "DISABLE"
+
+)
         .slice(0, 10);
 
     console.log(`

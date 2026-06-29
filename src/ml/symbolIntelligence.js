@@ -9,56 +9,86 @@ async function getSymbolIntelligence(pool) {
     const result = await pool.query(`
         SELECT
 
-            symbol,
+symbol,
 
-            COUNT(*) AS trades,
+COUNT(*) AS trades,
 
-            SUM(
-                CASE
-                    WHEN pnl > 0
-                    THEN 1
-                    ELSE 0
-                END
-            ) AS wins,
+SUM(
+CASE
+WHEN pnl > 0
+THEN 1
+ELSE 0
+END
+) AS wins,
 
-            SUM(
-                CASE
-                    WHEN pnl <= 0
-                    THEN 1
-                    ELSE 0
-                END
-            ) AS losses,
+SUM(
+CASE
+WHEN pnl < 0
+THEN 1
+ELSE 0
+END
+) AS losses,
 
-            ROUND(
-                AVG(
-                    NULLIF(pnl::text,'NaN')::numeric
-                ),
-                2
-            ) AS average_pnl,
+SUM(
+CASE
+WHEN pnl = 0
+THEN 1
+ELSE 0
+END
+) AS neutral,
 
-            ROUND(
-                100.0 *
-                SUM(
-                    CASE
-                        WHEN pnl > 0
-                        THEN 1
-                        ELSE 0
-                    END
-                )
-                /
-                COUNT(*),
-                2
-            ) AS win_rate
+ROUND(
+AVG(
+NULLIF(pnl::text,'NaN')::numeric
+),
+2
+) AS average_pnl,
 
-        FROM positions
+ROUND(
+MAX(
+NULLIF(pnl::text,'NaN')::numeric
+),
+2
+) AS best_trade,
 
-        WHERE status='CLOSED'
+ROUND(
+MIN(
+NULLIF(pnl::text,'NaN')::numeric
+),
+2
+) AS worst_trade,
 
-        GROUP BY symbol
+ROUND(
+100.0 *
+SUM(
+CASE
+WHEN pnl > 0
+THEN 1
+ELSE 0
+END
+)
+/NULLIF(
+SUM(
+CASE
+WHEN pnl <> 0
+THEN 1
+ELSE 0
+END
+),
+0
+),
+2
+) AS win_rate
 
-        HAVING COUNT(*)>=5
+FROM positions
 
-        ORDER BY win_rate DESC;
+WHERE status='CLOSED'
+
+GROUP BY symbol
+
+HAVING COUNT(*)>=5
+
+ORDER BY win_rate DESC;
     `);
 
     const symbols =
@@ -228,6 +258,21 @@ return {
     experienceScore,
 
     consistencyScore,
+
+    bestTrade:
+        Number(
+            symbol.best_trade || 0
+        ),
+
+    worstTrade:
+        Number(
+            symbol.worst_trade || 0
+        ),
+
+    neutralTrades:
+        Number(
+            symbol.neutral || 0
+        ),
 
     classification
 

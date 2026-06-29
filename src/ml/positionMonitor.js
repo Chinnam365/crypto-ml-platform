@@ -293,25 +293,37 @@ ${pnlPercent.toFixed(2)}%
           `
           UPDATE positions
           SET
-            status = 'CLOSED',
+status = 'CLOSED',
 
-            exit_price = $1,
+exit_price = $1,
 
-            pnl = $2,
+pnl = $2,
 
-            closed_at = NOW()
+outcome = $3,
+
+close_reason = $4,
+
+closed_at = NOW()
 
           WHERE id = $3
           `,
           [
-            currentPrice,
+currentPrice,
 
-            Number(
-              pnl.toFixed(2)
-            ),
+Number(
+pnl.toFixed(2)
+),
 
-            position.id,
-          ]
+pnl > 0
+  ? "WIN"
+  : pnl < 0
+    ? "LOSS"
+    : "NEUTRAL",
+
+closeReason,
+
+position.id,
+]
         );
 
         // ==========================================
@@ -415,7 +427,11 @@ position.side,
 position.entry_price,
 currentPrice,
 pnl,
-pnl > 0 ? "WIN" : "LOSS",
+pnl > 0
+  ? "WIN"
+  : pnl < 0
+    ? "LOSS"
+    : "NEUTRAL",
 position.opened_at
 ]
 );

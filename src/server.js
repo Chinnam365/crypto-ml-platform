@@ -323,7 +323,7 @@ async function initDB() {
     status TEXT DEFAULT 'OPEN',
 
     opened_at TIMESTAMP DEFAULT NOW(),
-    closed_at TIMESTAMP
+    _at TIMESTAMP
 );
 `);
    
@@ -750,32 +750,15 @@ app.get(
              id,
     symbol,
     side,
-
     confidence,
-
     entry_price,
     exit_price,
-
     stop_loss,
     take_profit,
-
     pnl,
-
     trend,
     regime,
-
-    volatility,
-
-    strategy_key,
-
-    strategy_classification,
-
-    opportunity_score,
-
-    ml_probability,
-
     status,
-
     opened_at,
     closed_at
           FROM positions

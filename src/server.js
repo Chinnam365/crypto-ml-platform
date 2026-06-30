@@ -734,7 +734,68 @@ app.get(
 
   }
 );
+// ==========================================
+// CLOSED TRADES
+// ==========================================
 
+app.get(
+  "/closed-trades",
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await pool.query(`
+          SELECT
+            id,
+            symbol,
+            side,
+            confidence,
+            entry_price,
+            exit_price,
+            stop_loss,
+            take_profit,
+            pnl,
+            trend,
+            regime,
+            status,
+            opened_at,
+            closed_at
+          FROM positions
+          WHERE status = 'CLOSED'
+          ORDER BY closed_at DESC
+          LIMIT 500
+        `);
+
+      res.json({
+
+        success: true,
+
+        total:
+          result.rowCount,
+
+        trades:
+          result.rows
+
+      });
+
+    }
+
+    catch (err) {
+
+      res.status(500).json({
+
+        success: false,
+
+        error:
+          err.message
+
+      });
+
+    }
+
+  }
+);
 /*
 ==================================================
 MODEL

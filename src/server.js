@@ -813,6 +813,52 @@ app.get(
 
   }
 );
+
+// ==========================================
+// SYMBOL INTELLIGENCE
+// ==========================================
+
+app.get(
+  "/symbol-intelligence",
+  async (req, res) => {
+
+    try {
+
+      const symbols =
+        await getSymbolIntelligence(pool);
+
+      res.json({
+
+        success: true,
+
+        total: symbols.length,
+
+        symbols
+
+      });
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "Symbol Intelligence:",
+        err.message
+      );
+
+      res.status(500).json({
+
+        success: false,
+
+        error:
+          err.message
+
+      });
+
+    }
+
+  }
+);
 /*
 ==================================================
 MODEL

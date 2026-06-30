@@ -1146,19 +1146,56 @@ const rankings =
 // ==========================================
 
 const qualifiedDiscoveries =
-  (discoveries || []).filter(
 
-    coin =>
+(discoveries || [])
 
-      coin.symbolScore >= 60 &&
+.filter(coin => {
 
-      coin.classification !==
-      "SUPPRESS" &&
+    if (!coin) {
 
-      coin.classification !==
-      "DISABLE"
+        return false;
 
-  );
+    }
+
+    if (coin.quoteVolume < 1000000) {
+
+        return false;
+
+    }
+
+    if (coin.symbolScore < 60) {
+
+        return false;
+
+    }
+
+    if (
+
+        coin.classification === "DISABLE" ||
+
+        coin.classification === "SUPPRESS"
+
+    ) {
+
+        return false;
+
+    }
+
+    return true;
+
+})
+
+.sort(
+
+    (a, b) =>
+
+        (b.symbolScore + b.score) -
+
+        (a.symbolScore + a.score)
+
+)
+
+.slice(0, 20);
 
 console.log(`
 ==================================
@@ -1188,31 +1225,7 @@ ${JSON.stringify(discoveries, null, 2)}
 ==================================
 `);
 
-console.log(
-  "DISCOVERY COUNT:",
-  discoveries.length
-);
-console.log(
-  "RANKING TYPE:",
-  typeof rankings
-);
 
-console.log(
-  "FIRST RANKING:",
-  JSON.stringify(
-    rankings?.[0],
-    null,
-    2
-  )
-);
-console.log(
-  "RANKINGS DEBUG:",
-  JSON.stringify(
-    rankings,
-    null,
-    2
-  )
-);
 
 const evaluatedDiscoveries =
   await evaluateDiscoveryCandidates(

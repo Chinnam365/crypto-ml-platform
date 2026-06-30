@@ -4230,6 +4230,40 @@ app.get(
 
   res.json(result.rows);
 });
+
+// ==========================================
+// DATABASE SCHEMA
+// ==========================================
+
+app.get("/database-schema", async (req, res) => {
+
+  try {
+
+    const result = await pool.query(`
+      SELECT
+        table_name,
+        column_name,
+        data_type
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+      ORDER BY table_name, ordinal_position
+    `);
+
+    res.json({
+      success: true,
+      schema: result.rows
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      success: false,
+      error: err.message
+    });
+
+  }
+
+});
   
 app.listen(PORT, () => {
 

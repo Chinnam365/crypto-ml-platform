@@ -747,20 +747,37 @@ app.get(
       const result =
         await pool.query(`
           SELECT
-            id,
-            symbol,
-            side,
-            confidence,
-            entry_price,
-            exit_price,
-            stop_loss,
-            take_profit,
-            pnl,
-            trend,
-            regime,
-            status,
-            opened_at,
-            closed_at
+             id,
+    symbol,
+    side,
+
+    confidence,
+
+    entry_price,
+    exit_price,
+
+    stop_loss,
+    take_profit,
+
+    pnl,
+
+    trend,
+    regime,
+
+    volatility,
+
+    strategy_key,
+
+    strategy_classification,
+
+    opportunity_score,
+
+    ml_probability,
+
+    status,
+
+    opened_at,
+    closed_at
           FROM positions
           WHERE status = 'CLOSED'
           ORDER BY closed_at DESC

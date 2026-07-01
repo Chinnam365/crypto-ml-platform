@@ -413,7 +413,156 @@ if (
     return decision;
 
 }
+function emergencyEvaluation(
+    decision,
+    confidence,
+    drawdown
+) {
 
+    if (
+
+        confidence < 35 ||
+
+        drawdown?.riskMode === "EMERGENCY"
+
+    ) {
+
+        return {
+
+            ...decision,
+
+            action: "EXIT",
+
+            urgency: "CRITICAL",
+
+            reason: "Emergency risk"
+
+        };
+
+    }
+
+    return null;
+
+}
+
+function momentumEvaluation(
+    decision,
+    momentum,
+    pnlPercent
+) {
+
+    if (
+
+        momentum === "BEARISH_ACCELERATION" &&
+
+        pnlPercent > 2
+
+    ) {
+
+        return {
+
+            ...decision,
+
+            action: "EXIT",
+
+            priority: 90,
+
+            reason: "Momentum reversal"
+
+        };
+
+    }
+
+    return null;
+
+}
+
+function profitProtectionEvaluation(
+    decision,
+    pnlPercent,
+    trend,
+    currentPrice,
+    position
+) {
+
+    if (
+
+        pnlPercent >= 6 &&
+
+        trend === "BULLISH"
+
+    ) {
+
+        return {
+
+            ...decision,
+
+            action: "MOVE_STOP",
+
+            priority: 70,
+
+            newStopLoss:
+                currentPrice * 0.985,
+
+            reason:
+                "Protect profits"
+
+        };
+
+    }
+
+    return null;
+
+}
+
+function timeEvaluation(
+    decision,
+    position,
+    pnlPercent
+) {
+
+    if (!position.opened_at) {
+
+        return null;
+
+    }
+
+    const hours =
+
+        (Date.now() -
+
+        new Date(
+            position.opened_at
+        ).getTime())
+
+        / 3600000;
+
+    if (
+
+        hours > 48 &&
+
+        pnlPercent < 1
+
+    ) {
+
+        return {
+
+            ...decision,
+
+            action: "EXIT",
+
+            priority: 40,
+
+            reason:
+                "Trade stalled"
+
+        };
+
+    }
+
+    return null;
+
+}
 module.exports = {
 
     evaluateTradeManagement,

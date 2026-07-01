@@ -1669,10 +1669,7 @@ const momentumState =
 // ==========================================
 
 const avgSymbolPnL = 0;
-const discoveryData =
-    qualifiedDiscoveries.find(
-        coin => coin.symbol === randomSymbol
-    ) || {};
+
   // ==========================================
 // OPPORTUNITY INTELLIGENCE V2
 // ==========================================

@@ -42,6 +42,18 @@ const {
 } = require("./ml/confidenceEngine");
 
 const {
+  evaluateOpportunity,
+} = require("./ml/opportunityIntelligenceV2");
+
+const {
+  fuseOpportunity,
+} = require("./ml/opportunityFusionEngine");
+
+const {
+  predictOpportunity,
+} = require("./ml/opportunityPredictionEngine");
+
+const {
   generateSymbolRankings,
 } = require("./ml/symbolRankingEngine");
 
@@ -1657,7 +1669,70 @@ const momentumState =
 // ==========================================
 
 const avgSymbolPnL = 0;
-   
+
+  // ==========================================
+// OPPORTUNITY INTELLIGENCE V2
+// ==========================================
+
+const opportunity =
+  evaluateOpportunity({
+
+    symbol: randomSymbol,
+
+    quoteVolume:
+      ticker?.quoteVolume || 0,
+
+    priceChange:
+      ticker?.priceChangePercent || 0,
+
+    trades:
+      ticker?.count || 0,
+
+  });
+
+const fusion =
+  fuseOpportunity({
+
+    opportunity,
+
+    symbolScore:
+      ranking?.score || 50,
+
+    confidence: 50,
+
+    reinforcement: 50,
+
+    discovery: 50,
+
+    portfolio: 50,
+
+});
+
+const prediction =
+  predictOpportunity({
+
+    fusionScore:
+      fusion.finalScore,
+
+    liquidity:
+      opportunity.liquidity,
+
+    momentum:
+      opportunity.momentum,
+
+    volatility:
+      opportunity.volatility,
+
+    confidence: 50,
+
+    discovery: 50,
+
+    reinforcement: 50,
+
+    trend,
+
+});
+  
 // ==========================================
 // AI CONFIDENCE
 // ==========================================
@@ -1681,6 +1756,12 @@ const confidenceData =
         Math.abs(macd) * 10
       ),
 
+    opportunityScore:
+  opportunity.opportunityScore,
+
+fusionScore:
+  fusion.finalScore,
+    
     alignmentScore:
       multiTf?.alignmentScore,
 
@@ -1700,6 +1781,27 @@ let confidence =
   Number(
     confidenceData?.confidence || 50
   );
+
+  console.log(`
+==================================
+OPPORTUNITY AI
+==================================
+
+Opportunity Score:
+${opportunity.opportunityScore}
+
+Fusion Score:
+${fusion.finalScore}
+
+Prediction:
+${prediction.probability}
+
+Should Trade:
+${prediction.shouldTrade}
+
+==================================
+`);
+  
  // ==========================================
 // CONFIDENCE VALIDATION
 // ==========================================

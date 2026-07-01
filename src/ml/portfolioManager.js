@@ -529,22 +529,3 @@ module.exports = {
 
   getPortfolioStats,
 };
-app.get("/portfolio-debug", async (req, res) => {
-
-  const pnl = await pool.query(`
-    SELECT
-      COUNT(*) AS trades,
-      SUM(pnl) AS total_pnl,
-      AVG(pnl) AS avg_pnl,
-      MIN(pnl) AS worst_trade,
-      MAX(pnl) AS best_trade
-    FROM positions
-    WHERE status='CLOSED'
-  `);
-
-  res.json({
-    success: true,
-    debug: pnl.rows[0]
-  });
-
-});

@@ -918,6 +918,38 @@ app.get("/history", async (req, res) => {
     res.send(err.message);
   }
 });
+
+console.log(`
+==================================
+FINAL EXECUTION CHECK
+==================================
+
+Symbol:
+${randomSymbol}
+
+Side:
+${side}
+
+Confidence:
+${confidence}
+
+Trade Quality:
+${tradeQuality}
+
+Execution Threshold:
+${executionThreshold}
+
+Stop Loss:
+${stopLoss}
+
+Take Profit:
+${takeProfit}
+
+Position Size:
+${positionSize}
+
+==================================
+`);
 /*
 ==================================================
 POSITIONS
@@ -2714,8 +2746,30 @@ if (!drawdown.tradingEnabled) {
     randomSymbol
   );
 
-if (!livePrice) {
+if (
+
+  !Number.isFinite(livePrice) ||
+
+  livePrice <= 0
+
+) {
+
+  console.log(`
+==================================
+INVALID LIVE PRICE
+==================================
+
+Symbol:
+${randomSymbol}
+
+Price:
+${livePrice}
+
+==================================
+`);
+
   continue;
+
 }
 
 const openPositionCheck =
@@ -2871,7 +2925,31 @@ const sizeMultiplier = 1;
 positionSize =
   positionSize *
   sizeMultiplier;
+if (
 
+  !Number.isFinite(positionSize) ||
+
+  positionSize <= 0
+
+) {
+
+  console.log(`
+==================================
+INVALID POSITION SIZE
+==================================
+
+Symbol:
+${randomSymbol}
+
+Position Size:
+${positionSize}
+
+==================================
+`);
+
+  continue;
+
+}
 console.log(`
 ==================================
 FINAL POSITION SIZE

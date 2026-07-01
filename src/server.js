@@ -1669,27 +1669,48 @@ const momentumState =
 // ==========================================
 
 const avgSymbolPnL = 0;
-
+const discoveryData =
+    qualifiedDiscoveries.find(
+        coin => coin.symbol === randomSymbol
+    ) || {};
   // ==========================================
 // OPPORTUNITY INTELLIGENCE V2
 // ==========================================
-
+const discoveryData =
+    qualifiedDiscoveries.find(
+        coin => coin.symbol === randomSymbol
+    ) || {};
+  
 const opportunity =
   evaluateOpportunity({
 
     symbol: randomSymbol,
 
     quoteVolume:
-      volume24h || 0,
+      Number(discoveryData.quoteVolume || 0),
 
     priceChange:
-      priceChangePercent || 0,
+      Number(
+        discoveryData.priceChange ||
+        discoveryData.priceChangePercent ||
+        0
+      ),
 
     trades:
-      tradeCount24h || 0,
+      Number(
+        discoveryData.count ||
+        discoveryData.tradeCount ||
+        discoveryData.trades ||
+        0
+      ),
 
   });
 
+  const ranking =
+    rankings.find(
+        item => item.symbol === randomSymbol
+    ) || {};
+  
 const fusion =
   fuseOpportunity({
 

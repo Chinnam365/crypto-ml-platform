@@ -305,7 +305,7 @@ close_reason = $4,
 
 closed_at = NOW()
 
-          WHERE id = $3
+          WHERE id = $5
           `,
           [
 currentPrice,

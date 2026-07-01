@@ -10,6 +10,18 @@ const {
   getSymbolIntelligence,
 } = require("./symbolIntelligence");
 
+const {
+  evaluateOpportunity,
+} = require("./opportunityIntelligenceV2");
+
+const {
+  fuseOpportunity,
+} = require("./opportunityFusionEngine");
+
+const {
+  predictOpportunity,
+} = require("./opportunityPredictionEngine");
+
 async function getDiscoveryCandidates() {
 
   try {
@@ -36,25 +48,99 @@ for (
    const discoveries =
   rankDiscoveries(
     marketData
-  ).map(coin => ({
+  ).map(coin => {
 
-    ...coin,
+    const opportunity =
+      evaluateOpportunity(
+        coin
+      );
 
-    symbolScore:
+    const fusion =
+      fuseOpportunity({
 
-      scoreMap[
-        coin.symbol
-      ]?.score || 50,
+        opportunity,
 
-    classification:
+        symbolScore:
+          scoreMap[
+            coin.symbol
+          ]?.score || 50,
 
-      scoreMap[
-        coin.symbol
-      ]?.classification ||
+        confidence: 50,
 
-      "NEUTRAL"
+        discovery:
+          coin.discoveryScore || 50,
 
-  }));
+        reinforcement: 50,
+
+        portfolio: 50,
+
+      });
+
+    const prediction =
+      predictOpportunity({
+
+        fusionScore:
+          fusion.finalScore,
+
+        liquidity:
+          opportunity.liquidity,
+
+        momentum:
+          opportunity.momentum,
+
+        volatility:
+          opportunity.volatility,
+
+        confidence: 50,
+
+        discovery:
+          coin.discoveryScore || 50,
+
+        reinforcement: 50,
+
+        trend:
+          coin.priceChange > 0
+            ? "BULLISH"
+            : "BEARISH"
+
+      });
+
+    return {
+
+      ...coin,
+
+      symbolScore:
+        scoreMap[
+          coin.symbol
+        ]?.score || 50,
+
+      classification:
+        scoreMap[
+          coin.symbol
+        ]?.classification ||
+        "NEUTRAL",
+
+      opportunityScore:
+        opportunity.opportunityScore,
+
+      opportunityClassification:
+        opportunity.classification,
+
+      opportunityReasons:
+        opportunity.reasons,
+
+      fusionScore:
+        fusion.finalScore,
+
+      predictionProbability:
+        prediction.probability,
+
+      shouldTrade:
+        prediction.shouldTrade
+
+    };
+
+});
 
     const candidates =
       discoveries
@@ -72,7 +158,17 @@ for (
       "DISABLE"
 
 )
-        .slice(0, 10);
+       .sort(
+
+  (a, b) =>
+
+    b.fusionScore -
+
+    a.fusionScore
+
+)
+
+.slice(0,10)
 
     console.log(`
 ==================================

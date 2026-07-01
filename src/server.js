@@ -1680,13 +1680,13 @@ const opportunity =
     symbol: randomSymbol,
 
     quoteVolume:
-      ticker?.quoteVolume || 0,
+      volume24h || 0,
 
     priceChange:
-      ticker?.priceChangePercent || 0,
+      priceChangePercent || 0,
 
     trades:
-      ticker?.count || 0,
+      tradeCount24h || 0,
 
   });
 

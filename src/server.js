@@ -4160,12 +4160,6 @@ app.get(
   }
 );
 
-  /*
-==================================================
-PORTFOLIO STATUS V2
-==================================================
-*/
-
 app.get(
   "/portfolio-status",
   async (req, res) => {
@@ -4182,6 +4176,22 @@ app.get(
         portfolio,
 
       });
+
+    } catch (err) {
+
+      res.status(500).json({
+
+        success: false,
+
+        error: err.message,
+
+      });
+
+    }
+
+  }
+);
+
 // ==========================================
 // PORTFOLIO DEBUG
 // ==========================================
@@ -4216,18 +4226,6 @@ app.get("/portfolio-debug", async (req, res) => {
   }
 
 });
-    } catch (err) {
-
-      res.status(500).json({
-
-        success: false,
-
-        error: err.message,
-
-      });
-    }
-  }
-);
 
  app.get(
   "/discovery",

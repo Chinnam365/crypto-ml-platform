@@ -46,7 +46,56 @@ function evaluateTradeManagement({
         urgency: "LOW",
 
     };
+/*
+==========================================
+DECISION PRIORITY
+==========================================
+*/
 
+const evaluations = [
+
+    emergencyEvaluation(
+        decision,
+        confidence,
+        drawdown
+    ),
+
+    momentumEvaluation(
+        decision,
+        momentum,
+        pnlPercent
+    ),
+
+    profitProtectionEvaluation(
+        decision,
+        pnlPercent,
+        trend,
+        currentPrice,
+        position
+    ),
+
+    timeEvaluation(
+        decision,
+        position,
+        pnlPercent
+    )
+
+];
+
+const highestPriority = evaluations
+    .filter(Boolean)
+    .sort(
+        (a, b) =>
+            b.priority - a.priority
+    )[0];
+
+if (highestPriority) {
+
+    return highestPriority;
+
+}
+
+return decision;
     if (!position) {
 
         decision.action = "EXIT";

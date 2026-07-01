@@ -3091,17 +3091,47 @@ ALLOW DUPLICATE EXPLORATION POSITIONS
 ==================================================
 */
 
-   console.log(`
+  console.log(`
 ==================================
-NEW POSITION
+FINAL EXECUTION CHECK
 ==================================
-Symbol: ${randomSymbol}
-Side: ${side}
-Entry Price: ${entryPrice}
-Stop Loss: ${stopLoss}
-Take Profit: ${takeProfit}
-Volatility: ${volatility}
-Confidence: ${confidence}
+
+Symbol:
+${randomSymbol}
+
+Side:
+${side}
+
+Entry Price:
+${entryPrice}
+
+Confidence:
+${confidence}
+
+Trade Quality:
+${tradeQuality}
+
+Execution Threshold:
+${executionThreshold}
+
+Stop Loss:
+${stopLoss}
+
+Take Profit:
+${takeProfit}
+
+Position Size:
+${adjustedPositionSize}
+
+Trend:
+${trend}
+
+Regime:
+${regime}
+
+Volatility:
+${volatility}
+
 ==================================
 `);
 await pool.query(

@@ -166,7 +166,171 @@ function evaluateTradeManagement({
             position.take_profit * 1.20;
 
     }
+/*
+==========================================
+PARTIAL PROFIT
+==========================================
+*/
 
+if (
+
+    pnlPercent >= 5 &&
+
+    confidence >= 70 &&
+
+    confidence < 85
+
+) {
+
+    decision.action =
+
+        "PARTIAL_EXIT";
+
+    decision.partialExit = 25;
+
+    decision.reason =
+
+        "Secure partial profits";
+
+}
+
+/*
+==========================================
+TRAILING STOP
+==========================================
+*/
+
+if (
+
+    pnlPercent >= 6 &&
+
+    trend === "BULLISH"
+
+) {
+
+    decision.action =
+
+        "MOVE_STOP";
+
+    decision.newStopLoss =
+
+        currentPrice * 0.985;
+
+    decision.reason =
+
+        "Activate trailing stop";
+
+}
+
+/*
+==========================================
+MOMENTUM WEAKENING
+==========================================
+*/
+
+if (
+
+    momentum ===
+
+    "BEARISH_ACCELERATION" &&
+
+    pnlPercent > 2
+
+) {
+
+    decision.action =
+
+        "EXIT";
+
+    decision.reason =
+
+        "Momentum reversal detected";
+
+    decision.urgency =
+
+        "HIGH";
+
+}
+
+/*
+==========================================
+TIME BASED EXIT
+==========================================
+*/
+
+if (
+
+    position.opened_at
+
+) {
+
+    const hoursOpen =
+
+        (Date.now() -
+
+        new Date(
+
+            position.opened_at
+
+        ).getTime())
+
+        / 3600000;
+
+    decision.hoursOpen =
+
+        Number(
+
+            hoursOpen.toFixed(2)
+
+        );
+
+    if (
+
+        hoursOpen >= 48 &&
+
+        pnlPercent < 1
+
+    ) {
+
+        decision.action =
+
+            "EXIT";
+
+        decision.reason =
+
+            "Trade stalled";
+
+    }
+
+}
+
+/*
+==========================================
+VOLATILITY PROTECTION
+==========================================
+*/
+
+if (
+
+    volatility >= 8 &&
+
+    pnlPercent > 3
+
+) {
+
+    decision.action =
+
+        "MOVE_STOP";
+
+    decision.newStopLoss =
+
+        currentPrice * 0.99;
+
+    decision.reason =
+
+        "High volatility protection";
+
+}
     /*
     ==========================================
     EMERGENCY EXIT

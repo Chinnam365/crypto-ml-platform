@@ -10,6 +10,10 @@ const {
   analyzeStrategyPerformance,
 } = require("./strategyAnalytics");
 
+const {
+  predictOpportunity,
+} = require("./opportunityPredictionEngine");
+
 /*
 ==================================================
 CROSS-MODEL CONSENSUS ENGINE
@@ -37,6 +41,10 @@ async function calculateConfidence({
   marketState,
 
   decision = "HOLD",
+
+opportunityScore = 50,
+
+fusionScore = 50,
 }) {
 
   try {
@@ -292,7 +300,41 @@ async function calculateConfidence({
       );
 
     let strategyBoost = 0;
+/*
+==================================================
+OPPORTUNITY PREDICTION
+==================================================
+*/
 
+const opportunityPrediction =
+  predictOpportunity({
+
+    fusionScore,
+
+    liquidity:
+      opportunityScore,
+
+    momentum:
+      momentumStrength,
+
+    volatility:
+      volatilityRegime === "HIGH"
+        ? 90
+        : volatilityRegime === "MEDIUM"
+          ? 70
+          : 50,
+
+    confidence,
+
+    discovery:
+      alignmentScore,
+
+    reinforcement:
+      adaptive.reinforcementBoost,
+
+    trend,
+
+});
     if (strategy) {
 
       if (
@@ -338,7 +380,17 @@ async function calculateConfidence({
 
       +
 
-      strategyBoost;
+      strategyBoost
+
+      +
+
+      (
+
+        opportunityPrediction.probability
+
+        - 50
+
+      ) * 0.08;
 
     /*
     ==================================================
@@ -515,6 +567,8 @@ ${memoryBoost.toFixed(2)}
 
 Strategy Boost:
 ${strategyBoost.toFixed(2)}
+Opportunity Probability:
+${opportunityPrediction.probability}
 
 Consensus Confidence:
 ${consensusConfidence}

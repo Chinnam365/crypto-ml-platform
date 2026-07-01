@@ -919,37 +919,6 @@ app.get("/history", async (req, res) => {
   }
 });
 
-console.log(`
-==================================
-FINAL EXECUTION CHECK
-==================================
-
-Symbol:
-${randomSymbol}
-
-Side:
-${side}
-
-Confidence:
-${confidence}
-
-Trade Quality:
-${tradeQuality}
-
-Execution Threshold:
-${executionThreshold}
-
-Stop Loss:
-${stopLoss}
-
-Take Profit:
-${takeProfit}
-
-Position Size:
-${positionSize}
-
-==================================
-`);
 /*
 ==================================================
 POSITIONS

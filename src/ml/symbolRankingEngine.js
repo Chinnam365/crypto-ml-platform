@@ -66,12 +66,18 @@ async function generateSymbolRankings() {
     const reinforcementMemory = reinforcementResult.rows;
 
     const symbols = [
-      "BTCUSDT",
-      "ETHUSDT",
-      "SOLUSDT",
-      "LINKUSDT",
-      "DOGEUSDT",
-    ];
+
+  ...new Set(
+
+    positions.map(
+
+      p => p.symbol
+
+    )
+
+  )
+
+];
 
     const rankings = [];
 
@@ -238,35 +244,32 @@ console.log(
       rankings.push({
         symbol,
 
-        trades: tradeCount,
+    trades: tradeCount,
 
-        winRate:
-          Number(winRate.toFixed(2)),
+    winRate: Number(winRate.toFixed(2)),
 
-        avgPnl:
-          Number(avgPnl.toFixed(2)),
+    avgPnl: Number(avgPnl.toFixed(2)),
 
-        avgConfidence:
-          Number(
-            avgConfidence.toFixed(2)
-          ),
+    avgConfidence: Number(avgConfidence.toFixed(2)),
 
-        avgReward:
-          Number(avgReward.toFixed(2)),
+    avgReward: Number(avgReward.toFixed(2)),
 
-        score:
-          Number(finalScore.toFixed(2)),
+    opportunityScore: 50,
 
-        classification,
+    fusionScore: 50,
 
-        allocation:
-          getAllocation(classification),
+    predictionProbability: 50,
 
-        status:
-          classification ===
-          "SUPPRESSED"
-            ? "SUPPRESSED"
-            : "ACTIVE",
+    score: Number(finalScore.toFixed(2)),
+
+    classification,
+
+    allocation: getAllocation(classification),
+
+    status:
+      classification === "SUPPRESSED"
+        ? "SUPPRESSED"
+        : "ACTIVE",
       });
     }
 

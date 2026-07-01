@@ -50,7 +50,35 @@ WHERE status = 'OPEN'
 
     const openTrades =
       openResult.rows;
+/*
+==================================================
+REALIZED PNL
+==================================================
+*/
 
+const pnlResult =
+  await pool.query(`
+    SELECT
+      COALESCE(
+        SUM(pnl),
+        0
+      ) AS realized_pnl
+    FROM positions
+    WHERE status='CLOSED'
+  `);
+
+const realizedPnL =
+  Number(
+    pnlResult.rows[0]
+      .realized_pnl || 0
+  );
+
+const startingCapital =
+  3000;
+
+const currentEquity =
+  startingCapital +
+  realizedPnL;
     /*
     ==================================================
     SYMBOL INTELLIGENCE
@@ -95,7 +123,8 @@ WHERE status = 'OPEN'
     ==================================================
     */
 
-    let maxExposure = 3000;
+    let maxExposure =
+  currentEquity;
 
     let maxPositions = 15;
 
@@ -465,12 +494,14 @@ async function getPortfolioStats() {
   return {
 
     equity:
-      result.maxExposure -
-      result.totalExposure,
+  result.maxExposure,
 
-    availableCapital:
-      result.maxExposure -
-      result.totalExposure,
+availableCapital:
+  Math.max(
+    0,
+    result.maxExposure -
+    result.totalExposure
+  ),
 
     usedCapital:
       result.totalExposure,

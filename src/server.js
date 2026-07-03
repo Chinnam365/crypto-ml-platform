@@ -1148,6 +1148,24 @@ async function runEngine() {
 
 await monitorPositions(pool);
     await updateReinforcementMemory();
+    
+    // ==========================================
+// MARKET UNIVERSE
+// ==========================================
+
+const marketUniverse =
+    await scanUniverse();
+
+console.log(`
+==================================
+MARKET UNIVERSE
+==================================
+
+Symbols Found:
+${marketUniverse.length}
+
+==================================
+`);
     // ==========================================
 // AI SYMBOL SELECTION
 // ==========================================

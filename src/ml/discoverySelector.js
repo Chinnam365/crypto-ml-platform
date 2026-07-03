@@ -1,6 +1,6 @@
 const {
-  getMarketScanner,
-} = require("./marketScanner");
+  scanUniverse,
+} = require("./universeScanner");
  
 const {
   rankDiscoveries,
@@ -27,7 +27,18 @@ async function getDiscoveryCandidates(pool) {
   try {
 
     const marketData =
-  await getMarketScanner();
+  await scanUniverse();
+
+console.log(`
+==================================
+UNIVERSE SCANNER
+==================================
+
+Symbols Returned:
+${marketData.length}
+
+==================================
+`);
 
 const symbolScores =
   await getSymbolIntelligence(pool);
@@ -143,32 +154,24 @@ for (
 });
 
     const candidates =
-      discoveries
-        .filter(
+  discoveries
+    .filter(
 
-  coin =>
+      coin =>
 
-    coin.quoteVolume >
-      3000000 &&
+        coin.quoteVolume > 1000000 &&
 
-    coin.symbolScore >=
-      55 &&
+        coin.symbolScore >= 45 &&
 
-    coin.classification !==
-      "DISABLE"
+        coin.classification !== "DISABLE"
 
-)
-       .sort(
-
-  (a, b) =>
-
-    b.fusionScore -
-
-    a.fusionScore
-
-)
-
-.slice(0,30);
+    )
+    .sort(
+      (a, b) =>
+        b.fusionScore -
+        a.fusionScore
+    )
+    .slice(0, 30);
 
 console.log(`
 ==================================

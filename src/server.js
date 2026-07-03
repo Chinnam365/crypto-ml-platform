@@ -211,10 +211,8 @@ const {
 } = require("./ml/universeScanner");
 
 const {
-  getMarketScanner,
-} = require(
-  "./ml/marketScanner"
-);
+  scanUniverse,
+} = require("./universeScanner");
 
 const {
   rankDiscoveries,
@@ -4375,7 +4373,7 @@ app.get("/portfolio-debug", async (req, res) => {
     try {
 
       const marketData =
-        await getMarketScanner();
+    await scanUniverse();
 
       const discoveries =
         rankDiscoveries(

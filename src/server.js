@@ -206,6 +206,9 @@ const {
   analyzeFeatureImportance,
 } = require("./ml/featureImportanceAnalyzer");
 
+const {
+    scanUniverse,
+} = require("./ml/universeScanner");
 
 const {
   getMarketScanner,

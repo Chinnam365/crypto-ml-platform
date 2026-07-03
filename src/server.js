@@ -1173,7 +1173,7 @@ ${marketUniverse.length}
 const rankings =
   await getBestSymbols();
     const discoveries =
-  await getDiscoveryCandidates();
+  await getDiscoveryCandidates(pool);
 
     // ==========================================
 // DISCOVERY SCORE FILTER

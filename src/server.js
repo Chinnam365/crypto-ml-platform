@@ -211,10 +211,6 @@ const {
 } = require("./ml/universeScanner");
 
 const {
-  scanUniverse,
-} = require("./universeScanner");
-
-const {
   rankDiscoveries,
 } = require(
   "./ml/discoveryRanking"

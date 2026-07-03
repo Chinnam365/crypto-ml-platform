@@ -1153,11 +1153,11 @@ const discoveries =
 
 console.log(`
 ==================================
-MARKET UNIVERSE
+DISCOVERY UNIVERSE
 ==================================
 
-Symbols Found:
-${marketUniverse.length}
+Candidates Found:
+${discoveries.length}
 
 ==================================
 `);

@@ -1673,7 +1673,7 @@ const avgSymbolPnL = 0;
   // ==========================================
 // OPPORTUNITY INTELLIGENCE V2
 // ==========================================
-const discoveryData =
+const opportunityDiscovery =
     qualifiedDiscoveries.find(
         coin => coin.symbol === randomSymbol
     ) || {};

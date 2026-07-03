@@ -22,7 +22,7 @@ const {
   predictOpportunity,
 } = require("./opportunityPredictionEngine");
 
-async function getDiscoveryCandidates() {
+async function getDiscoveryCandidates(pool) {
 
   try {
 
@@ -149,7 +149,7 @@ for (
   coin =>
 
     coin.quoteVolume >
-      1000000 &&
+      3000000 &&
 
     coin.symbolScore >=
       45 &&
@@ -168,9 +168,9 @@ for (
 
 )
 
-.slice(0,10)
+.slice(0,20);
 
-    console.log(`
+console.log(`
 ==================================
 DISCOVERY CANDIDATES
 ==================================
@@ -180,12 +180,12 @@ DISCOVERY CANDIDATES
       coin => {
 
         console.log(
-          coin.symbol,
-          "| Score:",
-          coin.discoveryScore,
-          "| Change:",
-          coin.priceChange
-        );
+    `${coin.symbol}
+ | Opportunity: ${coin.opportunityScore}
+ | Fusion: ${coin.fusionScore}
+ | Prediction: ${coin.predictionProbability}
+ | Discovery: ${coin.discoveryScore}`
+);
       }
     );
 

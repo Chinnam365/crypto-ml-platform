@@ -1,7 +1,7 @@
 const {
   getMarketScanner,
 } = require("./marketScanner");
-
+ 
 const {
   rankDiscoveries,
 } = require("./discoveryRanking");

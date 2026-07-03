@@ -10,9 +10,6 @@ const axios = require("axios");
 
 const BINANCE_URL =
     "https://fapi.binance.com/fapi/v1/ticker/24hr";
-const {
-    scanUniverse,
-} = require("./universeScanner");
 
 async function scanUniverse() {
 

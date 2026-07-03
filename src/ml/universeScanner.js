@@ -1,3 +1,6 @@
+const {
+    scanUniverse,
+} = require("./universeScanner");
 /*
 ==================================================
 DYNAMIC UNIVERSE SCANNER

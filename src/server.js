@@ -1153,8 +1153,8 @@ await monitorPositions(pool);
 // MARKET UNIVERSE
 // ==========================================
 
-const marketUniverse =
-    await scanUniverse();
+const discoveries =
+    await getDiscoveryCandidates(pool);
 
 console.log(`
 ==================================

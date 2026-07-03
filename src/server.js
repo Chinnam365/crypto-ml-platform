@@ -1684,20 +1684,20 @@ const opportunity =
     symbol: randomSymbol,
 
     quoteVolume:
-      Number(discoveryData.quoteVolume || 0),
+      Number(opportunityDiscovery.quoteVolume || 0),
 
     priceChange:
       Number(
-        discoveryData.priceChange ||
-        discoveryData.priceChangePercent ||
+        opportunityDiscovery.priceChange ||
+        opportunityDiscovery.priceChangePercent ||
         0
       ),
 
     trades:
       Number(
-        discoveryData.count ||
-        discoveryData.tradeCount ||
-        discoveryData.trades ||
+        opportunityDiscovery.count ||
+        opportunityDiscovery.tradeCount ||
+        opportunityDiscovery.trades ||
         0
       ),
 

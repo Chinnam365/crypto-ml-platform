@@ -152,7 +152,7 @@ for (
       3000000 &&
 
     coin.symbolScore >=
-      45 &&
+      55 &&
 
     coin.classification !==
       "DISABLE"
@@ -168,7 +168,7 @@ for (
 
 )
 
-.slice(0,20);
+.slice(0,30);
 
 console.log(`
 ==================================

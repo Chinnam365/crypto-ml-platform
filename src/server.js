@@ -1152,7 +1152,20 @@ await monitorPositions(pool);
 
 const discoveries =
     await getDiscoveryCandidates(pool);
+console.log(`
+==================================
+SERVER DISCOVERY DEBUG
+==================================
+Returned Candidates:
+${discoveryCandidates.length}
 
+${JSON.stringify(
+    discoveryCandidates.map(c => c.symbol),
+    null,
+    2
+)}
+==================================
+`);
 console.log(`
 ==================================
 DISCOVERY UNIVERSE
@@ -1254,7 +1267,14 @@ ${JSON.stringify(discoveries, null, 2)}
 ==================================
 `);
 
-
+console.log(`
+==================================
+BEFORE EVALUATOR
+==================================
+Candidates:
+${discoveryCandidates.length}
+==================================
+`);
 
 const evaluatedDiscoveries =
   await evaluateDiscoveryCandidates(

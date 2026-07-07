@@ -1884,35 +1884,35 @@ const mlConfidence =
   mlProbability * 100;
 
 // ==========================================
-// COMBINE RULES + ML
+// ML VALIDATION
 // ==========================================
 
-confidence =
-  (
-    confidence * 0.9
-  ) +
-  (
-    mlConfidence * 0.1
-  );
-// ==========================================
-// MULTI TF CONFIDENCE BOOST
-// ==========================================
+const mlDeviation =
+    Math.abs(
+        confidence -
+        mlConfidence
+    );
 
-if (
+if (mlDeviation > 30) {
 
-  multiTf.overallTrend ===
-  trend
+    console.log(`
+==================================
+ML DISAGREEMENT
+==================================
 
-) {
+AI:
+${confidence.toFixed(2)}
 
-  confidence += 10;
+ML:
+${mlConfidence.toFixed(2)}
+
+Deviation:
+${mlDeviation.toFixed(2)}
+
+==================================
+`);
+
 }
-
-else {
-
-  confidence -= 5;
-}
-
 
 // ==========================================
 // SYMBOL WEIGHTING
@@ -2221,8 +2221,19 @@ ${reinforcementReward}
 
   continue;
 }
-  confidence +=
-    reinforcementReward * 25;
+  console.log(`
+==================================
+REINFORCEMENT VALIDATION
+==================================
+
+Historical Reward:
+${reinforcementReward}
+
+Handled By:
+Evidence Fusion Engine
+
+==================================
+`);
 
   console.log(`
 ==================================
@@ -2274,7 +2285,7 @@ ${reinforcementReward}
 confidence =
   Math.max(
     confidence,
-    35
+    20
   );
 
 // ==========================================
@@ -2282,14 +2293,32 @@ confidence =
 // ==========================================
 
 confidence =
-  Math.max(
-    20,
-    Math.min(
-      confidence,
-      95
-    )
-  );
+    Math.max(
+        0,
+        Math.min(
+            confidence,
+            99
+        )
+    );
+console.log(`
+==================================
+AI FUSION SUMMARY
+==================================
 
+Agreement:
+${confidenceData.agreement}
+
+Evidence Quality:
+${confidenceData.evidenceQuality}
+
+Reliability:
+${confidenceData.reliability}
+
+Consensus:
+${confidenceData.consensusStrength}
+
+==================================
+`);
 console.log(`
 ==================================
 FINAL CONFIDENCE

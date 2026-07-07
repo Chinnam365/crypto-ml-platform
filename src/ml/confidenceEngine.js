@@ -485,76 +485,97 @@ const memoryScore =
     }
 
     /*
-    ==================================================
-    CLAMPING
-    ==================================================
-    */
+==================================================
+CONFIDENCE CALIBRATION
+==================================================
+*/
 
-   consensusConfidence =
+let reliability = 50;
 
-  Math.max(
-    1,
-    Math.min(
-      consensusConfidence,
-      99
-    )
-  );
+reliability +=
+    fusion.agreement * 0.25;
+
+reliability +=
+    fusion.evidenceQuality * 0.25;
+
+reliability +=
+    consensusStrength * 0.20;
+
+reliability =
+    Math.max(
+        0,
+        Math.min(
+            reliability,
+            100
+        )
+    );
+
+/*
+==================================================
+STRATEGY LIMITS
+==================================================
+*/
 
 if (
-  strategy &&
-  strategy.classification === "PROMOTE"
+    strategy &&
+    strategy.classification === "PROMOTE"
 ) {
 
-  consensusConfidence =
-    Math.min(
-      consensusConfidence,
-      92
-    );
+    consensusConfidence =
+        Math.min(
+            consensusConfidence,
+            95
+        );
 
 }
 
 else if (
-  strategy &&
-  strategy.classification === "FAVOR"
+    strategy &&
+    strategy.classification === "FAVOR"
 ) {
 
-  consensusConfidence =
-    Math.min(
-      consensusConfidence,
-      88
-    );
+    consensusConfidence =
+        Math.min(
+            consensusConfidence,
+            90
+        );
 
 }
 
 else {
 
-  consensusConfidence =
-    Math.min(
-      consensusConfidence,
-      85
-    );
+    consensusConfidence =
+        Math.min(
+            consensusConfidence,
+            85
+        );
 
 }
 
-    consensusStrength =
+/*
+==================================================
+FINAL CLAMP
+==================================================
+*/
 
-      Math.max(
-        0,
+consensusConfidence =
+    Math.max(
+        1,
         Math.min(
-          consensusStrength,
-          100
+            consensusConfidence,
+            99
         )
-      );
+    );
 
-    consensusConfidence =
-      Number(
+consensusConfidence =
+    Number(
         consensusConfidence.toFixed(2)
-      );
+    );
 
-    consensusStrength =
-      Number(
-        consensusStrength.toFixed(2)
-      );
+reliability =
+    Number(
+        reliability.toFixed(2)
+    );
 /*
 ==================================================
 EVIDENCE FUSION
@@ -599,7 +620,7 @@ let consensusConfidence =
 
     console.log(`
 ==================================
-CROSS-MODEL CONSENSUS ENGINE
+EVIDENCE FUSION ENGINE
 ==================================
 
 Base Confidence:
@@ -608,46 +629,65 @@ ${confidence}
 Adaptive Confidence:
 ${adaptive.adjustedConfidence}
 
-Memory Boost:
-${memoryBoost.toFixed(2)}
+Reinforcement:
+${reinforcementScore.toFixed(2)}
 
-Strategy Boost:
-${strategyBoost.toFixed(2)}
-Opportunity Probability:
+Memory:
+${memoryScore.toFixed(2)}
+
+Strategy:
+${strategyScore.toFixed(2)}
+
+Opportunity:
 ${opportunityPrediction.probability}
 
-Consensus Confidence:
-${consensusConfidence}
+Agreement:
+${fusion.agreement}
+
+Evidence Quality:
+${fusion.evidenceQuality}
+
+Reliability:
+${reliability}
 
 Consensus Strength:
 ${consensusStrength}
 
-Strategy:
-${strategyKey}
+Final Confidence:
+${consensusConfidence}
 
 ==================================
 `);
 
     return {
 
-      confidence:
+    confidence:
         consensusConfidence,
 
-      consensusStrength,
+    consensusStrength,
 
-      reinforcementBoost:
+    agreement:
+        fusion.agreement,
+
+    evidenceQuality:
+        fusion.evidenceQuality,
+
+    reliability,
+
+    reinforcementBoost:
         adaptive.reinforcementBoost,
 
-      memoryBoost:
+    memoryBoost:
         Number(
-          memoryBoost.toFixed(2)
+            memoryBoost.toFixed(2)
         ),
 
-      strategyBoost:
+    strategyBoost:
         Number(
-          strategyBoost.toFixed(2)
+            strategyBoost.toFixed(2)
         ),
-    };
+
+};
 
   } catch (err) {
 

@@ -4,6 +4,10 @@ const {
 const {
   generateSymbolRankings,
 } = require("./symbolRankingEngine");
+const {
+  getDiscoveryCandidates,
+} = require("./discoverySelector");
+
 const pool =
   require("../db/db");
 
@@ -360,7 +364,10 @@ async function getBestSymbols(
 
 module.exports = {
 
+  selectSymbols: selectTradingSymbols,
+
   selectTradingSymbols,
 
   getBestSymbols,
+
 };

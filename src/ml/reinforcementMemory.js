@@ -110,21 +110,50 @@ ${patternTrades.length}
     ==================================================
     */
 
-    if (
-      trades.length < 20
-    ) {
+    // ==========================================
+// HIERARCHICAL MEMORY
+// ==========================================
 
-      return {
+const memoryTrades =
+
+    trades.length >= 20
+
+        ? trades
+
+        : patternTrades;
+
+if (memoryTrades.length < 20) {
+
+    return {
 
         reinforcementScore: 50,
 
-        winRate: 0,
+        matches: memoryTrades.length,
 
-        sampleSize:
-          trades.length,
-      };
-    }
+        source: "DEFAULT"
 
+    };
+
+}
+console.log(`
+==================================
+MEMORY SOURCE
+==================================
+
+Symbol:
+${symbol}
+
+Using:
+${trades.length >= 20 ? "EXACT" : "PATTERN"}
+
+Exact Trades:
+${trades.length}
+
+Pattern Trades:
+${patternTrades.length}
+
+==================================
+`);
     /*
     ==================================================
     CALCULATE WIN RATE
@@ -134,7 +163,7 @@ ${patternTrades.length}
     let wins = 0;
 
     for (
-      const trade of trades
+      const trade of memoryTrades
     ) {
 
       const pnl =
@@ -150,7 +179,7 @@ ${patternTrades.length}
     const winRate =
       (
         wins /
-        trades.length
+        memoryTrades.length
       ) * 100;
 
     /*
@@ -231,7 +260,7 @@ ${patternTrades.length}
         ),
 
       sampleSize:
-        trades.length,
+        memoryTrades.length,
     };
 
   } catch (err) {

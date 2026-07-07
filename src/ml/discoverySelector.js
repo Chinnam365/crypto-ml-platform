@@ -163,8 +163,10 @@ for (
 
         coin.symbolScore >= 45 &&
 
-        coin.classification !== "DISABLE"
-coin.shouldTrade
+        coin.classification !== "DISABLE" &&
+
+        coin.shouldTrade
+
     )
     .sort(
       (a, b) =>
@@ -172,7 +174,22 @@ coin.shouldTrade
         a.fusionScore
     )
     .slice(0, 30);
+console.log(`
+==================================
+DISCOVERY STATS
+==================================
 
+Market Symbols:
+${marketData.length}
+
+Ranked:
+${discoveries.length}
+
+Qualified:
+${candidates.length}
+
+==================================
+`);
 console.log(`
 ==================================
 DISCOVERY CANDIDATES

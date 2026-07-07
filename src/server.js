@@ -4527,7 +4527,7 @@ app.listen(PORT, () => {
   );
 
   // START LIVE MARKET ENGINE
-  startBinanceWebsocket();
+  startBinanceWebsocket(pool);
 });
 }
 startServer();

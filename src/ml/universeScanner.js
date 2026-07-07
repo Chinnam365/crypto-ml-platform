@@ -84,15 +84,62 @@ async function scanUniverse() {
 
         }))
 
+        .map(symbol => {
+
+    const volumeScore =
+        Math.min(
+            100,
+            symbol.quoteVolume / 10000000
+        );
+
+    const volatilityScore =
+        Math.min(
+            100,
+            symbol.volatility * 5
+        );
+
+    const activityScore =
+        Math.min(
+            100,
+            symbol.trades / 50000
+        );
+
+    const momentumScore =
+        Math.abs(
+            symbol.priceChange
+        );
+
+    const universeScore =
+
+        volumeScore * 0.35 +
+
+        volatilityScore * 0.25 +
+
+        activityScore * 0.20 +
+
+        momentumScore * 0.20;
+
+    return {
+
+        ...symbol,
+
+        universeScore:
+            Number(
+                universeScore.toFixed(2)
+            ),
+
+    };
+
+})
         .sort(
 
-            (a, b) =>
+    (a, b) =>
 
-                b.quoteVolume -
+        b.universeScore -
 
-                a.quoteVolume
+        a.universeScore
 
-        );
+)
 
 }
 

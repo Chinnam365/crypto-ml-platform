@@ -1,42 +1,16 @@
 const WebSocket = require("ws");
 
 // ==========================================
-// SYMBOLS TO TRACK
-// ==========================================
-
-const symbols = [
-  "btcusdt",
-  "ethusdt",
-  "solusdt",
-  "linkusdt",
-  "dogeusdt",
-];
-
-// ==========================================
 // LIVE MARKET STORE
 // ==========================================
 
 const liveMarketData = {};
 
 // ==========================================
-// CREATE STREAM URL
-// ==========================================
-
-const streams = symbols
-  .map(
-    symbol =>
-      `${symbol}@kline_1m`
-  )
-  .join("/");
-
-const wsUrl =
-  `wss://stream.binance.com:9443/stream?streams=${streams}`;
-
-// ==========================================
 // START WEBSOCKET
 // ==========================================
 
-function startBinanceWebsocket() {
+async function startBinanceWebsocket(pool) {
 
   console.log(
     "Starting Binance WebSocket..."

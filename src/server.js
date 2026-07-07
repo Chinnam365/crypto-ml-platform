@@ -134,7 +134,9 @@ const {
   getMultiTimeframeAnalysis,
 } = require("./ml/multiTimeframe");
 
-
+const {
+  getAccountStats,
+} = require("./ml/accountManager");
 
 const {
   getAdaptiveThreshold,

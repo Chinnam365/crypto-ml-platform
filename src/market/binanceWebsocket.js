@@ -12,6 +12,43 @@ const liveMarketData = {};
 
 async function startBinanceWebsocket(pool) {
 
+    // ==========================================
+    // LOAD AI-SELECTED SYMBOLS
+    // ==========================================
+
+    let symbols;
+
+    try {
+
+        symbols =
+            await selectSymbols(pool);
+
+    } catch {
+
+        console.log(
+            "Using fallback symbols"
+        );
+
+        symbols = [
+            "BTCUSDT",
+            "ETHUSDT",
+            "SOLUSDT",
+            "LINKUSDT",
+            "DOGEUSDT",
+        ];
+
+    }
+
+    const streams =
+        symbols
+            .map(
+                s => `${s.toLowerCase()}@kline_1m`
+            )
+            .join("/");
+
+    const wsUrl =
+        `wss://stream.binance.com:9443/stream?streams=${streams}`;
+
   console.log(
     "Starting Binance WebSocket..."
   );

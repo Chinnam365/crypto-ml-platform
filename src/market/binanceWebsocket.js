@@ -24,6 +24,14 @@ async function startBinanceWebsocket(pool) {
 
         symbols =
             await selectSymbols(pool);
+      if (!Array.isArray(symbols) || symbols.length === 0) {
+
+    throw new Error(
+        "selectSymbols() returned no symbols"
+    );
+
+}
+      
 console.log(`
 ==================================
 AI SYMBOL SUBSCRIPTIONS
@@ -33,11 +41,21 @@ ${symbols.join("\n")}
 
 ==================================
 `);
-    } catch {
+    } catch (err) {
 
-        console.log(
-            "Using fallback symbols"
-        );
+    console.error(`
+==================================
+AI SYMBOL SELECTION FAILED
+==================================
+
+${err.stack}
+
+==================================
+`);
+
+    console.log(
+        "Using fallback symbols"
+    );
 
         symbols = [
             "BTCUSDT",

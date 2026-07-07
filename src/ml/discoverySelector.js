@@ -164,7 +164,7 @@ for (
         coin.symbolScore >= 45 &&
 
         coin.classification !== "DISABLE"
-
+coin.shouldTrade
     )
     .sort(
       (a, b) =>

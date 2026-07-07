@@ -14,6 +14,10 @@ const {
   predictOpportunity,
 } = require("./opportunityPredictionEngine");
 
+const {
+  fuseEvidence,
+} = require("./evidenceFusionEngine");
+
 /*
 ==================================================
 CROSS-MODEL CONSENSUS ENGINE
@@ -365,32 +369,39 @@ const opportunityPrediction =
     }
 
     /*
-    ==================================================
-    CONSENSUS CONFIDENCE
-    ==================================================
-    */
+==================================================
+PREPARE EVIDENCE SCORES
+==================================================
+*/
 
-    let consensusConfidence =
+const reinforcementScore =
+  Math.max(
+    0,
+    Math.min(
+      100,
+      50 + adaptive.reinforcementBoost * 4
+    )
+  );
 
-      adaptive.adjustedConfidence
+const strategyScore =
+  strategy
+    ? Math.max(
+        0,
+        Math.min(
+          100,
+          50 + strategyBoost * 10
+        )
+      )
+    : 50;
 
-      +
-
-      memoryBoost
-
-      +
-
-      strategyBoost
-
-      +
-
-      (
-
-        opportunityPrediction.probability
-
-        - 50
-
-      ) * 0.08;
+const memoryScore =
+  Math.max(
+    0,
+    Math.min(
+      100,
+      50 + memoryBoost * 8
+    )
+  );
 
     /*
     ==================================================
@@ -544,7 +555,42 @@ else {
       Number(
         consensusStrength.toFixed(2)
       );
+/*
+==================================================
+EVIDENCE FUSION
+==================================================
+*/
 
+const fusion = fuseEvidence({
+
+  mlConfidence:
+    adaptive.adjustedConfidence,
+
+  reinforcementScore,
+
+  opportunityScore:
+    opportunityPrediction.probability,
+
+  strategyScore,
+
+  memoryScore,
+
+  alignmentScore,
+
+  consensusStrength,
+
+  sampleConfidence:
+    Math.min(
+      1,
+      (
+        adaptive.sampleSize || 0
+      ) / 100
+    ),
+
+});
+
+let consensusConfidence =
+  fusion.confidence;
     /*
     ==================================================
     LOGGING

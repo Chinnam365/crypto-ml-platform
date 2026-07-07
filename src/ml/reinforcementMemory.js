@@ -274,41 +274,7 @@ reinforcementScore =
     Math.max(
         0,
         Math.min(100, reinforcementScore)
-    ); =
-      50;
-
-    if (
-      winRate >= 70
-    ) {
-
-      reinforcementScore = 90;
-    }
-
-    else if (
-      winRate >= 60
-    ) {
-
-      reinforcementScore = 75;
-    }
-
-    else if (
-      winRate >= 50
-    ) {
-
-      reinforcementScore = 60;
-    }
-
-    else if (
-      winRate >= 40
-    ) {
-
-      reinforcementScore = 45;
-    }
-
-    else {
-
-      reinforcementScore = 30;
-    }
+    ); 
 
     /*
     ==================================================

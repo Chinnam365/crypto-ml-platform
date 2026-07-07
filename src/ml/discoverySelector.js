@@ -153,27 +153,39 @@ for (
 
 });
 
-    const candidates =
-  discoveries
-    .filter(
+    const candidates = discoveries.filter(coin => {
 
-      coin =>
-
+    const passed =
         coin.quoteVolume > 1000000 &&
-
         coin.symbolScore >= 45 &&
-
         coin.classification !== "DISABLE" &&
+        coin.shouldTrade === true;
 
-        coin.shouldTrade
+    if (!passed) {
 
-    )
-    .sort(
-      (a, b) =>
+        console.log(`
+==================================
+DISCOVERY REJECTED
+==================================
+Symbol: ${coin.symbol}
+Quote Volume: ${coin.quoteVolume}
+Symbol Score: ${coin.symbolScore}
+Classification: ${coin.classification}
+Should Trade: ${coin.shouldTrade}
+==================================
+`);
+
+    }
+
+    return passed;
+
+})
+.sort(
+    (a, b) =>
         b.fusionScore -
         a.fusionScore
-    )
-    .slice(0, 30);
+)
+.slice(0, 30);
 console.log(`
 ==================================
 DISCOVERY STATS

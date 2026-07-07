@@ -125,14 +125,7 @@ else if (
   ].wins += 0.5;
 }
     
-    console.log(
-  trade.symbol,
-  trade.pnl,
-  Number(trade.pnl || 0) > 0
-    ? "WIN"
-    : "LOSS"
-);
-}
+    }
     /*
     ==================================================
     CALCULATE WEIGHTS
@@ -230,45 +223,75 @@ const sampleQuality =
   stats.wins,
   stats.pnl
 );
-      /*
-      ================================================
-      WEIGHT FORMULA
-      ================================================
-      */
-
-     let weight =
-
-  0.30 +
-
-  (winRate * 1.00) +
-
-  (avgPnL * 0.10) +
-
-  (avgConfidence / 100 * 0.40) +
-
-  (recentPnL * 0.05) +
-
-  (sampleQuality * 0.50);
-
-     /*
+/*
 ===============================================
-UNDERPERFORMANCE SUPPRESSION
+PROFIT-FIRST WEIGHT FORMULA
+===============================================
+*/
+
+const normalizedPnL =
+    Math.max(
+        -20,
+        Math.min(
+            avgPnL,
+            20
+        )
+    ) / 20;
+
+const normalizedRecentPnL =
+    Math.max(
+        -20,
+        Math.min(
+            recentPnL,
+            20
+        )
+    ) / 20;
+
+let weight =
+
+    0.20 +
+
+    (winRate * 0.60) +
+
+    (normalizedPnL * 0.90) +
+
+    (normalizedRecentPnL * 0.50) +
+
+    ((avgConfidence / 100) * 0.15) +
+
+    (sampleQuality * 0.15);
+
+    /*
+===============================================
+PROFITABILITY PENALTIES
 ===============================================
 */
 
 if (
-  avgPnL < -5 &&
-  stats.total >= 20
+    avgPnL < -2 &&
+    stats.total >= 20
 ) {
 
-  weight = 0.05;
+    weight *= 0.50;
+
 }
+
 if (
-  avgPnL < -10 &&
-  stats.total >= 30
+    avgPnL < -5 &&
+    stats.total >= 30
 ) {
 
-  weight = 0;
+    weight *= 0.25;
+
+}
+
+if (
+    avgPnL < -10 &&
+    stats.total >= 40
+) {
+
+    weight = 0.05;
+
 }
 /*
 ===============================================

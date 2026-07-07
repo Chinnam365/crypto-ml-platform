@@ -1734,7 +1734,8 @@ const fusion =
 
     reinforcement: 50,
 
-    discovery: 50,
+    discovery:
+    opportunity.opportunityScore,
 
     portfolio: 50,
 
@@ -1757,7 +1758,8 @@ const prediction =
 
     confidence: 50,
 
-    discovery: 50,
+    discovery:
+    opportunity.opportunityScore,
 
     reinforcement: 50,
 

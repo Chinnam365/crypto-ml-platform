@@ -54,7 +54,56 @@ async function getReinforcementScore({
 
     const trades =
       result.rows;
+// ==========================================
+// LEVEL 2 - PATTERN MEMORY
+// ==========================================
 
+let patternTrades = [];
+
+if (trades.length < 20) {
+
+    const patternResult =
+        await pool.query(
+
+`
+SELECT *
+FROM trade_history
+WHERE
+
+trend = $1
+AND overall_trend = $2
+AND volatility_regime = $3
+
+ORDER BY id DESC
+LIMIT 200
+`,
+
+[
+    trend,
+    overallTrend,
+    volatilityRegime
+]
+
+);
+
+    patternTrades =
+        patternResult.rows;
+
+    console.log(`
+==================================
+PATTERN MEMORY
+==================================
+
+Exact Matches:
+${trades.length}
+
+Pattern Matches:
+${patternTrades.length}
+
+==================================
+`);
+
+}
     /*
     ==================================================
     NOT ENOUGH DATA

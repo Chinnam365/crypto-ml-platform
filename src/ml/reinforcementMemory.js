@@ -181,14 +181,100 @@ ${patternTrades.length}
         wins /
         memoryTrades.length
       ) * 100;
+/*
+==================================================
+LEARNING METRICS
+==================================================
+*/
 
+let totalPnL = 0;
+let totalReward = 0;
+let recentPnL = 0;
+
+const recentTrades =
+    memoryTrades.slice(0, 20);
+
+for (const trade of memoryTrades) {
+
+    totalPnL += Number(trade.pnl || 0);
+
+    totalReward += Number(trade.reward || 0);
+}
+
+for (const trade of recentTrades) {
+
+    recentPnL += Number(trade.pnl || 0);
+}
+
+const avgPnL =
+    totalPnL / memoryTrades.length;
+
+const avgReward =
+    totalReward / memoryTrades.length;
+
+const recentAvgPnL =
+    recentPnL / recentTrades.length;
+
+const sampleConfidence =
+    Math.min(
+        memoryTrades.length / 100,
+        1
+    );
     /*
     ==================================================
     REINFORCEMENT SCORE
     ==================================================
     */
 
-    let reinforcementScore =
+    /*
+==================================================
+MULTI-FACTOR REINFORCEMENT SCORE
+==================================================
+*/
+
+let reinforcementScore = 50;
+
+// Win Rate
+
+reinforcementScore +=
+    (winRate - 50) * 0.6;
+
+// Average PnL
+
+reinforcementScore +=
+    avgPnL * 1.5;
+
+// Average Reward
+
+reinforcementScore +=
+    avgReward * 6;
+
+// Recent Performance
+
+reinforcementScore +=
+    recentAvgPnL * 0.8;
+
+// Sample Confidence
+
+reinforcementScore *=
+    (0.6 + sampleConfidence * 0.4);
+
+// Momentum Bonus
+
+if (
+    momentumState === "BULLISH_ACCELERATION" &&
+    recentAvgPnL > 0
+) {
+    reinforcementScore += 3;
+}
+
+// Clamp
+
+reinforcementScore =
+    Math.max(
+        0,
+        Math.min(100, reinforcementScore)
+    ); =
       50;
 
     if (
@@ -274,12 +360,23 @@ ${patternTrades.length}
 
     return {
 
-      reinforcementScore: 50,
+    reinforcementScore,
 
-      winRate: 0,
+    winRate:
+        Number(winRate.toFixed(2)),
 
-      sampleSize: 0,
-    };
+    avgPnL:
+        Number(avgPnL.toFixed(2)),
+
+    avgReward:
+        Number(avgReward.toFixed(2)),
+
+    recentAvgPnL:
+        Number(recentAvgPnL.toFixed(2)),
+
+    sampleSize:
+        memoryTrades.length,
+};
   }
 }
 

@@ -60,15 +60,26 @@ const suppressedSymbols =
     ==================================================
     */
 
-    if (
-      rankings.length === 0
-    ) {
-      return const discoveries =
+    if (rankings.length === 0) {
+
+  console.log(`
+==================================
+NO SYMBOL HISTORY
+==================================
+
+Using Discovery Selector
+
+==================================
+`);
+
+  const discoveries =
     await getDiscoveryCandidates(pool);
 
-return discoveries
+  return discoveries
+    .slice(0, maxSymbols)
     .map(item => item.symbol);
-    }
+
+}
 
     /*
     ==================================================
@@ -323,18 +334,12 @@ SYMBOL SELECTION ERROR
 ==================================
 `);
 
-    return [
+    const discoveries =
+  await getDiscoveryCandidates(pool);
 
-      "BTCUSDT",
-
-      "ETHUSDT",
-
-      "SOLUSDT",
-
-      "LINKUSDT",
-
-      "DOGEUSDT",
-    ];
+return discoveries
+  .slice(0, maxSymbols)
+  .map(item => item.symbol);
   }
 }
 

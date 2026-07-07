@@ -63,14 +63,11 @@ const suppressedSymbols =
     if (
       rankings.length === 0
     ) {
+      return const discoveries =
+    await getDiscoveryCandidates(pool);
 
-      return [
-        "BTCUSDT",
-        "ETHUSDT",
-        "SOLUSDT",
-        "LINKUSDT",
-        "DOGEUSDT",
-      ];
+return discoveries
+    .map(item => item.symbol);
     }
 
     /*

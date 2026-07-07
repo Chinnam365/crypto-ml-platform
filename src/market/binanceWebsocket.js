@@ -1,5 +1,7 @@
 const WebSocket = require("ws");
-
+const {
+  selectSymbols,
+} = require("../ml/symbolSelector");
 // ==========================================
 // LIVE MARKET STORE
 // ==========================================
@@ -22,7 +24,15 @@ async function startBinanceWebsocket(pool) {
 
         symbols =
             await selectSymbols(pool);
+console.log(`
+==================================
+AI SYMBOL SUBSCRIPTIONS
+==================================
 
+${symbols.join("\n")}
+
+==================================
+`);
     } catch {
 
         console.log(
@@ -165,9 +175,9 @@ async function startBinanceWebsocket(pool) {
       );
 
       setTimeout(
-        startBinanceWebsocket,
-        5000
-      );
+    () => startBinanceWebsocket(pool),
+    5000
+);
     }
   );
 

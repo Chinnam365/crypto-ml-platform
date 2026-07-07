@@ -41,54 +41,7 @@ ${trades.length}
 
 ==================================
 `);
-    /*
-    ==================================================
-    DEFAULT SYMBOLS
-    ==================================================
-    */
-
-    const symbolStats = {
-
-     BTCUSDT: {
-  wins: 0,
-  total: 0,
-  pnl: 0,
-  confidence: 0,
-  recentPnl: [],
-},
-
-ETHUSDT: {
-  wins: 0,
-  total: 0,
-  pnl: 0,
-  confidence: 0,
-  recentPnl: [],
-},
-
-SOLUSDT: {
-  wins: 0,
-  total: 0,
-  pnl: 0,
-  confidence: 0,
-  recentPnl: [],
-},
-
-LINKUSDT: {
-  wins: 0,
-  total: 0,
-  pnl: 0,
-  confidence: 0,
-  recentPnl: [],
-},
-
-DOGEUSDT: {
-  wins: 0,
-  total: 0,
-  pnl: 0,
-  confidence: 0,
-  recentPnl: [],
-},
-    };
+   const symbolStats = {};
 
     /*
     ==================================================
@@ -206,7 +159,16 @@ else if (
         stats.total < 5
       ) {
 
-        weights[symbol] = 1;
+        weights[symbol] = Number(
+
+    (
+        1 +
+
+        (stats.total * 0.02)
+
+    ).toFixed(2)
+
+);
 
         continue;
       }

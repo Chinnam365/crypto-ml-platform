@@ -484,6 +484,43 @@ const memoryScore =
       consensusStrength += 10;
     }
 
+   /*
+==================================================
+EVIDENCE FUSION
+==================================================
+*/
+
+const fusion = fuseEvidence({
+
+  mlConfidence:
+    adaptive.adjustedConfidence,
+
+  reinforcementScore,
+
+  opportunityScore:
+    opportunityPrediction.probability,
+
+  strategyScore,
+
+  memoryScore,
+
+  alignmentScore,
+
+  consensusStrength,
+
+  sampleConfidence:
+    Math.min(
+      1,
+      (
+        adaptive.sampleSize || 0
+      ) / 100
+    ),
+
+});
+
+let consensusConfidence =
+  fusion.confidence;
+
     /*
 ==================================================
 CONFIDENCE CALIBRATION
@@ -576,42 +613,6 @@ reliability =
     Number(
         reliability.toFixed(2)
     );
-/*
-==================================================
-EVIDENCE FUSION
-==================================================
-*/
-
-const fusion = fuseEvidence({
-
-  mlConfidence:
-    adaptive.adjustedConfidence,
-
-  reinforcementScore,
-
-  opportunityScore:
-    opportunityPrediction.probability,
-
-  strategyScore,
-
-  memoryScore,
-
-  alignmentScore,
-
-  consensusStrength,
-
-  sampleConfidence:
-    Math.min(
-      1,
-      (
-        adaptive.sampleSize || 0
-      ) / 100
-    ),
-
-});
-
-let consensusConfidence =
-  fusion.confidence;
     /*
     ==================================================
     LOGGING

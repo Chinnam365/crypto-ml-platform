@@ -77,17 +77,26 @@ const trades =
       ================================================
       */
 
-      const strategyKey =
+      const {
 
-        `${trade.regime || "UNKNOWN"}_` +
+    buildStrategyKey,
 
-        `${trade.trend || "SIDEWAYS"}_` +
+} = require("./strategyKeyBuilder");
 
-        `${trade.volatility_regime || "NORMAL"}_` +
+const strategyKey =
+    buildStrategyKey({
 
-        `${trade.momentum_state || "NEUTRAL"}_` +
+        regime,
 
-        `${trade.decision || "HOLD"}`;
+        trend,
+
+        volatilityRegime,
+
+        momentumState,
+
+        decision,
+
+    });
 
       /*
       ================================================

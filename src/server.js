@@ -3480,6 +3480,7 @@ async function startServer() {
     }
   }
 );
+  console.log("SERVER VERSION: c4a6839");
 // ==========================================
 // INITIAL ML TRAINING
 // ==========================================

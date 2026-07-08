@@ -4464,7 +4464,7 @@ app.get("/portfolio-debug", async (req, res) => {
     try {
 
       const candidates =
-        await getDiscoveryCandidates();
+        await getDiscoveryCandidates(pool);
 
       const evaluated =
         await evaluateDiscoveryCandidates(

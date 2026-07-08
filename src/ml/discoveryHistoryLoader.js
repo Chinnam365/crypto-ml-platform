@@ -17,7 +17,7 @@ async function loadDiscoveryHistory(
           },
         }
       );
-
+ 
     for (
       const candle of response.data
     ) {

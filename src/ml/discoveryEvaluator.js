@@ -36,49 +36,21 @@ console.log(
   candidate.symbol
 );
 
-      const {
-  loadDiscoveryHistory,
-} = require(
-  "./discoveryHistoryLoader"
-);
-      
+     
 let features =
-  await generateFeatures(
-    candidate.symbol
-  );
+    await generateFeatures(
+        candidate.symbol
+    );
+
+/*
+==================================================
+FEATURE VALIDATION
+==================================================
+*/
 
 if (!features) {
 
-  console.log(
-    `Loading history for ${candidate.symbol}`
-  );
-
-  console.log(
-  "AFTER FEATURES:",
-  candidate.symbol
-);
-
-console.log(
-  "FEATURE RESULT:",
-  JSON.stringify(features)
-);
-
-console.log(
-  "AFTER FEATURES:",
-  candidate.symbol
-);
-
-console.log(
-  JSON.stringify(
-    features,
-    null,
-    2
-  )
-);
-
-      if (!features) {
-
-  console.log(`
+    console.log(`
 ==================================
 DISCOVERY FEATURE FAILURE
 ==================================
@@ -92,10 +64,11 @@ ${features}
 ==================================
 `);
 
-  continue;
+    continue;
+
 }
 
-      console.log(`
+console.log(`
 ==================================
 DISCOVERY AI RESULT
 ==================================
@@ -114,32 +87,39 @@ ${features.marketState}
 
 ==================================
 `);
-      
-      evaluated.push({
 
-        symbol:
-          candidate.symbol,
+const confidence =
+    Number(features.confidence);
 
-        discoveryScore:
-          candidate.discoveryScore,
+const finalScore =
+    Number(
+        (
+            Number(candidate.discoveryScore || 0) +
+            (Number.isFinite(confidence) ? confidence : 0)
+        ).toFixed(2)
+    );
 
-        confidence:
-          features.confidence,
+evaluated.push({
 
-        decision:
-          features.decision,
+    symbol: candidate.symbol,
 
-        marketState:
-          features.marketState,
+    discoveryScore:
+        Number(candidate.discoveryScore || 0),
 
-        finalScore:
-          Number(
-            (
-              candidate.discoveryScore +
-              features.confidence
-            ).toFixed(2)
-          ),
-      });
+    confidence:
+        Number.isFinite(confidence)
+            ? confidence
+            : 0,
+
+    decision:
+        features.decision || "HOLD",
+
+    marketState:
+        features.marketState || "UNKNOWN",
+
+    finalScore,
+
+});
 
     } catch (err) {
 

@@ -22,13 +22,22 @@ const {
   predictOpportunity,
 } = require("./opportunityPredictionEngine");
 
+/*
+==================================================
+INVALID SYMBOL CACHE
+==================================================
+*/
+
+const invalidSymbols = new Set();
 async function getDiscoveryCandidates(pool) {
 
   try {
 
     const marketData =
   await scanUniverse();
-
+const filteredMarketData = marketData.filter(
+    coin => !invalidSymbols.has(coin.symbol)
+);
 console.log(`
 ==================================
 UNIVERSE SCANNER
@@ -57,9 +66,9 @@ for (
 }
 
    const discoveries =
-  rankDiscoveries(
-    marketData
-  ).map(coin => {
+    rankDiscoveries(
+        filteredMarketData
+    ).map(coin => {
 
     const opportunity =
       evaluateOpportunity(
@@ -237,7 +246,29 @@ DISCOVERY CANDIDATES
     return [];
   }
 }
+function markInvalidSymbol(symbol) {
 
+    if (!symbol) {
+        return;
+    }
+
+    invalidSymbols.add(symbol);
+
+    console.log(`
+==================================
+INVALID SYMBOL CACHED
+==================================
+
+${symbol}
+
+==================================
+`);
+
+}
 module.exports = {
-  getDiscoveryCandidates,
+
+    getDiscoveryCandidates,
+
+    markInvalidSymbol,
+
 };

@@ -259,11 +259,7 @@ ${candles.length}
     ==================================================
     */
 
-    const rsi =
-      calculateRSI(
-        closes
-      );
-let rsi =
+    let rsi =
     Number(
         calculateRSI(closes)
     );

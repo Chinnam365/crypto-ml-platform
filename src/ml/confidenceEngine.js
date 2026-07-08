@@ -282,6 +282,21 @@ fusionScore = 50,
     const analytics =
       await analyzeStrategyPerformance();
 
+    const strategyMap = new Map(
+
+    analytics.strategies.map(
+
+        strategy => [
+
+            strategy.strategyKey,
+
+            strategy
+
+        ]
+
+    )
+
+);
     const strategyKey =
 
       `${regime}_` +
@@ -295,14 +310,21 @@ fusionScore = 50,
       `${decision}`;
 
     const strategy =
+    strategyMap.get(strategyKey);
+if (!strategy) {
 
-      analytics.strategies.find(
+    console.log(`
+==================================
+UNKNOWN STRATEGY
+==================================
 
-        s =>
-          s.strategyKey ===
-          strategyKey
-      );
+Strategy:
+${strategyKey}
 
+==================================
+`);
+
+}
     let strategyBoost = 0;
 /*
 ==================================================

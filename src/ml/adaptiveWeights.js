@@ -119,15 +119,24 @@ ADAPTIVE WEIGHTS VERSION 2
     ==================================================
     */
 
-    const strategy =
+    const strategyMap = new Map(
 
-      analytics.strategies.find(
+    analytics.strategies.map(
 
-        s =>
+        strategy => [
 
-          s.strategyKey ===
-          strategyKey
-      );
+            strategy.strategyKey,
+
+            strategy
+
+        ]
+
+    )
+
+);
+
+const strategy =
+    strategyMap.get(strategyKey);
 
     /*
     ==================================================

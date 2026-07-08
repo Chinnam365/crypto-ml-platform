@@ -67,6 +67,17 @@ const {
 
 /*
 ==================================================
+FAILED BINANCE CACHE
+==================================================
+*/
+
+const failedSymbols = new Map();
+
+const FAILED_RETRY_MS =
+    60 * 60 * 1000;
+
+/*
+==================================================
 MAIN FEATURE ENGINE
 ==================================================
 */
@@ -186,7 +197,33 @@ ${candles.length}
   const {
     getCandles,
   } = require("../market/binance");
+const previousFailure =
+    failedSymbols.get(symbol);
 
+if (
+
+    previousFailure &&
+
+    (
+        Date.now() -
+        previousFailure
+    ) < FAILED_RETRY_MS
+
+) {
+
+    console.log(`
+==================================
+SKIPPING BINANCE RETRY
+==================================
+
+${symbol}
+
+==================================
+`);
+
+    return null;
+
+}
   const historical =
     await getCandles(
       symbol,
@@ -211,7 +248,17 @@ ${historical?.length || 0}
   if (
     !historical ||
     historical.length < 35
-) {
+) 
+  
+  failedSymbols.set(
+
+    symbol,
+
+    Date.now()
+
+);
+  
+  {
 
     const {
         markInvalidSymbol,
@@ -229,8 +276,10 @@ ${historical?.length || 0}
         close:
           candle.close
       })
+      
     );
-
+failedSymbols.delete(symbol);
+      
   console.log(`
 ==================================
 DISCOVERY USING LIVE CANDLES

@@ -1157,10 +1157,10 @@ console.log(`
 SERVER DISCOVERY DEBUG
 ==================================
 Returned Candidates:
-${discoveryCandidates.length}
+${discoveries.length}
 
 ${JSON.stringify(
-    discoveryCandidates.map(c => c.symbol),
+    discoveries.map(c => c.symbol),
     null,
     2
 )}
@@ -1205,11 +1205,9 @@ const qualifiedDiscoveries =
 
     }
 
-    if (coin.symbolScore < 60) {
-
-        return false;
-
-    }
+    if (coin.symbolScore < 50) {
+    return false;
+}
 
     if (
 
@@ -1272,7 +1270,7 @@ console.log(`
 BEFORE EVALUATOR
 ==================================
 Candidates:
-${discoveryCandidates.length}
+${qualifiedDiscoveries.length}
 ==================================
 `);
 

@@ -1,6 +1,15 @@
 const pool =
   require("../db/db");
+/*
+==================================================
+STRATEGY CACHE
+==================================================
+*/
 
+let cachedAnalytics = null;
+let cacheTimestamp = 0;
+
+const CACHE_DURATION_MS = 60000;
 
 /*
 ==================================================
@@ -17,7 +26,19 @@ async function analyzeStrategyPerformance() {
     LOAD COMPLETED TRADES
     ==================================================
     */
+const now = Date.now();
 
+if (
+
+    cachedAnalytics &&
+
+    (now - cacheTimestamp) < CACHE_DURATION_MS
+
+) {
+
+    return cachedAnalytics;
+
+}
   const result =
   await pool.query(
     `
@@ -355,15 +376,21 @@ if (
     .classification =
       "PROMOTE";
 }
-    return {
+    const analytics = {
 
-      strategies:
-        evolvedStrategies,
+    strategies: evolvedStrategies,
 
-      promotedStrategies,
+    promotedStrategies,
 
-      suppressedStrategies,
-    };
+    suppressedStrategies,
+
+};
+
+cachedAnalytics = analytics;
+
+cacheTimestamp = Date.now();
+
+return analytics;
 
   } catch (err) {
 
@@ -381,15 +408,27 @@ STRATEGY EVOLUTION ERROR
 
     return {
 
-      strategies: [],
+        strategies: [],
 
-      promotedStrategies: [],
+        promotedStrategies: [],
 
-      suppressedStrategies: [],
+        suppressedStrategies: [],
+
     };
-  }
-}
 
+}
+}
+function clearStrategyAnalyticsCache() {
+
+    cachedAnalytics = null;
+
+    cacheTimestamp = 0;
+
+}
 module.exports = {
-  analyzeStrategyPerformance,
+
+    analyzeStrategyPerformance,
+
+    clearStrategyAnalyticsCache,
+
 };

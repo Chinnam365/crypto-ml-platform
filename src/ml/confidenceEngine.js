@@ -297,17 +297,26 @@ fusionScore = 50,
     )
 
 );
-    const strategyKey =
+   const {
 
-      `${regime}_` +
+    buildStrategyKey,
 
-      `${trend}_` +
+} = require("./strategyKeyBuilder");
 
-      `${volatilityRegime}_` +
+const strategyKey =
+    buildStrategyKey({
 
-      `${momentumState}_` +
+        regime,
 
-      `${decision}`;
+        trend,
+
+        volatilityRegime,
+
+        momentumState,
+
+        decision,
+
+    });
 
     const strategy =
     strategyMap.get(strategyKey);

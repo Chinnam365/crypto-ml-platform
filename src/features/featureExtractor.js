@@ -211,10 +211,17 @@ ${historical?.length || 0}
   if (
     !historical ||
     historical.length < 35
-  ) {
+) {
+
+    const {
+        markInvalidSymbol,
+    } = require("../ml/discoverySelector");
+
+    markInvalidSymbol(symbol);
 
     return null;
-  }
+
+}
 
   candles =
     historical.map(

@@ -318,32 +318,31 @@ reinforcementScore =
   } catch (err) {
 
     console.log(
-
-      "Reinforcement error:",
-
-      err.message
+        "Reinforcement error:",
+        err.message
     );
+
+    console.log(err.stack);
 
     return {
 
-    reinforcementScore,
+        reinforcementScore: 50,
 
-    winRate:
-        Number(winRate.toFixed(2)),
+        winRate: 50,
 
-    avgPnL:
-        Number(avgPnL.toFixed(2)),
+        avgPnL: 0,
 
-    avgReward:
-        Number(avgReward.toFixed(2)),
+        avgReward: 0,
 
-    recentAvgPnL:
-        Number(recentAvgPnL.toFixed(2)),
+        recentAvgPnL: 0,
 
-    sampleSize:
-        memoryTrades.length,
-};
-  }
+        sampleSize: 0,
+
+        source: "ERROR"
+
+    };
+
+}
 }
 
 module.exports = {

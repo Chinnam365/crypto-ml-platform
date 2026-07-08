@@ -250,13 +250,10 @@ ${historical?.length || 0}
     historical.length < 35
 ) 
   
-  failedSymbols.set(
-
-    symbol,
-
-    Date.now()
-
-);
+  failedSymbols.set(symbol, {
+    timestamp: Date.now(),
+    reason: "Binance 400"
+});
   
   {
 

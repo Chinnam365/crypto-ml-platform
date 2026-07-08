@@ -3422,21 +3422,21 @@ overall_trend
       `
     );
     }
-  } catch (err) {
+  } catch (error) {
 
-  console.log(`
+    console.error(`
 ==================================
 FULL ENGINE ERROR
 ==================================
 `);
 
-  console.log(err);
+    console.error(error);
 
-  console.log(err.stack);
+    console.error(error.stack);
 
-  console.log(`
-==================================
-`);
+    console.error("Name:", error.name);
+    console.error("Message:", error.message);
+
 }
 }
 

@@ -263,7 +263,30 @@ ${candles.length}
       calculateRSI(
         closes
       );
+let rsi =
+    Number(
+        calculateRSI(closes)
+    );
 
+if (!Number.isFinite(rsi)) {
+
+    console.log(`
+==================================
+INVALID RSI
+==================================
+
+Symbol:
+${symbol}
+
+Candles:
+${closes.length}
+
+==================================
+`);
+
+    rsi = 50;
+
+}
     const ema =
       calculateEMA(
         closes

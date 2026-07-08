@@ -12,7 +12,7 @@ async function loadDiscoveryHistory(
         {
           params: {
             symbol,
-            interval: "1m",
+            interval: "5m",
             limit: 240,
           },
         }
@@ -41,7 +41,7 @@ async function loadDiscoveryHistory(
         `,
         [
           symbol,
-          "1m",
+          "5m",
           Number(candle[1]),
           Number(candle[2]),
           Number(candle[3]),

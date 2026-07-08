@@ -60,11 +60,25 @@ async function loadDiscoveryHistory(
 
   } catch (err) {
 
-    console.log(
-      `History load failed: ${symbol}`,
-      err.message
-    );
+    console.log(`
+==================================
+BINANCE HISTORY ERROR
+==================================
 
+Symbol:
+${symbol}
+
+Status:
+${err.response?.status}
+
+Response:
+${JSON.stringify(err.response?.data)}
+
+Message:
+${err.message}
+
+==================================
+`);
     return false;
   }
 }

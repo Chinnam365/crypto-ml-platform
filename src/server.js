@@ -4449,14 +4449,11 @@ app.get("/portfolio-debug", async (req, res) => {
   async (req, res) => {
 
     const discoveries =
-  await getDiscoveryCandidates(
-    pool
-  );
+      await getDiscoveryCandidates(pool);
 
     res.json({
-      count:
-        candidates.length,
-      candidates,
+      count: discoveries.length,
+      discoveries,
     });
   }
 );

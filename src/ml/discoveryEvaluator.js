@@ -53,25 +53,7 @@ if (!features) {
     `Loading history for ${candidate.symbol}`
   );
 
-  await loadDiscoveryHistory(
-  candidate.symbol
-);
-
-await new Promise(
-  resolve =>
-    setTimeout(
-      resolve,
-      1000
-    )
-);
-
-features =
-  await generateFeatures(
-    candidate.symbol
-  );
-}
-
-console.log(
+  console.log(
   "AFTER FEATURES:",
   candidate.symbol
 );

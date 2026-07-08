@@ -101,17 +101,26 @@ ADAPTIVE WEIGHTS VERSION 2
     ==================================================
     */
 
-    const strategyKey =
+    const {
 
-      `${regime}_` +
+    buildStrategyKey,
 
-      `${trend}_` +
+} = require("./strategyKeyBuilder");
 
-      `${volatilityRegime}_` +
+const strategyKey =
+    buildStrategyKey({
 
-      `${momentumState}_` +
+        regime,
 
-      `${decision}`;
+        trend,
+
+        volatilityRegime,
+
+        momentumState,
+
+        decision,
+
+    });
 
     /*
     ==================================================

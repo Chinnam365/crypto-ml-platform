@@ -609,31 +609,6 @@ if (
         );
 
 }
-
-if (
-    strategy &&
-    strategy.classification === "PROMOTE"
-) {
-
-    consensusConfidence =
-        Math.min(consensusConfidence, 95);
-
-}
-else {
-
-    consensusConfidence =
-        Math.min(consensusConfidence, 85);
-
-} {
-
-    consensusConfidence =
-        Math.min(
-            consensusConfidence,
-            90
-        );
-
-}
-
 else {
 
     consensusConfidence =

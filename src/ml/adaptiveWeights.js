@@ -168,7 +168,23 @@ if (!strategy) {
 
     strategy =
         strategyMap.get(matchedStrategyKey);
+if (strategy && matchedStrategyKey !== strategyKey) {
 
+  console.log(`
+==================================
+STRATEGY FALLBACK
+==================================
+
+Requested:
+${strategyKey}
+
+Matched:
+${matchedStrategyKey}
+
+==================================
+`);
+
+}
 }
 
     /*
@@ -419,7 +435,7 @@ ADAPTIVE WEIGHT ERROR
 
   classification: "NEUTRAL",
 
-  strategyKey,
+  strategyKey: null,
 
   evolutionScore: 0
 };

@@ -144,12 +144,14 @@ const strategyKey =
 
 );
 
+let matchedStrategyKey = strategyKey;
+
 let strategy =
     strategyMap.get(strategyKey);
 
 if (!strategy) {
 
-    const fallbackKey =
+    matchedStrategyKey =
         buildStrategyKey({
 
             regime,
@@ -165,7 +167,7 @@ if (!strategy) {
         });
 
     strategy =
-        strategyMap.get(fallbackKey);
+        strategyMap.get(matchedStrategyKey);
 
 }
 
@@ -378,7 +380,8 @@ return {
   classification:
     strategy.classification,
 
-  strategyKey,
+  strategyKey:
+    matchedStrategyKey,
 
   evolutionScore:
     strategy.evolutionScore

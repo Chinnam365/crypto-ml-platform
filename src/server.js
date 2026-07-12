@@ -1972,10 +1972,19 @@ ${symbolWeight}
 
   continue;
 }
+console.log(`
+==================================
+CONFIDENCE BEFORE WEIGHTING
+==================================
+
+Confidence:
+${confidence.toFixed(2)}
+
+==================================
+`);
+
 confidence =
-  Number(
-    confidence || 0
-  ) *
+  Number(confidence || 0) *
   (
     0.5 +
     (
@@ -1985,16 +1994,21 @@ confidence =
   );
 
 confidence =
-  Number(
-    confidence.toFixed(2)
-  );
+  Number(confidence.toFixed(2));
+
 console.log(`
 ==================================
-CONFIDENCE BEFORE WEIGHTING
+CONFIDENCE AFTER WEIGHTING
 ==================================
 
+Symbol:
+${randomSymbol}
+
+Weight:
+${symbolWeight}
+
 Confidence:
-${confidence}
+${confidence.toFixed(2)}
 
 ==================================
 `);
@@ -2075,7 +2089,7 @@ if (
   "CAPITAL_PRESERVATION"
 ) {
 
-  confidence -= 20;
+  confidence *= 0.80;
 }
 
    // ==========================================
@@ -2661,7 +2675,7 @@ ${decisionReasons.join("\n")}
 let executionThreshold =
   Math.max(
     adaptiveThresholdValue,
-    75
+    60
   );
 
 // ==========================================

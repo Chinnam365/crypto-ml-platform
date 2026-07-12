@@ -2182,17 +2182,17 @@ const reinforcementContextKey =
   `${multiTf?.overallTrend || trend}`;
 
 const reinforcementLookupResult =
-  await pool.query(
-    `
-    SELECT
-    avg_reward,
-    sample_size
-FROM reinforcement_memory
-WHERE context_key = $1
-LIMIT 1
-    `,
-    [reinforcementContextKey]
-  );
+    await pool.query(
+        `
+        SELECT
+            avg_reward,
+            sample_size
+        FROM reinforcement_memory
+        WHERE context_key = $1
+        LIMIT 1
+        `,
+        [reinforcementContextKey]
+    );
 
 console.log(`
 ==================================
@@ -2208,44 +2208,19 @@ ${reinforcementLookupResult.rows.length}
 ==================================
 `);
 
-if (
-  reinforcementLookupResult.rows.length > 0
-) {
+if (reinforcementLookupResult.rows.length > 0) {
 
-  const reinforcementReward =
-    Number(
-        reinforcementLookupResult.rows[0].avg_reward || 0
-    );
+    const reinforcementReward =
+        Number(
+            reinforcementLookupResult.rows[0].avg_reward || 0
+        );
 
-const reinforcementSamples =
-    Number(
-        reinforcementLookupResult.rows[0].sample_size || 0
-    );
-if (
+    const reinforcementSamples =
+        Number(
+            reinforcementLookupResult.rows[0].sample_size || 0
+        );
 
-    reinforcementSamples >= 5 &&
-
-    reinforcementReward < -0.40
-
-) {
-
-  console.log(`
-==================================
-RL SUPPRESSED
-==================================
-
-Context:
-${reinforcementContextKey}
-
-Reward:
-${reinforcementReward}
-
-==================================
-`);
-
-  continue;
-}
-  console.log(`
+    console.log(`
 ==================================
 REINFORCEMENT VALIDATION
 ==================================
@@ -2253,38 +2228,21 @@ REINFORCEMENT VALIDATION
 Historical Reward:
 ${reinforcementReward}
 
+Sample Size:
+${reinforcementSamples}
+
 Handled By:
 Evidence Fusion Engine
 
 ==================================
 `);
 
-  console.log(`
-==================================
-REINFORCEMENT ADJUSTMENT
-==================================
+    if (
+        reinforcementSamples >= 5 &&
+        reinforcementReward < -0.40
+    ) {
 
-Context:
-${reinforcementContextKey}
-
-Avg Reward:
-${reinforcementReward}
-
-Confidence After RL:
-${confidence}
-
-==================================
-`);
-
-  // ==========================================
-  // REINFORCEMENT TRADE FILTER
-  // ==========================================
-
-  if (
-    reinforcementReward < -0.40
-  ) {
-
-    console.log(`
+        console.log(`
 ==================================
 RL BLOCKED TRADE
 ==================================
@@ -2292,14 +2250,19 @@ RL BLOCKED TRADE
 Context:
 ${reinforcementContextKey}
 
-Avg Reward:
+Average Reward:
 ${reinforcementReward}
+
+Samples:
+${reinforcementSamples}
 
 ==================================
 `);
 
-    confidence = 0;
-  }
+        confidence = 0;
+
+    }
+
 }
 
 // ==========================================

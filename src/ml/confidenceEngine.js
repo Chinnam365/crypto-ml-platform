@@ -329,8 +329,30 @@ const strategyKey =
 
     });
 
-    const strategy =
+    let strategy =
     strategyMap.get(strategyKey);
+
+if (!strategy) {
+
+    const fallbackKey =
+        buildStrategyKey({
+
+            regime,
+
+            trend,
+
+            volatilityRegime,
+
+            momentumState,
+
+            decision: "HOLD",
+
+        });
+
+    strategy =
+        strategyMap.get(fallbackKey);
+
+}
 if (!strategy) {
 
     console.log(`

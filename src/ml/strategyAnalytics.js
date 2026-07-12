@@ -249,12 +249,20 @@ evolutionScore =
   "NEUTRAL";
 
 if (
-  winRate >= 52 &&
-  avgPnL > 0
+    (
+        winRate >= 55 &&
+        avgPnL > 0
+    )
+    ||
+    (
+        evolutionScore >= 55 &&
+        avgPnL >= 0
+    )
 ) {
-  classification = "PROMOTE";
-}
 
+    classification = "PROMOTE";
+
+}
 else if (
 
   avgPnL < -1 ||

@@ -2073,12 +2073,24 @@ if (
   confidence -= 10;
 }
 
-if (
-  drawdownState.riskMode ===
-  "CAPITAL_PRESERVATION"
-) {
+// ==========================================
+// DRAWDOWN RISK MODES
+// ==========================================
 
-  confidence *= 0.80;
+switch (drawdownState.riskMode) {
+
+  case "CAUTION":
+    confidence *= 0.95;
+    break;
+
+  case "DEFENSIVE":
+    confidence *= 0.90;
+    break;
+
+  case "CAPITAL_PRESERVATION":
+    confidence *= 0.80;
+    break;
+
 }
 
    // ==========================================

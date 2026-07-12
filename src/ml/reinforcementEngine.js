@@ -258,29 +258,26 @@ WHERE id = $1
             `
             UPDATE reinforcement_memory
 
-            SET
+SET
+  total_reward = $1,
+  sample_size = $2,
+  avg_reward = $3,
+  reward = $4,
+  confidence = $5,
+  pnl = $6
 
-              total_reward = $1,
-
-              sample_size = $2,
-
-              avg_reward = $3
-
-            WHERE context_key = $4
+WHERE context_key = $7
             `,
 
             [
-
-              newTotalReward,
-
-              newSampleSize,
-
-              Number(
-                avgReward.toFixed(4)
-              ),
-
-              contextKey,
-            ]
+  newTotalReward,
+  newSampleSize,
+  Number(avgReward.toFixed(4)),
+  reward,
+  Number(trade.confidence || 0),
+  Number(trade.pnl || 0),
+  contextKey,
+]
           );
           console.log(`
 ==================================

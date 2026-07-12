@@ -200,9 +200,9 @@ async function calibrateConfidence({
       +
 
       (
-        memoryBoost
-        * memoryWeight
-      );
+    (50 + memoryBoost)
+    * memoryWeight
+);
 
     /*
     ==================================================

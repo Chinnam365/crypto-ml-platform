@@ -102,9 +102,11 @@ ADAPTIVE WEIGHTS VERSION 2
     */
 
     const {
+    analyzeStrategyPerformance,
+} = require("./strategyAnalytics");
 
+const {
     buildStrategyKey,
-
 } = require("./strategyKeyBuilder");
 
 const strategyKey =
@@ -175,8 +177,11 @@ if (strategy && matchedStrategyKey !== strategyKey) {
 STRATEGY FALLBACK
 ==================================
 
-Requested:
+Strategy Requested:
 ${strategyKey}
+
+Strategy Used:
+${matchedStrategyKey}
 
 Matched:
 ${matchedStrategyKey}

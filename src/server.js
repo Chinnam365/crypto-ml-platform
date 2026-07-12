@@ -2053,25 +2053,6 @@ Trading Disabled
   continue;
 }
 
-// ==========================================
-// DRAWDOWN RISK MODES
-// ==========================================
-
-if (
-  drawdownState.riskMode ===
-  "CAUTION"
-) {
-
-  confidence -= 5;
-}
-
-if (
-  drawdownState.riskMode ===
-  "DEFENSIVE"
-) {
-
-  confidence -= 10;
-}
 
 // ==========================================
 // DRAWDOWN RISK MODES
@@ -2203,10 +2184,12 @@ const reinforcementContextKey =
 const reinforcementLookupResult =
   await pool.query(
     `
-    SELECT avg_reward
-    FROM reinforcement_memory
-    WHERE context_key = $1
-    LIMIT 1
+    SELECT
+    avg_reward,
+    sample_size
+FROM reinforcement_memory
+WHERE context_key = $1
+LIMIT 1
     `,
     [reinforcementContextKey]
   );
@@ -2231,11 +2214,19 @@ if (
 
   const reinforcementReward =
     Number(
-      reinforcementLookupResult.rows[0]
-        .avg_reward || 0
+        reinforcementLookupResult.rows[0].avg_reward || 0
+    );
+
+const reinforcementSamples =
+    Number(
+        reinforcementLookupResult.rows[0].sample_size || 0
     );
 if (
-  reinforcementReward < -0.40
+
+    reinforcementSamples >= 5 &&
+
+    reinforcementReward < -0.40
+
 ) {
 
   console.log(`

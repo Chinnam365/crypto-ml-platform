@@ -1,5 +1,9 @@
 const pool =
   require("../db/db");
+
+const {
+    buildStrategyKey,
+} = require("./strategyKeyBuilder");
 /*
 ==================================================
 STRATEGY CACHE

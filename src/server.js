@@ -1931,7 +1931,6 @@ ${mlDeviation.toFixed(2)}
 `);
 
 }
-
 // ==========================================
 // SYMBOL WEIGHTING
 // ==========================================
@@ -1948,6 +1947,7 @@ const symbolWeight =
   Number(
     symbolEntry?.weight || 1
   );
+
 // ==========================================
 // SYMBOL SUPPRESSION
 // ==========================================
@@ -1972,6 +1972,8 @@ ${symbolWeight}
 
   continue;
 }
+
+// Log BEFORE applying the weight
 console.log(`
 ==================================
 CONFIDENCE BEFORE WEIGHTING
@@ -1983,38 +1985,25 @@ ${confidence.toFixed(2)}
 ==================================
 `);
 
+// Apply weight
 confidence =
   Number(confidence || 0) *
   (
     0.5 +
     (
-      Number(symbolWeight || 1)
-      * 0.5
+      symbolWeight * 0.5
     )
   );
 
 confidence =
-  Number(confidence.toFixed(2));
+  Number(
+    confidence.toFixed(2)
+  );
 
+// Log AFTER applying the weight
 console.log(`
 ==================================
 CONFIDENCE AFTER WEIGHTING
-==================================
-
-Symbol:
-${randomSymbol}
-
-Weight:
-${symbolWeight}
-
-Confidence:
-${confidence.toFixed(2)}
-
-==================================
-`);
-console.log(`
-==================================
-SYMBOL WEIGHTING
 ==================================
 
 Symbol:

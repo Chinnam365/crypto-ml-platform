@@ -103,26 +103,22 @@ symbolStats[
     trade.pnl || 0
   )
 );
-     const pnl =
-  Number(trade.pnl || 0);
+    const pnl =
+    Number(trade.pnl || 0);
 
 if (pnl > 0) {
 
-  symbolStats[
-    trade.symbol
-  ].wins++;
+    symbolStats[
+        trade.symbol
+    ].wins++;
+
 }
 else if (pnl === 0) {
 
-  continue;
-}
-else if (
-  Number(trade.pnl || 0) === 0
-) {
+    symbolStats[
+        trade.symbol
+    ].wins += 0.5;
 
-  symbolStats[
-    trade.symbol
-  ].wins += 0.5;
 }
     
     }
@@ -148,23 +144,13 @@ else if (
       ================================================
       */
 
-      if (
-        stats.total < 5
-      ) {
+     if (stats.total < 20) {
 
-        weights[symbol] = Number(
+    weights[symbol] = 1.00;
 
-    (
-        1 +
+    continue;
 
-        (stats.total * 0.02)
-
-    ).toFixed(2)
-
-);
-
-        continue;
-      }
+}
 
       /*
       ================================================
@@ -251,11 +237,11 @@ let weight =
 
     0.20 +
 
-    (winRate * 0.60) +
+    (winRate * 0.75) +
 
-    (normalizedPnL * 0.90) +
+    (normalizedPnL * 0.60) +
 
-    (normalizedRecentPnL * 0.50) +
+    (normalizedRecentPnL * 0.35) +
 
     ((avgConfidence / 100) * 0.15) +
 

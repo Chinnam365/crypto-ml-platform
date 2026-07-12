@@ -60,7 +60,12 @@ fusionScore = 50,
     */
 
     let confidence = 30;
+const confidenceTrace = [];
 
+confidenceTrace.push({
+    stage: "BASE",
+    confidence,
+});
     /*
     ==================================================
     RSI
@@ -210,7 +215,10 @@ fusionScore = 50,
           95
         )
       );
-
+confidenceTrace.push({
+    stage: "BASE_FEATURES",
+    confidence,
+});
     /*
     ==================================================
     ADAPTIVE CONFIDENCE
@@ -233,7 +241,10 @@ fusionScore = 50,
 
         overallTrend,
       });
-
+confidenceTrace.push({
+    stage: "ADAPTIVE",
+    confidence: adaptive.adjustedConfidence,
+});
     /*
     ==================================================
     TEMPORAL MEMORY
@@ -346,8 +357,7 @@ const opportunityPrediction =
 
     fusionScore,
 
-    liquidity:
-      opportunityScore,
+    liquidity: 50,
 
     momentum:
       momentumStrength,
@@ -551,7 +561,10 @@ const fusion = fuseEvidence({
 
 let consensusConfidence =
   fusion.confidence;
-
+confidenceTrace.push({
+    stage: "FUSION",
+    confidence: consensusConfidence,
+});
     /*
 ==================================================
 CONFIDENCE CALIBRATION
@@ -597,10 +610,21 @@ if (
 
 }
 
-else if (
+if (
     strategy &&
-    strategy.classification === "FAVOR"
+    strategy.classification === "PROMOTE"
 ) {
+
+    consensusConfidence =
+        Math.min(consensusConfidence, 95);
+
+}
+else {
+
+    consensusConfidence =
+        Math.min(consensusConfidence, 85);
+
+} {
 
     consensusConfidence =
         Math.min(
@@ -690,7 +714,17 @@ ${consensusConfidence}
 
 ==================================
 `);
+console.log(`
+==================================
+CONFIDENCE TRACE
+==================================
+`);
 
+console.table(confidenceTrace);
+
+console.log(`
+==================================
+`);
     return {
 
     confidence:
